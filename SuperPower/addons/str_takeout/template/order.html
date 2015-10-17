@@ -1,3 +1,4 @@
+{php session_start();}
 {template 'common/header'}
 <style type="text/css">
 	.require{color:red;}
@@ -53,6 +54,7 @@
 				<li{if $status == 2} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', 'status' => 2))}">处理中</a></li>
 				<li{if $status == 3} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', 'status' => 3))}">已完成</a></li>
 				<li{if $status == 4} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', 'status' => 4))}">已取消</a></li>
+				<li{if $status == 6} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', 'status' => 6))}">问题订单</a></li>
 			</ul>
 			<div class="panel panel-default">
 				<div class="panel-body table-responsive" style="overflow:inherit">
@@ -67,7 +69,11 @@
 								<th>订单状态</th>
 								<th>打印(份数)</th>
 								<th>下单时间</th>
-								<th style="width:150px; text-align:right;">详情/删除/黑名单</th>
+								{if $_SESSION['role'] == 'manager'}
+								<th style="width:150px; text-align:right;">详情/删除</th>
+								{else}
+								<th style="width:150px; text-align:right;">详情</th>
+								{/if}
 							</tr>
 						</thead>
 						<tbody>
@@ -107,6 +113,8 @@
 										<span class="label label-success">已完成</span>
 									{elseif $dca['status'] == 4}
 										<span class="label label-default">已取消</span>
+									{elseif $dca['status'] == 6}
+										<span class="label label-danger">问题订单</span>
 									{else}
 										<span class="label label-default">未知</span>
 									{/if}
@@ -124,17 +132,27 @@
 								<td>{php echo date('Y-m-d H:i', $dca['addtime'])}</td>
 								<td style="text-align:right;">
 									<a href="{php echo $this->createWebUrl('manage', array('op' => 'orderdetail', 'id' => $dca['id']))}" class="btn btn-success btn-sm" title="查看详情" data-toggle="tooltip" data-placement="top">详情</a>
+									{if $_SESSION['role'] == 'manager'}
 									<a href="{php echo $this->createWebUrl('manage', array('op' => 'orderdel', 'id' => $dca['id']))}" class="btn btn-default btn-sm" title="删除" data-toggle="tooltip" data-placement="top" onclick="if(!confirm('删除后将不可恢复，确定删除吗?')) return false;"><i class="fa fa-times"> </i></a>
-									<a href="{php echo $this->createWebUrl('manage', array('op' => 'trash_add', 'id' => $dca['id']))}" class="btn btn-default btn-sm" title="加入黑名单" data-toggle="tooltip" data-placement="top" onclick="if(!confirm('确定加入黑名单吗?')) return false;" {if !empty($dca['is_trash'])}style="color:red"{/if}><i class="fa fa-trash"> </i></a>
+									{/if}
+									<!-- 二次开发 加入黑名单取消掉 -->
+									<!-- <a href="{php echo $this->createWebUrl('manage', array('op' => 'trash_add', 'id' => $dca['id']))}" class="btn btn-default btn-sm" title="加入黑名单" data-toggle="tooltip" data-placement="top" onclick="if(!confirm('确定加入黑名单吗?')) return false;" {if !empty($dca['is_trash'])}style="color:red"{/if}><i class="fa fa-trash"> </i></a>  -->
 								</td>
 							</tr>
 							{/loop}
 						</tbody>
 					</table>
+					
 				</div>
 			</div>
 			{$pager}
 		</form>
+		<!-- 二次开发，增加导出为excel -->
+					{if empty($status)}
+					<button onclick="exportExcel(0)" class="btn btn-success">导出为Excel</button>
+					{else}
+					<button onclick="exportExcel({php echo $status;})" class="btn btn-success">导出为Excel</button>
+					{/if}
 	</div>
 	<script type="text/javascript">
 		require(['util'], function(u){
@@ -154,6 +172,10 @@
 			});
 
 		});
+		//二次开发，导出为excel
+		function exportExcel(status){
+			location.href = "./index.php?c=site&a=entry&op=exportExcel&do=manage&m=str_takeout" + "&status=" + status;
+		}
 	</script>
 {elseif $op == 'orderdetail'}
 	<div class="main">
@@ -296,6 +318,8 @@
 									<span class="label label-success">已完成</span>
 								{elseif $order['status'] == 4}
 									<span class="label label-default">已取消</span>
+								{elseif $order['status'] == 6}
+									<span class="label label-danger">问题订单</span>
 								{else}
 									<span class="label label-default">未知</span>
 								{/if}
@@ -330,6 +354,15 @@
 						<div class="col-sm-9 col-xs-9 col-md-9">
 							<p class="form-control-static">{$order['address']}</p>
 						</div>	
+					</div>
+				</div>
+			</div>
+			<!-- 二次开发 问题订单备注 -->
+			<div class="panel panel-default">
+				<div class="panel-heading">问题订单订单备注</div>
+				<div class="panel-body">
+					<div class="form-group">
+						<textarea class="form-control" id="problemOrderRemark" rows="5" placeholder="请输入问题备注">{php echo $order['premark']}</textarea>
 					</div>
 				</div>
 			</div>
@@ -412,10 +445,30 @@
 					<a href="{php echo $this->createWeburl('manage', array('op' => 'status', 'id' => $order['id'], 'status' => 3));}" class="btn btn-primary" onclick="if(!confirm('确定修改订单状态?')) return false;">设为已完成</a>
 					<a href="{php echo $this->createWeburl('manage', array('op' => 'status', 'id' => $order['id'], 'status' => 4));}" class="btn btn-default" onclick="if(!confirm('确定修改订单状态?')) return false;">设为已取消</a>
 					<a href="{php echo $this->createWeburl('manage', array('op' => 'status', 'id' => $order['id'], 'status' => 5));}" class="btn btn-warning" onclick="if(!confirm('确定设置为已支付?')) return false;">设为已支付</a>
+					<!-- 设为问题订单   -->
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<button type="button" onclick="wenti('{php echo $order['id']}')" class="btn btn-danger">设为问题订单</button>
 				</div>	
 			</div>
 		</form>
 	</div>
+	<script type="text/javascript">
+	function wenti(orderID){
+		 var premark = $("#problemOrderRemark").val();
+		 premark = $.trim(premark);
+		 if(premark == ""){
+			 alert("请输入问题备注");
+			 return false;
+		 }else{
+			 if(confirm("确认设为问题订单？")){
+				//location.href="{php echo $this->createWeburl('manage', array('op' => 'status', 'status' => 6, 'id' => " + orderID + ", 'premark' => " + premark + "));}";
+				location.href = "./index.php?c=site&a=entry&op=status&status=5&do=manage&m=str_takeout" + "&status=" + 6 + "&id=" + orderID + "&premark=" + premark; 
+			 }
+			 
+		 }
+		 
+	 }
+	</script>
 {/if}
 {template 'common'}
 {template 'common/footer'}

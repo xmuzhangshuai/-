@@ -1,13 +1,11 @@
+{php session_start();}
 {template 'common/header'}
 <style type="text/css">
 	.require{color:red;}
 	.highlight{font-size:18px;font-color:#FFF;}
 </style>
-<ul class="nav nav-tabs">
-	<li {if $op == 'list'}class="active"{/if}><a href="{php echo $this->createWebUrl('store', array('op' => 'list'));}">门店列表</a></li>
-	<li {if $op == 'post' && !$id} class="active"{/if}><a href="{php echo $this->createWebUrl('store', array('op' => 'post'));}">添加门店</a></li>
-	{if $op == 'post' && $id}<li class="active"><a href="{php echo $this->createWebUrl('store', array('op' => 'post', 'id' => $id));}">编辑门店</a></li>{/if}
-</ul>
+{template 'storeordernav'}
+
 {if $config['num_limit'] > 0}
 <div class="alert alert-danger">
 	<i class="fa fa-info-circle"></i>
@@ -425,7 +423,10 @@
 	.status-toggle{cursor:pointer;}
 </style>
 <div class="main">
+<!-- 二次开发，根据是否为总店管理员判断是否显示筛选字段 -->
+	{if $_SESSION['role'] != 'operator'}
 	<div class="panel panel-info">
+	
 		<div class="panel-heading">筛选</div>
 		<div class="panel-body">
 			<form action="./index.php" method="get" class="form-horizontal" role="form">
@@ -446,6 +447,8 @@
 			</form>
 		</div>
 	</div>
+	{/if}
+	<!-- 门店列表 by lwq -->
 	<form class="form-horizontal" action="" method="post">
 		<div class="panel panel-default">
 			<div class="panel-body table-responsive">
@@ -455,10 +458,13 @@
 							<th>门店logo</th>
 							<th>门店名称</th>
 							<th>门店电话</th>
-							<th style="width:350px">门店地址</th>
+							<th>门店地址</th>
+							<!--二次开发 这两栏不用显示 by lwq
 							<th>点餐类型</th>
 							<th>是否显示</th>
+							 -->
 							<th style="width:200px; text-align:right;">操作</th>
+							<th style="text-align:right;">开关店</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -468,6 +474,7 @@
 							<td>{$item['title']}</td>
 							<td>{$item['telephone']}</td>
 							<td>{$item['address']}</td>
+							<!-- 不用显示 by lwq
 							<td>
 								{if $item['is_meal'] == 1}
 									<label class="label label-warning">店内</label>
@@ -483,19 +490,52 @@
 									<span class="label label-warning status-toggle" id="{$item['id']}" data-toggle="1" title="点击修改">隐藏</span>
 								{/if}
 							</td>
+							 -->
 							<td style="text-align:right;">
+							<!-- 开关闭管理 二次开发 by lwq -->
+								
 								<a href="{php echo $this->createWebUrl('store', array('op' => 'post', 'id' => $item['id']))}" class="btn btn-default btn-sm" title="编辑" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"> </i> 编辑</a>
+								<!-- 二次开发 只有超级管理员才能删除门店 -->
+								{if $_SESSION['role'] == 'manager'}
 								<a href="{php echo $this->createWebUrl('store', array('op' => 'del', 'id' => $item['id']))}" class="btn btn-default btn-sm" title="删除" data-toggle="tooltip" data-placement="top" onclick="if(!confirm('删除后将不可恢复，确定删除吗?')) return false;"><i class="fa fa-times"> </i> 删除</a>
+								{/if}
 								<a href="{php echo $this->createWebUrl('switch', array('sid' => $item['id']))}" class="btn btn-default btn-sm" title="管理门店" data-toggle="tooltip" data-placement="top" style="color:#D9534F;"><i class="fa fa-cog fa-spin"> </i> 管理</a>
+							</td>
+							<td style="text-align:right;">
+								<!-- 店已经关闭 -->
+								{if $item['open'] == 0}
+								<button type="button" onclick="openClose('1','{php echo $item['id']}')" class="btn btn-success">开店</button>
+								{else}
+								<button type="button" onclick="openClose('0','{php echo $item['id']}')" class="btn btn-warning">关店</button>
+								{/if}		
 							</td>
 						</tr>
 						{/loop}
 					</tbody>
 				</table>
 			</div>
+			
 		</div>
 		{$pager}
 	</form>
+	<!-- 二次开发，点击关店之后提醒前往菜品管理维护菜单 -->
+			<div id="closeTip" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+  				<div class="modal-dialog modal-sm">
+    				<div class="modal-content">
+    					<div class="modal-header">
+          					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+          						<h4 class="modal-title" id="mySmallModalLabel">门店关闭提醒</h4>
+      					</div>
+      					<div class="modal-body">
+      						门店已关闭，请注意前往菜品管理维护菜单。
+      					</div>
+     				 	<div class="modal-footer">
+        					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      					</div>
+    				</div>
+    				
+  				</div>
+			</div>
 </div>
 <script type="text/javascript">
 	require(['util'], function(u){
@@ -516,7 +556,29 @@
 				}
 			});
 		});
+		
 	});
+	//二次开发：修改门店开关闭状态
+	function openClose(openStatus, storeID){
+		//请求链接：./index.php?c=site&a=entry&op=open_store&do=ajax&m=str_takeout
+		$.post('{php echo $this->createWebUrl('ajax', array('op' => 'open_store'))}', {'id':storeID, 'open':openStatus}, function(data){
+			if(data == 'success') {
+				if(openStatus == '1'){
+					location.reload(true);
+				}else{
+					$("#closeTip").modal('show');
+					//location.reload(true);
+				}
+			} else {
+				alert('编辑门店开关闭失败');
+				location.reload(true);
+			}
+		});
+	}
+	$("#closeTip").on("hidden.bs.modal", function(e){
+		location.reload(true);
+	})
+	
 </script>
 {/if}
 {template 'common'}

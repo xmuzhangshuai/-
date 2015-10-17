@@ -3,6 +3,15 @@
  * [WeEngine System] Copyright (c) 2014 WE7.CC
  * WeEngine is NOT a free software, it under the license terms, visited http://www.we7.cc/ for more details.
  */
+/**
+ * @author lwq
+ * 二次开发：1、编辑管理员信息 添加门店部分
+ * 2、位新增的选项卡新增获取UNiacid
+ */
+//二次开发 为新增选项卡：账号操作员列表后去uniacid
+session_start();
+$uniacid = $_SESSION['uniacid'];
+//
 defined('IN_IA') or exit('Access Denied');
 $_W['page']['title'] = '编辑用户 - 用户管理 - 用户管理';
 load()->model('setting');
@@ -32,12 +41,17 @@ if ($do == 'edit') {
 		if (empty($_GPC['groupid'])) {
 			message('请选择所属用户组');
 		}
+		//二次开发 管理门店
+		if (empty($_GPC['storeid'])) {
+			message('请选择管理门店');
+		}
 		load()->model('user');
 		$record = array();
 		$record['uid'] = $uid;
 		$record['password'] = $_GPC['password'];
 		$record['salt'] = $user['salt'];
 		$record['groupid'] = intval($_GPC['groupid']);
+		$record['storeid'] = intval($_GPC['storeid']);
 		$record['remark'] = $_GPC['remark'];
 		user_update($record);
 		
@@ -91,7 +105,8 @@ if ($do == 'edit') {
 	unset($user['profile']['birthday']);
 	
 	$groups = pdo_fetchall("SELECT id, name FROM ".tablename('users_group')." ORDER BY id ASC");
-	
+	//二次开发 门店列表
+	$stores = pdo_fetchall("SELECT id, title FROM ".tablename('str_store')." ORDER BY id ASC");
 	template('user/edit');
 	exit;
 }

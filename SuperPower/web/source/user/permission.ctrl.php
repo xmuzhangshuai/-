@@ -78,7 +78,7 @@ if ($do == 'select') {
 	$permission = pdo_fetchall("SELECT uniacid FROM ".tablename('uni_account_users')." WHERE uid = '$uid'", array(), 'uniacid');
 	template('user/select');
 }
-
+//为操作员设定权限
 if ($do == 'menu') {
 	$uniacid = intval($_GPC['uniacid']);
 	$uid = intval($_GPC['uid']);
@@ -144,7 +144,7 @@ if ($do == 'revo') {
 	}
 	exit('success');
 }
-
+//更新管理员角色：管理员还是操作员
 if ($do == 'role') {
 	$uid = intval($_GPC['uid']);
 	$uniacid = intval($_GPC['uniacid']);

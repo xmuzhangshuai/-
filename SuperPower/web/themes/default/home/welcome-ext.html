@@ -1,3 +1,4 @@
+{php session_start();}
 {if $moudles}
 {if $enable_modules}
 <div class="page-header">
@@ -91,6 +92,7 @@
 </div>
 {/if}
 {else}
+	{if $_SESSION['role']=='manager'}
 	<div class="page-header">
 		<h4><i class="fa fa-plane"></i> 核心功能设置</h4>
 	</div>
@@ -103,6 +105,8 @@
 			</a>
 			{/loop}
 		{/if}
+		<!-- 二次开发：后面的都不需要 -->
+		<!-- 
 		{if $module['isrulefields']}
 			<a href="{php echo url('platform/reply', array('m' => $m))}">
 				<i class="fa fa-comments"></i>
@@ -135,18 +139,30 @@
 				<span title="参数设置">参数设置</span>
 			</a>
 		{/if}
+		 -->
 	</div>
+	{/if}<!-- 超级管理员所能看到的菜单   end -->
 	{if empty($module['issolution'])}
 	{if $entries['menu']}
 	<div class="page-header">
 		<h4><i class="fa fa-plane"></i> 业务功能菜单</h4>
 	</div>
 	<div class="shortcut clearfix">
+	
 		{loop $entries['menu'] $menu}
+		{if $_SESSION['role']=='operator'}
+		{if $menu['title'] == '门店管理'}		
 		<a href="{$menu['url']}" title="{$menu['title']}">
 			<i class="fa fa-puzzle-piece"></i>
 			<span>{$menu['title']}</span>
 		</a>
+		{/if}
+		{else}
+		<a href="{$menu['url']}" title="{$menu['title']}">
+			<i class="fa fa-puzzle-piece"></i>
+			<span>{$menu['title']}</span>
+		</a>
+		{/if}
 		{/loop}
 	</div>
 	{/if}
