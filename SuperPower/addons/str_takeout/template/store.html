@@ -580,6 +580,133 @@
 	})
 	
 </script>
+<!-- 二次开发 超级管理员拥有查看所有门店的订单 -->
+{elseif $op == 'allorder'}
+	<div class="main">
+		<div class="panel panel-info">
+			<div class="panel-heading">筛选</div>
+			<div class="panel-body">
+				<form action="./index.php" method="get" class="form-horizontal" role="form">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="m" value="str_takeout">
+					<input type="hidden" name="do" value="store"/>
+					<input type="hidden" name="op" value="allorder"/>
+					<input type="hidden" name="status" value="{$_GPC['status']}"/>
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-3 col-md-2 control-label">门店</label>
+						<div class="col-sm-9 col-xs-9 col-md-9">
+							<input class="form-control" name="keyword" placeholder="输入门店名称或编号" type="text" value="{$_GPC['keyword']}">
+						</div>	
+					</div>
+					<div class="form-group clearfix">
+						<label class="col-xs-12 col-sm-2 col-md-2 control-label">下单时间</label>
+						<div class="col-sm-7 col-lg-8 col-md-8 col-xs-12">
+							{php echo tpl_form_field_daterange('addtime', array('start' => date('Y-m-d', $starttime), 'end' => date('Y-m-d', $endtime)));}
+						</div>
+						<div class="col-xs-12 col-sm-3 col-md-2 col-lg-1">
+							<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<form class="form-horizontal" action="" method="post">
+			
+			<div class="panel panel-default">
+				<div class="panel-body table-responsive" style="overflow:inherit">
+					<table class="table table-hover">
+						<thead class="navbar-inner">
+							<tr>
+								<th>门店id</th>
+								<th>门店名称</th>
+								<th>订单数</th>
+								<th>总金额</th>
+								<!-- <th>下单时间</th> -->
+							</tr>
+						</thead>
+						<tbody>
+							{loop $data $dca}
+							<tr>
+								<td><b>{$dca['sid']}</b></td>
+								<td>{$dca['title']}</td>
+								<td>{$dca['ordernum']}单</td>
+								
+								<!-- <td>{php echo date('Y-m-d H:i', $dca['addtime'])}元</td> -->
+								<td>
+									{$dca['totalmoney']}元
+								</td>
+							</tr>
+							{/loop}
+						</tbody>
+					</table>
+					
+				</div>
+			</div>
+			{$pager}
+		</form>
+		<!-- 二次开发，增加导出为excel 
+					{if empty($status)}
+					<button onclick="exportExcel(0)" class="btn btn-success">导出为Excel</button>
+					{else}
+					<button onclick="exportExcel({php echo $status;})" class="btn btn-success">导出为Excel</button>
+					{/if}-->
+	</div>
+	<script type="text/javascript">
+	</script>
+	<!-- 二次开发：超级管理员可以看到所有用户的历史订单 -->
+	{elseif $op == 'allhisorder'}
+	<div class="main">
+	<!-- 二次开发 排序 -->
+		<div class="panel panel-info">
+			<div class="panel-heading">选择排序</div>
+			<div class="panel-body">
+				<button onclick="paixu(0)" class="btn btn-primary">按消费金额排序（从大到小）</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<button onclick="paixu(1)" class="btn btn-success">按消费次数排序（从大到小）</button>
+			</div>
+		</div>
+
+		<form class="form-horizontal" action="" method="post">
+			<div class="panel panel-default">
+				<div class="panel-body table-responsive" style="overflow:inherit">
+					<table class="table table-hover">
+						<thead class="navbar-inner">
+							<tr>
+								<th>用户id</th>
+								<th>消费次数</th>
+								<th>消费金额</th>
+								<th>首次次预订人/电话</th>
+								<th>最近一次下单时间</th>
+								<th style="width:150px; text-align:right;">详情</th>
+							</tr>
+						</thead>
+						<tbody>
+							{loop $data $dca}
+							<tr>
+								<td>{$dca['uid']}</td>
+								<td>{$dca['buynum']}</td>
+								<td>{$dca['total']}</td>
+								<td>{$dca['username']}/{$dca['mobile']}</td>
+								<td>{php echo date('Y-m-d H:i', $dca['latestbuytime'])}</td>
+								<td style="text-align:right;">
+									<a href="{php echo $this->createWebUrl('manage', array('op' => 'his_orderdetail', 'uid' => $dca['uid']))}" class="btn btn-success btn-sm" title="查看详情" data-toggle="tooltip" data-placement="top">查看历史订单</a>							
+								</td>
+							</tr>
+							{/loop}
+						</tbody>
+					</table>
+					
+				</div>
+			</div>
+			{$pager}
+		</form>
+	</div>
+	<script type="text/javascript">
+		function paixu(type){
+			location.href = "./index.php?c=site&a=entry&op=allhisorder&do=store&m=str_takeout&type=" + type;
+		}
+	</script>
+	{elseif $op == 'dd'}
 {/if}
 {template 'common'}
 {template 'common/footer'}

@@ -172,6 +172,87 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			pdo_delete('str_store', array('uniacid' => $_W['uniacid'], 'id' => $id));
 			message('删除门店成功', $this->createWebUrl('store', array('op' => 'list')), 'success');
 		}
+		/**
+		 * @author lwq
+		 * 二次开发：超级管理员拥有查看所有门店订单的权限和查看所有用户历史订单
+		 */
+		 if($op == 'allorder'){
+		 	load()->func('tpl');
+		 	//只需要微信号的ID，不需要店铺ID
+			//$condition = ' WHERE uniacid = :aid AND sid = :sid';
+			$condition = ' WHERE ' . tablename('str_store') . '.uniacid = :aid';
+			$params[':aid'] = $_W['uniacid'];
+			//$params[':sid'] = $sid;
+
+			$status = intval($_GPC['status']);
+			if($status) {
+				$condition .= ' AND status = :stu';
+				$params[':stu'] = $status;
+			}
+			$keyword = trim($_GPC['keyword']);
+			if(!empty($keyword)) {
+				//二次开发 需要订单共和店铺相联系
+				$condition .= (" AND " . tablename('str_order'). '.sid=' . tablename('str_store'). '.id');
+				$condition .= " AND (sid LIKE '%{$keyword}%' OR title LIKE '%{$keyword}%')";
+			}
+			if(!empty($_GPC['addtime'])) {
+				$starttime = strtotime($_GPC['addtime']['start']);
+				$endtime = strtotime($_GPC['addtime']['end']) + 86399;
+			} else {
+				$starttime = strtotime('-15 day');
+				$endtime = TIMESTAMP;
+			}
+			$condition .= " AND addtime > :start AND addtime < :end";
+			$params[':start'] = $starttime;
+			$params[':end'] = $endtime;
+
+			$pindex = max(1, intval($_GPC['page']));
+			$psize = 20;
+			
+			
+			$total = pdo_fetchcolumn('SELECT COUNT(sid) from '. tablename('str_order') . ',' . tablename('str_store') . $condition, $params);
+			//$data = pdo_fetchall('SELECT * FROM ' . tablename('str_order') . $condition . ' ORDER BY addtime DESC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			//二次开发:data的获取要重新搞过
+			$data = pdo_fetchall('SELECT title, sid, COUNT(sid) as ordernum, SUM(price) as totalmoney from '. tablename('str_order') . ',' . tablename('str_store') . $condition, $params);
+			if(!empty($data)) {
+				foreach($data as &$da) {
+					$da['is_trash'] = check_trash($da['sid'], $da['uid'], 'fetch');
+				}
+			}
+			$pager = pagination($total, $pindex, $psize);
+			//include $this->template('order');
+		 }
+		 if($op == 'allhisorder'){
+		 	/**
+			 * @author lwq
+			 * 二次开发：用户历史订单，根据消费额度，消费次数排名 ， 超级管理员含有此权限
+			 */
+			load()->func('tpl');
+			$condition = ' WHERE uniacid = :aid GROUP BY uid';
+			$type = intval($_GPC['type']);
+			if($type == 0){
+				$condition.= ' ORDER BY SUM(price) DESC';
+			}else if($type == 1){
+				$condition.= ' ORDER BY COUNT(uid) DESC';
+			}else{
+				$condition.= ' ORDER BY SUM(price) DESC';//默认
+			}
+			$params[':aid'] = $_W['uniacid'];
+			
+			$pindex = max(1, intval($_GPC['page']));
+			$psize = 20;
+			
+			$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') .  $condition, $params);
+			$data = pdo_fetchall('SELECT uid,COUNT(uid) as buynum,SUM(price) as total, MAX(addtime) as latestbuytime, username, mobile FROM ' . 
+					tablename('str_order') . $condition . '  LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			if(!empty($data)) {
+				//foreach($data as &$da) {
+				//	$da['is_trash'] = check_trash($da['sid'], $da['uid'], 'fetch');
+				//}
+			}
+			$pager = pagination($total, $pindex, $psize);
+		 }
+
 		include $this->template('store');
 	}
 	//专门处理ajax请求 
