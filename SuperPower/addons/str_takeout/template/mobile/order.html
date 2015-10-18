@@ -3,89 +3,102 @@
 <script src="../addons/str_takeout/template/resource/js/order.js"></script>
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <style type="text/css">
-	{if $store['comment_status'] == 1}
-	.nav a{width:33.333%;}
+	{if $store['comment_status']==1}
+	.nav a {
+		width: 33.333%;
+	}
 	{/if}
+	body{background-color: #E5E5E5;}
+	#totalPrice2{color:#f29801;}
 </style>
-<header class="nav menu">
-	<div>
-		<a href="javascript:;" class="on">订单详情</a>
-		{if $store['comment_status'] == 1}
-		<a href="{php echo $this->createMobileUrl('comment_list', array('sid' => $_GPC['sid']));}">用户评论</a>
-		{/if}
-		<a href="{php echo murl('mc/home');}">会员中心</a>
+<div class="nav_sp">
+	<a href="#" class="nav_sp_back"></a>
+	<div id="nav_sp_wrap">
+		<a href="#" class="nav_sp_logo"></a>
 	</div>
-</header>
+	<a href="#" class="nav_sp_home"></a>
+</div>
 <div class="container">
 	<form name="cart_confirm_form" id="cart_confirm_form" action="{php echo $this->createMobileUrl('orderconfirm', array('sid' => $sid), true)}" method="post">
 		<section class="menu_wrap">
-			<ul class="menu_list order_list" id="orderList">
-			{loop $dish_info $li}
-				<li id="{$li['id']}">
-					<div>
-						<img src="{php echo tomedia($li['thumb']);}" alt="">
-					</div>
-					<div>
-						<h3>{$li['title']}</h3>
-						<div>
+			<div class="cont_box delivery_info">
+				<label class="left">送餐地址</label>
+				<div class="mid"><span id="showAddres">地址地址地址地址{$address['address']}</span><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 1));}"><i class="ico_forward"></i></a></div>
+				<br />
+				<label class="left">楼层房号</label>
+				<div class="mid">
+					<input type="text" id="showNumber" value="111{$address['address']}"></input>
+				</div>
+				<br />
+				<input type="text" id="showName" value="姓名{$address['realname']}" class="half"></input>
+				<input type="tel" id="showTel" value="18888888888{$address['mobile']}" class="half"></input>
+			</div>
+			<div class="cont_box">
+				<div class="shopping_info cont_box">
+					<time>2015-13-32</time>
+					<span id="shopName">南普陀店<a class="ico_tel" href="tel:18888888888"></a></span>
+				</div>
+				<ul class="menu_list order_list" id="orderList">
+					{loop $dish_info $li}
+					<li id="{$li['id']}" class="cont_box">
+						<div class="order_item">
+							<h3>{$li['title']}</h3>
+							<strong>￥<span class="unit_price">{$li['price']}</span></strong>
+							<div class="info">{$li['description']}</div>
+						</div>
+						<div class="order_item_count">
+
 							<div class="fr" max="{$li['total']}">
 								<a href="javascript:void(0);" class="btn_n add active"></a>
 							</div>
 							<input autocomplete="off" class="number" type="hidden" name="dish[{$li['id']}]" value="{$dishes[$li['id']]}">
 							<span class="count">{$dishes[$li['id']]}</span>
-							<strong>￥<span class="unit_price">{$li['price']}</span></strong>
 						</div>
-					</div>
-				</li>
-			{/loop}
-			</ul>
+
+					</li>
+					{/loop}
+					<li id="totalprice_wrap" class="cont_box">
+						<div class="order_item">
+							<h3>总价</h3>
+							<strong>￥<span class="unit_price" id="totalPrice2"></span></strong>
+						</div>
+
+					</li>
+				</ul>
+				<p>&nbsp;</p>
+			</div>
 			<div class="tips" id="addtip" style="background-color:#e1943c;display:none" data-flag="0">亲，您可能还需要以下菜品</div>
 			<!-- 提醒客户需要点的菜品（比如：米饭）-->
 			{if !empty($dish_add)}
-				<ul class="menu_list order_list" id="addList" style="display:none">
+			<ul class="menu_list order_list" id="addList" style="display:none">
 				{loop $dish_add $add_li}
-					<li>
+				<li>
+					<div>
+						<img src="{php echo tomedia($add_li['thumb']);}" alt="">
+					</div>
+					<div>
+						<h3>{$add_li['title']}</h3>
 						<div>
-							<img src="{php echo tomedia($add_li['thumb']);}" alt="">
-						</div>
-						<div>
-							<h3>{$add_li['title']}</h3>
-							<div>
-								<div class="fr" max="{$add_li['total']}">
-									<a href="javascript:void(0);" class="btn_n add active"></a>
-								</div>
-								<input autocomplete="off" class="number" type="hidden" name="dish[{$add_li['id']}]" value="0">
-								<span class="count">0</span>
-								<strong>￥<span class="unit_price">{$add_li['price']}</span></strong>
+							<div class="fr" max="{$add_li['total']}">
+								<a href="javascript:void(0);" class="btn_n add active"></a>
 							</div>
+							<input autocomplete="off" class="number" type="hidden" name="dish[{$add_li['id']}]" value="0">
+							<span class="count">0</span>
+							<strong>￥<span class="unit_price">{$add_li['price']}</span></strong>
 						</div>
-					</li>
+					</div>
+				</li>
 				{/loop}
-				</ul>
+			</ul>
 			{/if}
-			<div style="margin:15px 0 0 15px;">
-				<a href="javascript:;" class="comm_btn" style="display: inline-block;background: #51C332;margin-right:15px" id="emptyBtn">重选</a>
-			</div>
 		</section>
 		<footer class="order_fixed">
-			<div class="fixed">
-				<p>
-					<span class="fr">总计：<strong>￥<span id="totalPrice"></span></strong> / <span id="cartNum" class="has_num"></span>份</span>
-					配送费：￥{$store['delivery_price']}		
-				</p>
-				<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}" class="add"><label><span>加菜</span></label></a>
-				<a href="javascript:;" class="comm_btn submit_order" style="display: inline-block;">订单确认</a>
+			<div class="fixed" id="fix_bar">
+				<a id="settlement" href="javascript:;" class="comm_btn submit_order"><span id="totalPrice"></span>元 去支付</a>
 			</div>
 		</footer>
 	</form>
 	{template 'footerbar'}
-</div>
-<div class="confirm_box" style="" id="emptyBox">
-	<p>确定清空已选菜品吗？</p>
-	<div>
-		<span><a href="javascript:void(0);" class="comm_btn disabled" id="cancel_empty">取消</a></span>
-		<span><a href="javascript:void(0);" class="comm_btn" id="confirm_empty">确定</a></span>
-	</div>
 </div>
 <div class="confirm_box" style="" id="addBox">
 	<p>或许您对我们的推荐菜品感兴趣！！</p>
@@ -96,45 +109,44 @@
 </div>
 
 <script type="text/javascript">
-	$(function(){
+	$(function() {
 		var amountCb = $.amountCb();
-		$('.order_list li').each(function(){
+		$('.order_list li').each(function() {
 			var count = parseInt($(this).find('.count').text()),
 				_add = $(this).find('.add'),
 				i = 0;
-
-			for(; i < count; i++){
+			for (; i < count; i++) {
 				amountCb.call(_add, '+');
 			}
 			_add.amount(count, amountCb);
 		});
 	});
-
-	$('#emptyBtn').click(function(){
-		$('#emptyBox').dialog({title: '确定重选菜品'});
+	$('#emptyBtn').click(function() {
+		$('#emptyBox').dialog({
+			title: '确定重选菜品'
+		});
 	});
-
-	$("#cancel_empty").click(function(){
+	$("#cancel_empty").click(function() {
 		$('#emptyBox').dialog('close');
 	});
-
-	$("#confirm_empty").click(function(){
-		location.href="{php echo $this->createMobileUrl('dish', array('sid' => $_GPC['sid'], 'f' => 1))}";
+	$("#confirm_empty").click(function() {
+		location.href = "{php echo $this->createMobileUrl('dish', array('sid' => $_GPC['sid'], 'f' => 1))}";
 		return false;
 	});
-
 	var is_add = "{$is_add}";
-	$('.submit_order').click(function(){
+	$('.submit_order').click(function() {
 		var add_flag = parseInt($('#addtip').attr('data-flag'));
-		if(!add_flag && is_add == 1) {
-			$('#addBox').dialog({title: '亲，看看我们的推荐菜品嘛！'});
-			$("#add_back").click(function(){
+		if (!add_flag && is_add == 1) {
+			$('#addBox').dialog({
+				title: '亲，看看我们的推荐菜品嘛！'
+			});
+			$("#add_back").click(function() {
 				$('#addtip').attr('data-flag', 1)
 				$('#addBox').dialog('close');
 				$('#addList, #addtip').slideDown(500);
 				return false;
 			});
-			$("#add_go").click(function(){
+			$("#add_go").click(function() {
 				$('#cart_confirm_form').submit();
 				return false;
 			});
@@ -143,10 +155,8 @@
 			return false;
 		}
 	});
-
 	document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
 		WeixinJSBridge.call('hideOptionMenu');
 	});
 </script>
-{template 'common'}
-{template 'common/footer'}
+{template 'common'} {template 'common/footer'}

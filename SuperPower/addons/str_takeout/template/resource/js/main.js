@@ -12,6 +12,10 @@ $.fn.amount = function(num, callback){
 
 		var data_obj = obj.parent();
 		var max = data_obj.attr("max");
+		if(null != max && max != "" && max != "-1" && curNum >= max-1)
+		{
+			data_obj.addClass("buy_btn_out");
+		}
 		if(null != max && max != "" && max != "-1" && curNum >= max)
 		{
 			return false;
@@ -61,7 +65,8 @@ $.fn.amount = function(num, callback){
 			_num = obj.find('.num'),
 			_add = obj.next(),
 			curNum = parseInt(_num.text(), 10);
-
+		var data_obj = obj.parent();
+		data_obj.removeClass("buy_btn_out");
 		_num.text(--curNum);
 		obj.parent().next(".number").val(curNum);
 		$(".h_num",obj.parent()).val(curNum)
@@ -118,6 +123,7 @@ $.amountCb = function(){
 	var _condition = $('#sendCondition'),
 		_total = $('#totalPrice'),
 		_cartNum = $('#cartNum'),
+		_fix = $('#fix_bar'),
 		sendCondition = parseFloat(_condition.text()).toFixed(3);
 
 	return function(sign){
@@ -138,8 +144,10 @@ $.amountCb = function(){
 
 		if(disNumber > 0){
 			_cartNum.addClass('has_num');
+			_fix.removeClass('hidden');
 		}else{
 			_cartNum.removeClass('has_num').text('');
+			_fix.addClass('hidden');
 		}
 		return false;
 	}

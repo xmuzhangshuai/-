@@ -6,6 +6,23 @@
 </style>
 <div class="container">
 	<section class="pay_wrap">
+					<ul class="menu_list order_list" id="orderList">
+			{loop $dish_info $li}
+				<li id="{$li['id']}">
+					<div>
+						<h3>{$li['title']}</h3>
+						<div>
+							<div class="fr" max="{$li['total']}">
+								<a href="javascript:void(0);" class="btn_n add active"></a>
+							</div>
+							<input autocomplete="off" class="number" type="hidden" name="dish[{$li['id']}]" value="{$dishes[$li['id']]}">
+							<span class="count">{$dishes[$li['id']]}</span>
+							<strong>￥<span class="unit_price">{$li['price']}</span></strong>
+						</div>
+					</div>
+				</li>
+			{/loop}
+			</ul>
 		<ul class="box pay_box">
 			<li><label>订单费用&赠送积分</label></li>
 			<li>
