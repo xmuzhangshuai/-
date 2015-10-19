@@ -11,11 +11,6 @@
 	{/if}
 </style>
 <div class="container" onselectstart="return true;" ondragstart="return false;">
-	<!--
-    	作者：librazy@foxmail.com
-    	时间：2015-10-14
-    	描述：TODO:导航条
-    -->
     <div class="nav_sp">
     	<a href="#" class="nav_sp_back"></a>
     	<div id="nav_sp_wrap"><a href="#" class="nav_sp_logo"></a></div>
@@ -26,12 +21,13 @@
     	时间：2015-10-14
     	描述：TODO:定位、选择
     -->
+    <div class="nav_address"><span>送货到：</span><span>{$address['address']}</span>-<span>{$address['room']}</span><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a></div>
 	<form name="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
 		<input type="hidden" name="more" value="{$_GPC['more']}">
 		<input type="hidden" name="dish_str" value="{$dish_str}">
 		<section class="menu_wrap {if $store['dish_style'] == 1}skin1{/if}" id="menuWrap">
 			{if !$store['business_hours_flag']}
-				<div class="tips">企鹅休息中，接受预定~下次配送时间：<br />{$hour_str}</div>
+				<div class="tips">企鹅休息中，接受预定~下次配送时间：<br /><span>{$hour_str}</span></div>
 			{/if}
 			<div class="menu_container">
 				{loop $category $cate_row}

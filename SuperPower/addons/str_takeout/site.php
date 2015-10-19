@@ -1143,6 +1143,11 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		if(!empty($_GPC['f'])) {
 			del_order_cart($sid);
 		}
+		$address_id = intval($_GPC['address_id']);
+		$address = get_address($address_id);
+		if(empty($address)) {
+			$address = get_default_address();
+		}
 		//获取购物车的信息
 		$cart = get_order_cart($sid);
 		$category = pdo_fetchall('SELECT title, id FROM ' . tablename('str_dish_category') . ' WHERE uniacid = :aid AND sid = :sid ORDER BY displayorder DESC, id ASC', array(':aid' => $_W['uniacid'], ':sid' => $sid));
@@ -1220,93 +1225,46 @@ class Str_takeoutModuleSite extends WeModuleSite {
 	public function doMobileOrder() {
 		global $_W, $_GPC;
 		checkauth();
-		$sid = intval($_GPC['sid']);
-		checkclerk($sid);
-		check_trash($sid);
-		$store = pdo_fetch('SELECT * FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
-		$title = $store['title'];
-		$_share = get_share($store);
-		if(empty($store)) {
-			message('门店不存在', '', 'error');
-		}
-		//购物车
-		$cart = set_order_cart($sid);
-		if(is_error($cart)) {
-			message($cart.message, '', 'error');
-		}
-		$dishes = $cart['data'];
-		//提醒客户需要点的菜品（比如：米饭）
-		$is_add = 0;
-		$recommend = pdo_fetchall('SELECT id FROM ' . tablename('str_dish') . ' WHERE uniacid = :uniacid AND sid = :sid AND recommend = 1 AND is_display = 1', array(':uniacid' => $_W['uniacid'], ':sid' => $sid), id);
-		$add = array_keys($recommend);
-		$add_arr = array_diff($add, array_keys($dishes));
-		if(!empty($add_arr)) {
-			$is_add = 1;
-			$add_str = implode(',', $add_arr);
-			$dish_add = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') ." WHERE uniacid = :aid AND sid = :sid AND id IN ($add_str)", array(':aid' => $_W['uniacid'], ':sid' => $sid), 'id');
-		}
-		if(!empty($dishes)) {
-			$ids_str = implode(',', array_keys($dishes));
-			$dish_info = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') ." WHERE uniacid = :aid AND sid = :sid AND id IN ($ids_str)", array(':aid' => $_W['uniacid'], ':sid' => $sid), 'id');
-		}
-		include $this->template('order');
-	}
-	public function doMobileOrderConfirm() {
-		global $_W, $_GPC;
-		checkauth();
 		if(!$_W['isajax']) {
 			$sid = intval($_GPC['sid']);
-			$return = intval($_GPC['r']);
 			checkclerk($sid);
+			check_trash($sid);
 			$store = pdo_fetch('SELECT * FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
 			$title = $store['title'];
+			$_share = get_share($store);
 			if(empty($store)) {
 				message('门店不存在', '', 'error');
 			}
-			if(!$return) {
-				$cart = set_order_cart($sid);
-			} else {
+			//购物车
+			$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'post';
+			if($op=='get'){
 				$cart = get_order_cart($sid);
+			}else{
+				$cart = set_order_cart($sid);
 			}
-			if(empty($cart['data'])) {
-				message('订单信息出错', '', 'error');
+			if(is_error($cart)) {
+				message("购物车错误".$cart.message, '', 'error');
 			}
-			//送餐时间
-			$minut = date('i', TIMESTAMP);
-			if($minut <= 15) {
-				$minut = 15;
-			} elseif($minut >15 && $minut <= 30) {
-				$minut = 30;
-			} elseif($minut >30 && $minut <= 45) {
-				$minut = 45;
-			} elseif($minut >45 && $minut <= 60) {
-				$minut = 60;
-			}
-			$now = mktime(date('H'), $minut);
-			$now_limit = $now + 180*60;
-			for($now; $now <= $now_limit; $now += 15 * 60) {
-				$str .= '<a href="javascript:void(0);">'.date('H:i', $now).'</a>';
-			}
-			//桌号
-			$tables = pdo_fetch('SELECT * FROM ' . tablename('str_tables') . ' WHERE uniacid = :uniacid AND sid = :sid', array(':uniacid' => $_W['uniacid'], ':sid' => $sid));
-			if(!empty($tables)) {
-				$tables['tables'] = iunserializer($tables['tables']);
-				$tables['rooms'] = iunserializer($tables['rooms']);
-			}
-
-			//获取送餐地址(外卖用)
+			$dishes = $cart['data'];
+			//提醒客户需要点的菜品（比如：米饭）
+			$is_add = 0;
+			$recommend = pdo_fetchall('SELECT id FROM ' . tablename('str_dish') . ' WHERE uniacid = :uniacid AND sid = :sid AND recommend = 1 AND is_display = 1', array(':uniacid' => $_W['uniacid'], ':sid' => $sid), id);
+			$add = array_keys($recommend);
+			$add_arr = array_diff($add, array_keys($dishes));
 			$address_id = intval($_GPC['address_id']);
 			$address = get_address($address_id);
 			if(empty($address)) {
 				$address = get_default_address();
 			}
-
-			//点餐人信息(点餐用)
-			$member = mc_fetch($_W['member']['uid'], array('realname', 'mobile', 'address', 'nickname'));
-			$order_member = pdo_fetch('SELECT id,mobile,username, address FROM ' . tablename('str_order') . ' WHERE uniacid = :aid AND uid = :uid ORDER BY id DESC LIMIT 1', array(':aid' => $_W['uniacid'], ':uid' => $_W['member']['uid']));
-			$member['realname'] = !empty($order_member['username']) ? $order_member['username'] : $member['realname'];
-			$member['mobile'] = !empty($order_member['mobile']) ? $order_member['mobile'] : $member['mobile'];
-			$member['address'] = !empty($order_member['address']) ? $order_member['address'] : $member['address'];
+			if(!empty($add_arr)) {
+				$is_add = 1;
+				$add_str = implode(',', $add_arr);
+				$dish_add = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') ." WHERE uniacid = :aid AND sid = :sid AND id IN ($add_str)", array(':aid' => $_W['uniacid'], ':sid' => $sid), 'id');
+			}
+			if(!empty($dishes)) {
+				$ids_str = implode(',', array_keys($dishes));
+				$dish_info = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') ." WHERE uniacid = :aid AND sid = :sid AND id IN ($ids_str)", array(':aid' => $_W['uniacid'], ':sid' => $sid), 'id');
+			}
 		} else {
 			$sid = intval($_GPC['sid']);
 			$store = pdo_fetch('SELECT notice_acid,title,store_tpl,member_tpl,delivery_tpl,delivery_price FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
@@ -1379,6 +1337,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			//init_notice_order($sid, $id, 'order');
 			del_order_cart($sid);
 			if($id) {
+				$out['id'] = $id;
+				$out['openid'] = $data['openid'];
+				$out['priceYuan'] = $data['price'];
 				$out['errno'] = 0;
 				$out['url'] = $this->createMobileUrl('pay', array('id' => $id));
 			} else {
@@ -1387,7 +1348,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			exit(json_encode($out));
 		}
-		include $this->template('orderconfirm');
+		include $this->template('order');
 	}
 	public function doMobileOrderDetail() {
 		global $_W, $_GPC;
@@ -1695,6 +1656,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					'realname' => trim($_GPC['realname']),
 					'mobile' => trim($_GPC['mobile']),
 					'address' => trim($_GPC['address']),
+					'room'=> trim($_GPC['room'])
 				);
 				if(!empty($address)) {
 					pdo_update('str_address', $data, array('uniacid' => $_W['uniacid'], 'id' => $id));

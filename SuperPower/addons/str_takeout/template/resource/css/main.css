@@ -386,6 +386,25 @@ margin: 7px;
 float: right;
 position: static;
 }
+.nav_address{
+height: 38px;
+width: 100%;
+background-color: #d9d9d9;
+font-size: 16px;
+line-height: 38px;
+padding-left:20px;
+}
+.nav_sp_location{
+background: url(../images/location.png);
+height: 28px;
+display: table-cell;
+width: 20px;
+background-size:20px 28px ;
+margin-top: 5px;
+margin-right: 12px;
+float: right;
+position: static;
+}
 .img_swipe {
 	position: relative;
 	overflow: hidden;
@@ -507,14 +526,18 @@ position: static;
 	position: relative;
 }
 .menu_wrap .tips {
-	background-color: #d9d9d9;
 	height: 40px;
 	line-height: 20px;
 	text-align: center;
 	font-size: 12px;
+	margin-bottom:10px;
 }
 .menu_wrap .tips a {
 	display: block;
+}
+.menu_wrap .tips span{
+	border: 2px orange solid;
+	border-radius: 5px;
 }
 .mine-tips {
 	padding: 0 10px;
@@ -924,6 +947,9 @@ background-size: 8px 13px;
 	float: right;
 	padding-top: 22px;
 }
+#totalprice_wrap{
+	margin-top:2px;
+}
 @media (max-width: 720px) {
 	.menu_list li > div.order_item{
 		width:60%;
@@ -938,15 +964,16 @@ background-size: 8px 13px;
 	.menu_list li h3 {
 		font-weight: bold;
 		line-height: 1.7;
-		font-size: 20px;
+		font-size: 16px;
 		color: #000000;
 		display: inline;
 	}
-	.menu_list li strong span {
+	.menu_list li .order_item strong span {
 		font-size: 16px;
 	}
-	.menu_list li strong {
+	.menu_list li .order_item strong {
 		font-size: 12px;
+		margin-top: 4px;
 	}
 }
 .menu_list li > div.order_item_count .num{

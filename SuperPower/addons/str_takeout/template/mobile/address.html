@@ -14,6 +14,7 @@
 							<td>
 							<div class="text"><span>{$address['realname']}</span><label>{$address['mobile']}</label></div>
 							<div class="text">{$address['address']}</div>
+							<div class="text">{$address['room']}</div>
 							</td>
 							<td class="td_edit"><a href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'id' => $address['id'],'sid' => $sid, 'r' => $_GPC['r']))}" class="edit_icon"><span></span></a></td>
 						</tr>
@@ -32,6 +33,7 @@
 			<div class="line"><input type="text" name="realname" value="{$address['realname']}" placeholder="姓名"></div>
 			<div class="line"><input type="text" name="mobile" value="{$address['mobile']}" placeholder="手机"></div>
 			<div class="line address addr1"><input name="address" value="{$address['address']}" type="text" placeholder="详细地址">
+			<div class="line address addr1"><input name="room" value="{$address['room']}" type="text" placeholder="楼层房号">
 				<i class="getposition"></i>
 			</div>
 		</div>
@@ -61,13 +63,16 @@
 <script type="text/javascript">
 	$(function(){
 		var r = "{$_GPC['r']}";
-		var return_url = "{php echo $this->createMobileUrl('orderconfirm', array('sid' => $sid, 'r' => 1));}";
+		var return_url1 = "{php echo $this->createMobileUrl('order', array('op' => 'get','sid' => $sid, 'r' => 1));}";
+		var return_url2 = "{php echo $this->createMobileUrl('dish', array('sid' => $sid));}";
 		$('.addressChecked').click(function(){
 			var address_id = $(this).attr('data-id');
 			if(address_id) {
 				$.post("{php echo $this->createMobileUrl('address', array('op' => 'default', 'sid' => $sid))}", {'id':address_id},function(){
-					if(r) {
-						location.href=return_url + '&address_id='+address_id;
+					if(r==1) {
+						location.href=return_url1 + '&address_id='+address_id;
+					} else if(r==2) {
+						location.href=return_url2 + '&address_id='+address_id;
 					} else {
 						location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
 					}
@@ -93,7 +98,12 @@
 				alert('收件地址不能为空');
 				return false;
 			}
-			$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'realname':realname, 'mobile':mobile, 'address':address}, function(data){
+			var room = $.trim($(':text[name="room"]').val());
+			if(!address) {
+				alert('楼层房号不能为空');
+				return false;
+			}
+			$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'realname':realname, 'mobile':mobile, 'address':address, 'room':room}, function(data){
 				var data = $.parseJSON(data);
 				if(!data.errorno) {
 					if(r) {
