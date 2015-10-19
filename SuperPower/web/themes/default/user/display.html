@@ -43,6 +43,7 @@
 	});
 </script>
 <ul class="nav nav-tabs">
+	<li><a href="{url 'account/permission' array('uniacid' => $uniacid)}">账号操作员列表</a></li>
 	<li {if intval($_GPC['status']) != 1}class="active"{/if}><a href="{php echo url('user/display');}">用户列表</a></li>
 	{if !empty($settings['verify'])}
 	<li {if intval($_GPC['status']) == 1}class="active"{/if}><a href="{php echo url('user/display', array('status' => 1));}">审核用户</a></li>
@@ -97,8 +98,9 @@
 			<tr>
 				<th style="width:150px;">用户名</th>
 				<th style="width:200px;">身份</th>
-				<th style="width:100px;">状态</th>
+				<!-- <th style="width:100px;">状态</th> -->
 				<th style="min-width:180px;">注册时间</th>
+				<th style="min-width:100px;">管理的门店</th>
 				<th style="min-width:300px;">操作</th>
 			</tr>
 		</thead>
@@ -115,16 +117,28 @@
 					<span class="label label-error">未分配</span>
 				{/if}
 				</td>
+				<!-- 
 				<td>
 					{if intval($user['status']) != 2}<span class="label label-danger">被禁止</span>{/if}
 				</td>
+				 -->
 				<td>{php echo date('Y-m-d H:i:s', $user['joindate'])}</td>
+				<!-- 二次开发  显示管理的门店 -->
+				<td>
+				{if $user['storeid'] == 0}
+					<span class="label label-success">所有门店</span>
+				{else}
+					<span class="label label-info">{php echo $user['title']}</span>
+				{/if}
+				</td>
 				<td>
 					<div>
 						<a href="{php echo url('user/edit', array('uid' => $user['uid']))}">编辑</a>&nbsp;&nbsp;
 					{if empty($user['founder'])}
+					<!-- 二次开发：取消 查看用户权限， 启用等操作 -->
+					<!--  
 						<a href="{php echo url('user/permission', array('uid' => $user['uid']))}">查看操作权限</a>&nbsp;&nbsp;
-						<a href="javascript:;" onclick="u.deny('{$user['uid']}');">{if intval($user['status']) == 2}禁止{else}启用{/if}用户</a>&nbsp;&nbsp;
+						<a href="javascript:;" onclick="u.deny('{$user['uid']}');">{if intval($user['status']) == 2}禁止{else}启用{/if}用户</a>&nbsp;&nbsp;-->
 						<a href="javascript:;" onclick="u.del('{$user['uid']}');">删除用户</a>
 					{/if}
 					</div>

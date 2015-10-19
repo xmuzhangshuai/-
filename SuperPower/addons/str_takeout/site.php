@@ -4,9 +4,16 @@
  * @author strday
  * @url http://bbs.we7.cc/
  */
+/**
+ * @author lwq
+ * 二次开发：1、门店相关 等
+ */
+//二次开发
+session_start();
 defined('IN_IA') or exit('Access Denied');
 include('model.php');
 include 'wprint.class.php';
+include 'PHPExcel/PHPExcel.php';
 class Str_takeoutModuleSite extends WeModuleSite {
 	public function doWebConfig() {
 		global $_W, $_GPC;
@@ -25,7 +32,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		}
 		include $this->template('config');
 	}
-
+	//门店相关
 	public function doWebStore() {
 		global $_W, $_GPC;
 		$op = empty($_GPC['op']) ? 'list' : trim($_GPC['op']);
@@ -33,7 +40,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		if($config['num_limit'] > 0) {
 			$now_store_num = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_store') . ' WHERE uniacid = :uniacid' , array(':uniacid' => $_W['uniacid']));
 		}
+		//显示门店列表
 		if($op == 'list') {
+			$lists = "";
 			$condition = ' uniacid = :aid';
 			$params[':aid'] = $_W['uniacid'];
 			if(!empty($_GPC['keyword'])) {
@@ -41,17 +50,25 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			$pindex = max(1, intval($_GPC['page']));
 			$psize = 20;
-
 			$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_store') . ' WHERE ' . $condition, $params);
-			$lists = pdo_fetchall('SELECT * FROM ' . tablename('str_store') . ' WHERE ' . $condition . ' ORDER BY displayorder DESC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			//二次开发：超级管理员和门店管理员显示不同的门店
+			if($_SESSION['role'] == 'operator'){
+				$lists = pdo_fetchall('SELECT ' . tablename('str_store') . '.* FROM ' . tablename('str_store') . ',' . tablename('users') .
+						 ' WHERE uid=' . $_SESSION['uid'] . ' AND id=storeid' . 
+						' ORDER BY displayorder DESC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			}else{
+				$lists = pdo_fetchall('SELECT * FROM ' . tablename('str_store') . ' WHERE ' . $condition . ' ORDER BY displayorder DESC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			}		
 			$pager = pagination($total, $pindex, $psize);
 			if(!empty($lists)) {
 				foreach($lists as &$li) {
 					$li['address'] = str_replace('+', ' ', $li['district']) . ' ' . $li['address'];
 				}
 			}
+			//方便模板判断当前是门店管理员还是总店管理员
+			$nowrole = $_SESSION['role'];
 		}
-
+		//新增/编辑门店
 		if($op == 'post') {
 			load()->func('tpl');
 			$id = intval($_GPC['id']);
@@ -143,7 +160,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				message('编辑门店信息成功', $this->createWebUrl('store', array('op' => 'list')), 'success');
 			}
 		}
-
+		//删除门店
 		if($op == 'del') {
 			$id = intval($_GPC['id']);
 			pdo_delete('str_dish_category', array('uniacid' => $_W['uniacid'], 'sid' => $id));
@@ -155,9 +172,90 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			pdo_delete('str_store', array('uniacid' => $_W['uniacid'], 'id' => $id));
 			message('删除门店成功', $this->createWebUrl('store', array('op' => 'list')), 'success');
 		}
+		/**
+		 * @author lwq
+		 * 二次开发：超级管理员拥有查看所有门店订单的权限和查看所有用户历史订单
+		 */
+		 if($op == 'allorder'){
+		 	load()->func('tpl');
+		 	//只需要微信号的ID，不需要店铺ID
+			//$condition = ' WHERE uniacid = :aid AND sid = :sid';
+			$condition = ' WHERE ' . tablename('str_store') . '.uniacid = :aid';
+			$params[':aid'] = $_W['uniacid'];
+			//$params[':sid'] = $sid;
+
+			$status = intval($_GPC['status']);
+			if($status) {
+				$condition .= ' AND status = :stu';
+				$params[':stu'] = $status;
+			}
+			$keyword = trim($_GPC['keyword']);
+			if(!empty($keyword)) {
+				//二次开发 需要订单共和店铺相联系
+				$condition .= (" AND " . tablename('str_order'). '.sid=' . tablename('str_store'). '.id');
+				$condition .= " AND (sid LIKE '%{$keyword}%' OR title LIKE '%{$keyword}%')";
+			}
+			if(!empty($_GPC['addtime'])) {
+				$starttime = strtotime($_GPC['addtime']['start']);
+				$endtime = strtotime($_GPC['addtime']['end']) + 86399;
+			} else {
+				$starttime = strtotime('-15 day');
+				$endtime = TIMESTAMP;
+			}
+			$condition .= " AND addtime > :start AND addtime < :end";
+			$params[':start'] = $starttime;
+			$params[':end'] = $endtime;
+
+			$pindex = max(1, intval($_GPC['page']));
+			$psize = 20;
+			
+			
+			$total = pdo_fetchcolumn('SELECT COUNT(sid) from '. tablename('str_order') . ',' . tablename('str_store') . $condition, $params);
+			//$data = pdo_fetchall('SELECT * FROM ' . tablename('str_order') . $condition . ' ORDER BY addtime DESC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			//二次开发:data的获取要重新搞过
+			$data = pdo_fetchall('SELECT title, sid, COUNT(sid) as ordernum, SUM(price) as totalmoney from '. tablename('str_order') . ',' . tablename('str_store') . $condition, $params);
+			if(!empty($data)) {
+				foreach($data as &$da) {
+					$da['is_trash'] = check_trash($da['sid'], $da['uid'], 'fetch');
+				}
+			}
+			$pager = pagination($total, $pindex, $psize);
+			//include $this->template('order');
+		 }
+		 if($op == 'allhisorder'){
+		 	/**
+			 * @author lwq
+			 * 二次开发：用户历史订单，根据消费额度，消费次数排名 ， 超级管理员含有此权限
+			 */
+			load()->func('tpl');
+			$condition = ' WHERE uniacid = :aid GROUP BY uid';
+			$type = intval($_GPC['type']);
+			if($type == 0){
+				$condition.= ' ORDER BY SUM(price) DESC';
+			}else if($type == 1){
+				$condition.= ' ORDER BY COUNT(uid) DESC';
+			}else{
+				$condition.= ' ORDER BY SUM(price) DESC';//默认
+			}
+			$params[':aid'] = $_W['uniacid'];
+			
+			$pindex = max(1, intval($_GPC['page']));
+			$psize = 20;
+			
+			$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') .  $condition, $params);
+			$data = pdo_fetchall('SELECT uid,COUNT(uid) as buynum,SUM(price) as total, MAX(addtime) as latestbuytime, username, mobile FROM ' . 
+					tablename('str_order') . $condition . '  LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			if(!empty($data)) {
+				//foreach($data as &$da) {
+				//	$da['is_trash'] = check_trash($da['sid'], $da['uid'], 'fetch');
+				//}
+			}
+			$pager = pagination($total, $pindex, $psize);
+		 }
+
 		include $this->template('store');
 	}
-
+	//专门处理ajax请求 
 	public function doWebAjax() {
 		global $_W, $_GPC;
 		$op = trim($_GPC['op']);
@@ -188,6 +286,23 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			exit('error');
 		}
+		//门店开关闭管理 add by  lwq
+		if($op == 'open_store'){
+			$id = intval($_GPC['id']);
+			$open = intval($_GPC['open']);
+			//echo $open;
+			$state = pdo_update('str_store',array('open' => $open), array('uniacid' => $_W['uniacid'], 'id' => $id));
+			if($state !== false){
+				exit('success');
+			}
+			exit('error');
+		}
+		//进入门店检测是否开启 edit by lwq
+		if($op == 'get_open'){
+			$id = intval($_GPC['id']);
+			$open = pdo_fetchcolumn('SELECT open FROM ' . tablename('str_store') . ' WHERE ' . 'id=:id and uniacid=:uniacid', array(':id'=>id, ':uniacid'=>$_W['uniacid']));
+			exit($open);
+		}
 	}
 
 	public function doWebSwitch() {
@@ -197,7 +312,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		header('location: ' . $this->createWebUrl('manage'));
 		exit();
 	}
-
+	//二次开发：设置问题订单
 	public function doWebManage() {
 		global $_W, $_GPC;
 		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'cate_list';
@@ -527,18 +642,179 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				}
 			}
 			include $this->template('order');
-		} elseif($op == 'status') {
+		} elseif($op == 'history_order'){
+			/**
+			 * @author lwq
+			 * 二次开发：用户历史订单，根据消费额度，消费次数排名
+			 */
+			load()->func('tpl');
+			$condition = ' WHERE uniacid = :aid AND sid = :sid GROUP BY uid';
+			$type = intval($_GPC['type']);
+			if($type == 0){
+				$condition.= ' ORDER BY SUM(price) DESC';
+			}else if($type == 1){
+				$condition.= ' ORDER BY COUNT(uid) DESC';
+			}else{
+				$condition.= ' ORDER BY SUM(price) DESC';//默认
+			}
+			$params[':aid'] = $_W['uniacid'];
+			$params[':sid'] = $sid;
+			
+			$pindex = max(1, intval($_GPC['page']));
+			$psize = 20;
+			
+			$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') .  $condition, $params);
+			$data = pdo_fetchall('SELECT sid,uid,COUNT(uid) as buynum,SUM(price) as total, MAX(addtime) as latestbuytime, username, mobile FROM ' . 
+					tablename('str_order') . $condition . '  LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			if(!empty($data)) {
+				foreach($data as &$da) {
+					$da['is_trash'] = check_trash($da['sid'], $da['uid'], 'fetch');
+				}
+			}
+			$pager = pagination($total, $pindex, $psize);
+			include $this->template('hisorder');
+		}elseif($op == 'his_orderdetail'){
+			/**
+			 * @author lwq
+			 * 二次开发：用户订单详情中显示订单列表
+			 */
+			load()->func('tpl');
+			$condition = ' WHERE uniacid = :aid AND sid = :sid AND uid = :uid';
+			$params[':aid'] = $_W['uniacid'];
+			$params[':sid'] = $sid;
+			
+			$uid = intval($_GPC['uid']);
+			$params[':uid'] = $uid;
+			
+			$status = intval($_GPC['status']);
+			if($status) {
+				$condition .= ' AND status = :stu';
+				$params[':stu'] = $status;
+			}
+			$keyword = trim($_GPC['keyword']);
+			if(!empty($keyword)) {
+				$condition .= " AND (username LIKE '%{$keyword}%' OR mobile LIKE '%{$keyword}%')";
+			}
+			if(!empty($_GPC['addtime'])) {
+				$starttime = strtotime($_GPC['addtime']['start']);
+				$endtime = strtotime($_GPC['addtime']['end']) + 86399;
+			} else {
+				$starttime = strtotime('-15 day');
+				$endtime = TIMESTAMP;
+			}
+			$condition .= " AND addtime > :start AND addtime < :end";
+			$params[':start'] = $starttime;
+			$params[':end'] = $endtime;
+			
+			$pindex = max(1, intval($_GPC['page']));
+			$psize = 20;
+			
+			$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') .  $condition, $params);
+			$data = pdo_fetchall('SELECT * FROM ' . tablename('str_order') . $condition . ' ORDER BY addtime DESC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			if(!empty($data)) {
+				foreach($data as &$da) {
+					$da['is_trash'] = check_trash($da['sid'], $da['uid'], 'fetch');
+				}
+			}
+			$pager = pagination($total, $pindex, $psize);
+			include $this->template('hisorder');
+		}elseif($op == 'status') {
 			$id = intval($_GPC['id']);
 			$status = intval($_GPC['status']);
+			$premark = $_GPC['premark'];
 			if($status == 5) {
 				pdo_update('str_order', array('pay_type' => 'cash'), array('uniacid' => $_W['uniacid'], 'id' => $id));
 			} else {
 				pdo_update('str_order', array('status' => $status), array('uniacid' => $_W['uniacid'], 'id' => $id));
 			}
+			//二次开发  by lwq 问题订单设置
+			/**
+			 * @author lwq
+			 * 问题订单备注
+			 */
+			if($status == 6){
+				pdo_update('str_order',array('premark'=>premark),array('uniacid' => $_W['uniacid'], 'id' => $id));
+			}
+			
 			//todo
 			wechat_notice($sid, $id, $status);
 			message('更新订状态成功', referer(), 'success');
-		} elseif($op == 'trash_add') {
+		} else if($op == 'exportExcel'){//二次开发 by lwq 导出为excel
+			/**
+			 * 二次开发：订单打印
+			 * @author lwq
+			 * 
+			 */
+			$status = intval($_GPC['status']);
+			$title = array( "0" => "所有订单",
+						   "1" => "待确认订单",
+						   "2" => "处理中订单",
+					       "3" => "已完成订单",
+					       "4" => "已取消订单",
+					       "6" => "问题订单"
+			);
+			$name = $title["{$status}"];
+			$params[':aid'] = $_W['uniacid'];
+			$params[':sid'] = $sid;
+			$condition = " WHERE uniacid=:aid AND sid=:sid";
+			if($status != 0){
+				$condition = " WHERE uniacid=:aid AND sid=:sid AND status=:status";
+				$params[':status'] = $status;
+			}
+			$data = pdo_fetchall('SELECT * FROM ' . tablename('str_order') . $condition, $params);
+			
+			$objPHPExcel = new PHPExcel();
+			/*以下是一些设置 ，什么作者  标题啊之类的*/
+			$objPHPExcel->getProperties()->setCreator("Admin")
+			->setLastModifiedBy("Admin")
+			->setTitle($name)
+			->setSubject($name)
+			->setDescription("订单数据")
+			->setKeywords("excel")
+			->setCategory("result file");
+			/*设置栏目名称*/
+			$column = array( "A1" => "微信平台编号", "B1" => "门店编号", "C1" => "订单编号", "D1" => "用户名", "E1" => "手机号", "F1" => "地址", "G1" => "总价", 
+					"H1" => "下单时间", "I1" => "订单状态", "J1" => "支付类型"/*, "K1" => "订单状态", "L1" => "下单时间", "M1" => "订单状态", "N1" => "下单时间", "O1" => "订单状态"*/);
+			$objPHPExcel->setActiveSheetIndex(0)
+			//Excel的第A列，uid是你查出数组的键值，下面以此类推
+			->setCellValue('A1', $column['A1'])
+			->setCellValue('B1', $column['B1'])
+			->setCellValue('C1', $column['C1'])
+			->setCellValue('D1', $column['D1'])
+			->setCellValue('E1', $column['E1'])
+			->setCellValue('F1', $column['F1'])
+			->setCellValue('G1', $column['G1'])
+			->setCellValue('H1', $column['H1'])
+			->setCellValue('I1', $column['I1'])
+			->setCellValue('J1', $column['J1']);
+			/*以下就是对处理Excel里的数据， 横着取数据，主要是这一步，其他基本都不要改*/
+			foreach($data as $k => $v){
+				$num=$k+2;				
+				$v['addtime'] = date('Y-m-d H:i', $v['addtime']);
+				$v['status'] = $title["{$v['status']}"];
+				$objPHPExcel->setActiveSheetIndex(0)
+				//Excel的第A列，uid是你查出数组的键值，下面以此类推
+				->setCellValue('A'.$num, $v['uniacid'])
+				->setCellValue('B'.$num, $v['sid'])
+				->setCellValue('C'.$num, $v['id'])
+				->setCellValue('D'.$num, $v['username'])
+				->setCellValueExplicit('E'.$num, $v['mobile'], PHPExcel_Cell_DataType::TYPE_STRING)
+				->setCellValue('F'.$num, $v['address'])
+				->setCellValue('G'.$num, $v['price'])
+				->setCellValue('H'.$num, $v['addtime'])
+				->setCellValue('I'.$num, $v['status'])
+				->setCellValue('J'.$num, $v['paytype']);
+			}
+			$objPHPExcel->getActiveSheet()->setTitle($name);
+			$objPHPExcel->setActiveSheetIndex(0);
+			ob_end_clean();//清除缓冲区，防止乱码
+			header('Content-Type: application/vnd.ms-excel');
+			header('Content-Disposition: attachment;filename="'.$name.'.xls"');
+			header('Cache-Control: max-age=0');
+			$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+			$objWriter->save('php://output');
+			exit;
+		}elseif($op == 'trash_add') {
 			$id = intval($_GPC['id']);
 			$order = get_order($id);
 			if(empty($order)) {
@@ -1276,6 +1552,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		}
 		include $this->template('comment');
 	}
+	//没隔一段时间检查是否有新的订单，并打印新的订单
 	public function doWebCron() {
 		global $_W, $_GPC;
 		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'print';
@@ -1295,7 +1572,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				}
 			}
 		} elseif($op == 'order') {
-			$sid = intval($_GPC['__sid']);
+			//订单提醒功能
+			$sid = intval($_GPC['__sid']);//店铺id
 			$order = pdo_fetch('SELECT id FROM ' . tablename('str_order') . ' WHERE uniacid = :uniacid AND sid = :sid AND is_notice = 0 ORDER BY addtime DESC', array(':uniacid' => $_W['uniacid'], ':sid' => $sid));
 			if(!empty($order)) {
 				pdo_update('str_order', array('is_notice' => 1), array('uniacid' => $_W['uniacid'], 'id' => $order['id']));

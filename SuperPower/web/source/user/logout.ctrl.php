@@ -3,6 +3,11 @@
  * [WeEngine System] Copyright (c) 2014 WE7.CC
  * WeEngine is NOT a free software, it under the license terms, visited http://www.we7.cc/ for more details.
  */
+/**
+ * 二次开发，退出登录后取消role角色
+ */
+session_start();
+$_SESSION['role'] = "";
 defined('IN_IA') or exit('Access Denied');
 isetcookie('__session', '', -10000);
 $forward = $_GPC['forward'];

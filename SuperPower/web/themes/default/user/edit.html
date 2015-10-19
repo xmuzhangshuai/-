@@ -22,10 +22,15 @@
 				u.message('请选择所属用户组.', '', 'error');
 				return false;
 			}
+			if($('#storeid option:selected').val() == 0) {
+				u.message('请选择门店.', '', 'error');
+				return false;
+			}
 		});
 	});
 </script>
 <ul class="nav nav-tabs">
+	<li><a href="{url 'account/permission' array('uniacid' => $uniacid)}">账号操作员列表</a></li>
 	<li><a href="{php echo url('user/display');}">用户列表</a></li>
 	<li><a href="{php echo url('user/create');}">添加用户</a></li>
 	<li class="active"><a href="{php echo url('user/edit', array('uid' => $uid));}">编辑用户</a></li>
@@ -62,6 +67,19 @@
 					<option value="0">请选择所属用户组</option>
 					{loop $groups $row}
 					<option value="{$row['id']}" {if $user['groupid'] == $row['id']}selected{/if}>{$row['name']}</option>
+					{/loop}
+				</select>
+				<span class="help-block">分配用户所属用户组后，该用户会自动拥有此用户组内的模块操作权限</span>
+			</div>
+		</div>
+		<!-- 二次开发 新增加 门店设置 -->
+		<div class="form-group">
+			<label class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">管理门店</label>
+			<div class="col-sm-10 col-xs-12">
+				<select name="storeid" class="form-control" id="storeid">
+					<option value="0">请选择要管理的门店</option>
+					{loop $stores $store}
+					<option value="{$store['id']}" {if $user['storeid'] == $store['id']}selected{/if}>{$store['title']}</option>
 					{/loop}
 				</select>
 				<span class="help-block">分配用户所属用户组后，该用户会自动拥有此用户组内的模块操作权限</span>

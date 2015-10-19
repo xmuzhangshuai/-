@@ -3,6 +3,12 @@
  * [WeEngine System] Copyright (c) 2014 WE7.CC
  * WeEngine is NOT a free software, it under the license terms, visited http://www.we7.cc/ for more details.
  */
+/**
+ * @author lwq
+ * 二次开发：1、新增门店管理员时，role改为operator
+ */
+
+session_start();
 defined('IN_IA') or exit('Access Denied');
 
 $do = $_GPC['do'];
@@ -13,7 +19,7 @@ if (empty($_W['isfounder'])) {
 	message('您无权限进行该操作！', referer(), 'error');
 }
 $uniacid = intval($_GPC['uniacid']);
-
+$_SESSION['uniacid'] = $uniacid;
 if($do == 'edit') {
 	$_W['page']['title'] = '账号操作员列表 - 编辑主公众号';
 	$account = pdo_fetch("SELECT * FROM ".tablename('uni_account')." WHERE uniacid = :uniacid", array(':uniacid' => $uniacid));
@@ -42,8 +48,9 @@ if ($do == 'auth') {
 		$data = array(
 				'uniacid' => $uniacid,
 				'uid' => $tmpuid,
-				'role' => 'manager',
+				'role' => 'operator',
 		);
+		
 		if ($_GPC['reference'] == 'solution') {
 			$data['role'] = 'operator';
 		}

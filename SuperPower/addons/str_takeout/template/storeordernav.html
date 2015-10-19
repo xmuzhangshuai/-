@@ -1,0 +1,13 @@
+<ul class="nav nav-tabs">
+	<li {if $op == 'list'}class="active"{/if}><a href="{php echo $this->createWebUrl('store', array('op' => 'list'));}">门店列表</a></li>
+	<!-- 二次开发 超级管理员拥有增添门店的权限 -->
+	{if $_SESSION['role'] == 'manager'}
+	<li {if $op == 'post' && !$id} class="active"{/if}><a href="{php echo $this->createWebUrl('store', array('op' => 'post'));}">添加门店</a></li>
+	{/if}
+	{if $op == 'post' && $id}<li class="active"><a href="{php echo $this->createWebUrl('store', array('op' => 'post', 'id' => $id));}">编辑门店</a></li>{/if}
+	<!-- 二次开发 超级管理员拥有查看所有订单的权限 -->
+	{if $_SESSION['role'] == 'manager'}
+	<li {if $op == 'allorder' && !$id} class="active"{/if}><a href="{php echo $this->createWebUrl('store', array('op' => 'allorder'));}">门店订单统计</a></li>
+	<li {if $op == 'allhisorder' && !$id} class="active"{/if}><a href="{php echo $this->createWebUrl('store', array('op' => 'allhisorder'));}">用户历史订单</a></li>
+	{/if}
+</ul>
