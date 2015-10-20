@@ -1,4 +1,15 @@
 eclipse.preferences.version=1
+encoding//addons/str_takeout/template/dish.html=UTF-8
+encoding//addons/str_takeout/template/hisorder.html=UTF-8
+encoding//addons/str_takeout/template/nav.html=UTF-8
+encoding//addons/str_takeout/template/order.html=UTF-8
+encoding//addons/str_takeout/template/resource=UTF-8
+encoding//addons/str_takeout/template/store.html=UTF-8
+encoding//addons/str_takeout/template/storeordernav.html=UTF-8
+encoding//addons/str_takeout/template/system.html=UTF-8
+encoding//addons/str_takeout/template/table.html=UTF-8
+encoding//addons/str_takeout/template/trash.html=UTF-8
+encoding//data/config.php=UTF-8
 encoding//payment/unionpay/upacp_sdk_php/utf8/func/SDKConfig.php=UTF-8
 encoding/<project>=UTF-8
 separateDerivedEncodings=true

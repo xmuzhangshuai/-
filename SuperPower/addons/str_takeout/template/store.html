@@ -366,6 +366,9 @@
 	<link rel="stylesheet" href="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.css" />
 	<!--加载检索信息窗口-->
 	<script type="text/javascript" src="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.js"></script>
+	<!-- 二次开发：加载判断多边形是否相交的js -->
+	
+	<script type="text/javascript" src="./resource/js/lib/intersectPolygon.js" ></script>
 	<script type="text/javascript">
 	var points = '{$item['points']}';
 	points = eval(points.replace(/&quot;/g,"\""));
@@ -437,7 +440,6 @@
     }
 	 //画出该门店区域
 	 function drawArea(points){
-
 		 var pointArray = [];
 		 for(var i = 0; i < points.length; i++){
 			 var point = new BMap.Point(points[i].lng, points[i].lat)
