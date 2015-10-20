@@ -133,7 +133,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					'print_type' => intval($_GPC['print_type']),
 					'notice' => trim($_GPC['notice']),
 					'content' => trim($_GPC['content']),
+					'points' => addslashes(trim($_GPC['points']))
 				);
+
 				if(!empty($_GPC['business_start_hours'])) {
 					$hour = array();
 					foreach($_GPC['business_start_hours'] as $k => $v) {
