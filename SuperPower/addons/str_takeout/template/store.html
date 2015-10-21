@@ -3,6 +3,28 @@
 <style type="text/css">
 	.require{color:red;}
 	.highlight{font-size:18px;font-color:#FFF;}
+	#allmap {width: 100%; height:700px; overflow: hidden;}
+	#result {width:100%;font-size:12px;}
+	dl,dt,dd,ul,li{
+		margin:0;
+		padding:0;
+		list-style:none;
+	}
+	p{font-size:12px;}
+	dt{
+		font-size:14px;
+		font-family:"微软雅黑";
+		font-weight:bold;
+		border-bottom:1px dotted #000;
+		padding:5px 0 5px 5px;
+		margin:5px 0;
+	}
+	dd{
+		padding:5px 0 0 5px;
+	}
+	li{
+		line-height:28px;
+	}
 </style>
 {template 'storeordernav'}
 
@@ -313,15 +335,123 @@
 					</div>
 				</div>
 			</div>
+			<!-- 二次开发：范围管理 -->
+			<div class="panel panel-default">
+				<div class="panel-heading">配送范围设置</div>
+				<div class="panel-body">
+						<div id="allmap" style="overflow:hidden;zoom:1;position:relative;">	
+							<div id="map" style="height:100%;-webkit-transition: all 0.5s ease-in-out;transition: all 0.5s ease-in-out;"></div>
+						</div>
+						<div id="result">
+							<input type="button" value="重置" onclick="clearAll()"/>
+							<input type="hidden" id="points" name="points" value="{$item['points']}"/>
+							<span>{$item['points']}</span>
+						</div>
+				</div>
+			</div>
+			<!-- 范围管理结束 -->
 			<div class="form-group">
 				<div class="col-sm-9 col-xs-9 col-md-9">
 					<input type="hidden" name="token" value="{$_W['token']}">
 					<input name="submit" id="submit" type="submit" value="提交" class="btn btn-primary col-lg-1">
+					
 				</div>	
 			</div>
 		</div>
 	</form>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=WIxLhQRxc9dTcKRD6LvCTRR4"></script>
+	<!--加载鼠标绘制工具-->
+	<script type="text/javascript" src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+	<link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
+	<link rel="stylesheet" href="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.css" />
+	<!--加载检索信息窗口-->
+	<script type="text/javascript" src="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.js"></script>
+	<!-- 二次开发：加载判断多边形是否相交的js -->
+	
+	<script type="text/javascript" src="./resource/js/lib/intersectPolygon.js" ></script>
 	<script type="text/javascript">
+	var points = '{$item['points']}';
+	points = eval(points.replace(/&quot;/g,"\""));
+	// 百度地图API功能
+    var map = new BMap.Map('map');
+    var poi = new BMap.Point(points[0].lng,points[0].lat);
+    var pointsJSON = new Array();//多边形顶点
+    map.centerAndZoom(poi, 16);
+    map.enableScrollWheelZoom(); 
+    
+    var overlays = [];
+    
+  	//画出该门店的管理区域
+    drawArea(points);
+  	//TODO:画出其他门店的配送范围
+  	//drawOtherArea();
+    //划区结束后的函数
+	var overlaycomplete = function(e){
+      map.removeOverlay(overlays[0]);//清除上一次的多边形
+      overlays = [];
+      overlays.push(e.overlay);
+      var points = e.overlay.getPath();//获取多边形的顶点
+      //TODO:判断是否和多边形相交
+      pointsJSON = [];
+      //将多边形顶点存入pointsJson中
+      for(var i = 0 ; i < points.length; i++){
+    	  var pointJson = 
+    	  	{
+    		 'lng' : points[i].lng,
+    		 'lat' : points[i].lat
+    		};
+        pointsJSON.push(pointJson);
+      } 
+      //将json转成string，存入
+      document.getElementById("points").value = JSON.stringify(pointsJSON);
+    };
+    var styleOptions = {
+        strokeColor:"red",    //边线颜色。
+        fillColor:"red",      //填充颜色。当参数为空时，圆形将没有填充效果。
+        strokeWeight: 3,       //边线的宽度，以像素为单位。
+        strokeOpacity: 0.8,	   //边线透明度，取值范围0 - 1。
+        fillOpacity: 0.3,      //填充的透明度，取值范围0 - 1。
+        strokeStyle: 'solid' //边线的样式，solid或dashed。
+    }
+    //实例化鼠标绘制工具
+    var drawingManager = new BMapLib.DrawingManager(map, {
+        isOpen: false, //是否开启绘制模式
+        enableDrawingTool: true, //是否显示工具栏
+        drawingToolOptions: {
+            anchor: BMAP_ANCHOR_TOP_RIGHT, //位置
+            offset: new BMap.Size(5, 5), //偏离值
+           //工具栏显示数据 ：多边形
+         	drawingModes:[      
+             BMAP_DRAWING_POLYGON     
+         ]  
+        },
+        polygonOptions: styleOptions //多边形的样式
+    });  
+	 //添加鼠标绘制工具监听事件，用于获取绘制结果
+    drawingManager.addEventListener('overlaycomplete', overlaycomplete);  
+	 //重置
+    function clearAll() {
+		for(var i = 0; i < overlays.length; i++){
+            map.removeOverlay(overlays[i]);
+        }
+        overlays.length = 0 ; 
+        pointsJSON = [];
+        document.getElementById("points").value = "";
+    }
+	 //画出该门店区域
+	 function drawArea(points){
+		 var pointArray = [];
+		 for(var i = 0; i < points.length; i++){
+			 var point = new BMap.Point(points[i].lng, points[i].lat)
+			 pointArray.push(point);
+			 //alert(points[i].lng);
+		 }
+		 var polygon = new BMap.Polygon(pointArray, 
+				 {strokeColor:"red",fillColor:"red", strokeWeight:3, strokeOpacity:0,fillOpacity:0.3,});  
+		 map.addOverlay(polygon); 
+		 overlays.push(polygon);
+	 }
+    //范围管理js结束
 		function delhouritem(obj) {
 			if($(':text[name="business_start_hours[]"]').length == 1) return false;
 			$(obj).parent().parent().remove();
@@ -412,6 +542,10 @@
 				}
 				if(!$.trim($(':text[name="address"]').val())) {
 					u.message("请填写详细地址");
+					return false;
+				}
+				if($.trim($('#points').val()) == '') {
+					u.message('请选定配送范围');
 					return false;
 				}
 				return true;
