@@ -78,8 +78,13 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					unset($li[$k]);
 				}
 			}
-			if($id) {
+			if($id) {//编辑门店
 				$item = pdo_fetch('SELECT * FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $id));
+				
+				/**
+				 * 二次开发，获取其他门店的区域
+				 */
+				$otherArea = pdo_fetchall('SELECT points FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id <> :id ORDER BY id ASC', array(':aid' => $_W['uniacid'], ':id' => $id));
 				if(empty($item)) {
 					message('门店信息不存在或已删除', 'referer', 'error');
 				} else {
@@ -91,7 +96,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					$item['map'] = array('lat' => $item['location_x'], 'lng' => $item['location_y']);
 					$item['business_hours'] = iunserializer($item['business_hours']);
 				}
-			} else {
+			} else {//添加门店
 				if($config['num_limit'] > 0 && ($config['num_limit'] - $now_store_num <= 0)) {
 					message("您的公众号只能添加{$config['num_limit']}个门店，不能再添加门店，请联系管理员", referer(), 'error');
 				}
@@ -102,6 +107,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$item['is_takeout'] = 1;
 				$item['dish_style'] = 1;
 				$item['business_hours'] = array(array('s' => '8:00', 'e' => '24:00'));
+				
+				$otherArea = pdo_fetchall('SELECT points FROM ' . tablename('str_store') . ' WHERE uniacid = :aid ORDER BY id ASC', array(':aid' => $_W['uniacid']));
 			}
 			if(checksubmit('submit')) {
 				$data = array(

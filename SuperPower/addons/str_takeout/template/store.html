@@ -337,15 +337,15 @@
 			</div>
 			<!-- 二次开发：范围管理 -->
 			<div class="panel panel-default">
-				<div class="panel-heading">配送范围设置</div>
+				<div class="panel-heading">配送范围设置（<span style="color:red">红色</span>为当前门店配送区域，<span style="color:blue">蓝色</span>为其他门店配送区域）</div>
 				<div class="panel-body">
 						<div id="allmap" style="overflow:hidden;zoom:1;position:relative;">	
 							<div id="map" style="height:100%;-webkit-transition: all 0.5s ease-in-out;transition: all 0.5s ease-in-out;"></div>
 						</div>
 						<div id="result">
-							<input type="button" value="重置" onclick="clearAll()"/>
+							<br/>
+							<input type="button" value="重置" onclick="clearAll()" class="btn btn-success col-lg-1"/>
 							<input type="hidden" id="points" name="points" value="{$item['points']}"/>
-							<span>{$item['points']}</span>
 						</div>
 				</div>
 			</div>
@@ -370,11 +370,16 @@
 	
 	<script type="text/javascript" src="./resource/js/lib/intersectPolygon.js" ></script>
 	<script type="text/javascript">
+	//该门店的范围顶点
 	var points = '{$item['points']}';
 	points = eval(points.replace(/&quot;/g,"\""));
+	
+	//其他门店的范围个数
+	var otherStoresLen = '{php echo count($otherArea);}';//其他门店的个数
 	// 百度地图API功能
     var map = new BMap.Map('map');
-    var poi = new BMap.Point(points[0].lng,points[0].lat);
+    var poi = '{$item['points']}' != ''? new BMap.Point(points[0].lng,points[0].lat):new BMap.Point(116.307852,40.057031);
+    
     var pointsJSON = new Array();//多边形顶点
     map.centerAndZoom(poi, 16);
     map.enableScrollWheelZoom(); 
@@ -382,28 +387,57 @@
     var overlays = [];
     
   	//画出该门店的管理区域
-    drawArea(points);
-  	//TODO:画出其他门店的配送范围
-  	//drawOtherArea();
+  	if('{$item['points']}' != ''){
+  		drawArea(points, 'red', 'myStore');
+	}
+  	//画出其他门店的配送范
+  	if(otherStoresLen > 0){
+	'{loop $otherArea $one}'
+		var storePoints = '{$one['points']}';
+		storePoints = eval(storePoints.replace(/&quot;/g,"\""));
+		drawArea(storePoints, 'blue', 'otherStore');
+	'{/loop}'
+		
+  	}
     //划区结束后的函数
 	var overlaycomplete = function(e){
-      map.removeOverlay(overlays[0]);//清除上一次的多边形
-      overlays = [];
-      overlays.push(e.overlay);
-      var points = e.overlay.getPath();//获取多边形的顶点
-      //TODO:判断是否和多边形相交
-      pointsJSON = [];
-      //将多边形顶点存入pointsJson中
-      for(var i = 0 ; i < points.length; i++){
-    	  var pointJson = 
-    	  	{
-    		 'lng' : points[i].lng,
-    		 'lat' : points[i].lat
-    		};
-        pointsJSON.push(pointJson);
-      } 
-      //将json转成string，存入
-      document.getElementById("points").value = JSON.stringify(pointsJSON);
+		//TODO:判断是否和多边形相交
+		var cross = false;
+		var drawPoints = e.overlay.getPath();//获取多边形的顶点
+		'{loop $otherArea $one}'
+		
+		var storePoints = '{$one['points']}';
+		storePoints = eval(storePoints.replace(/&quot;/g,"\""));
+		cross = isCross(drawPoints,storePoints);
+		if(cross)
+			'{php break;}';
+		'{/loop}'
+		
+		if(cross){
+			alert('选定配送区域与其他门店重叠，请重新选择');
+			map.removeOverlay(overlays[0]);//清除上一次的多边形
+		    overlays = [];
+		    overlays.push(e.overlay);
+			clearAll();
+		}else{
+			map.removeOverlay(overlays[0]);//清除上一次的多边形
+		    overlays = [];
+		    overlays.push(e.overlay);
+		      
+		    pointsJSON = [];
+		    //将多边形顶点存入pointsJson中
+		    for(var i = 0 ; i < drawPoints.length; i++){
+		    	var pointJson = 
+		    	 	{
+		    			'lng' : drawPoints[i].lng,
+		    			'lat' : drawPoints[i].lat
+		    		};
+		        pointsJSON.push(pointJson);
+		     } 
+		     //将json转成string，存入
+		     document.getElementById("points").value = JSON.stringify(pointsJSON);
+		}
+      
     };
     var styleOptions = {
         strokeColor:"red",    //边线颜色。
@@ -438,8 +472,8 @@
         pointsJSON = [];
         document.getElementById("points").value = "";
     }
-	 //画出该门店区域
-	 function drawArea(points){
+	 //画出门店区域
+	 function drawArea(points, color, mode){
 		 var pointArray = [];
 		 for(var i = 0; i < points.length; i++){
 			 var point = new BMap.Point(points[i].lng, points[i].lat)
@@ -447,9 +481,28 @@
 			 //alert(points[i].lng);
 		 }
 		 var polygon = new BMap.Polygon(pointArray, 
-				 {strokeColor:"red",fillColor:"red", strokeWeight:3, strokeOpacity:0,fillOpacity:0.3,});  
-		 map.addOverlay(polygon); 
-		 overlays.push(polygon);
+				 {strokeColor:color,fillColor:color, strokeWeight:3, strokeOpacity:0,fillOpacity:0.3,});  
+		 map.addOverlay(polygon);
+		 if(mode == 'myStore')
+		 	overlays.push(polygon);
+	 }
+	 //判断是否相交
+	 function isCross(points1,points2){
+	     var p1 = [];
+	     var p2 = [];
+	     for(var i = 0; i < points1.length; i++){
+	         p1.push({x:points1[i].lng,y:points1[i].lat});
+	     }
+	     for(var j = 0; j < points2.length; j++){
+	         p2.push({x:points2[j].lng,y:points2[j].lat});
+	     }
+	     if(intersectsPolygonAndPolygon(p1,p2)){
+	    	 alert('重叠');
+	         return true;
+	     }else{
+	    	 alert('不重叠');
+	         return false;
+	     }
 	 }
     //范围管理js结束
 		function delhouritem(obj) {
