@@ -1350,6 +1350,43 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		}
 		include $this->template('order');
 	}
+	public function doMobileMyorder() {
+		global $_W, $_GPC;
+		checkauth();
+		$sid = intval($_GPC['sid']);
+		check_trash($sid);
+
+		$store = get_store($sid);
+		$_share = get_share($store);
+		if(empty($store)) {
+			message('门店不存在', referer(), 'error');
+		}
+		$title = $store['title'];
+		$where = ' WHERE uniacid = :aid AND sid = :sid AND uid = :uid';
+		$params = array(
+			':aid' => $_W['uniacid'],
+			':uid' => $_W['member']['uid'],
+			':sid' => $sid,
+		);
+		$status = intval($_GPC['status']);
+
+		if($status > 0 && $status != 5) {
+			$where .= ' AND status = :status';
+			$params[':status'] = $status;
+		} 
+		if($status == 5) {
+			$where .= " AND pay_type = ''";
+		}
+
+		$pindex = max(1, intval($_GPC['page']));
+		$psize = 10;
+
+		$limit = ' ORDER BY addtime DESC LIMIT ' . ($pindex - 1) * $psize . ',' . $psize;
+		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') . $where, $params);
+		$data = pdo_fetchall('SELECT * FROM ' . tablename('str_order') . $where . $limit, $params);
+		$pager = pagination($total, $pindex, $psize, '', array('before' => 0, 'after' => 0));
+		include $this->template('myorder');
+	}
 	public function doMobileOrderDetail() {
 		global $_W, $_GPC;
 		checkauth();
@@ -1425,43 +1462,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 		}
 	}
-	public function doMobileMyorder() {
-		global $_W, $_GPC;
-		checkauth();
-		$sid = intval($_GPC['sid']);
-		check_trash($sid);
 
-		$store = get_store($sid);
-		$_share = get_share($store);
-		if(empty($store)) {
-			message('门店不存在', referer(), 'error');
-		}
-		$title = $store['title'];
-		$where = ' WHERE uniacid = :aid AND sid = :sid AND uid = :uid';
-		$params = array(
-			':aid' => $_W['uniacid'],
-			':uid' => $_W['member']['uid'],
-			':sid' => $sid,
-		);
-		$status = intval($_GPC['status']);
-
-		if($status > 0 && $status != 5) {
-			$where .= ' AND status = :status';
-			$params[':status'] = $status;
-		} 
-		if($status == 5) {
-			$where .= " AND pay_type = ''";
-		}
-
-		$pindex = max(1, intval($_GPC['page']));
-		$psize = 10;
-
-		$limit = ' ORDER BY addtime DESC LIMIT ' . ($pindex - 1) * $psize . ',' . $psize;
-		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') . $where, $params);
-		$data = pdo_fetchall('SELECT * FROM ' . tablename('str_order') . $where . $limit, $params);
-		$pager = pagination($total, $pindex, $psize, '', array('before' => 0, 'after' => 0));
-		include $this->template('myorder');
-	}
 
 	public function doMobileComment() {
 		global $_W, $_GPC;
@@ -1643,6 +1644,11 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$return_url = urldecode($_GPC['return_url']);
 		}
 		if($op == 'list') {
+			$address_id = intval($_GPC['address_id']);
+			$currentadd = get_address($address_id);
+			if(empty($currentadd)) {
+				$currentadd = get_default_address();
+			}
 			$addresses = get_addresses();
 		}
 

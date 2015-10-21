@@ -2,7 +2,7 @@
 <link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css">
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 {if $op == 'list'}
-<div data-role="container" class="container addresslist">
+<!--<div data-role="container" class="container addresslist">
 	<section data-role="body">
 		<ul class="list">
 			{loop $addresses $address}
@@ -25,19 +25,70 @@
 		</ul>
 		<div class="btn_div"><a href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid, 'r' => $_GPC['r']))}" class="add"><span><i></i>新增收件地址</span></a></div>
 	</section>
+</div>-->
+<style>
+	body{background: #E5E5E5;}
+	.cont_box, .menu_list li.cont_box{float: none;}
+</style>
+<div class="cont_box">
+	<div class="cont_box">
+		<img class="cont_userimg" src="../addons/str_takeout/template/resource/images/penguin.png" />
+		<!--src="../resource/images/penguin.png"-->
+
+		<span class="cont_userdec">微信昵称</span>
+		<br>
+		<br>
+		<span class="cont_userdec1">共-1个订单</span>
+	</div>
+</div>
+{template 'header'}
+<div class="cont_box">
+	<p class="buyrecord">购买记录</p>
+	<p class="run_adress">地址管理</p>
+
+	<hr width="102%" class="division" />
+	<div class="cont_box">
+		<div class="cont_box person_info">
+			<img class="phone" src="../addons/str_takeout/template/resource/images/phone.png" />
+
+			<br />
+			<p class="phone_number">{$currentadd['mobile']}</p>
+			<img class="compiler" src="../addons/str_takeout/template/resource/images/phone.png" />
+		</div>
+	</div>
+	<ul class="menu_list order_list cont_box">
+
+		<li style="margin-top: 15px;margin-bottom: 4px;" class="cont_box">
+			<span class="adress_name">中关村店</span>
+		</li>
+		{loop $addresses $address}
+		<li style="padding: 0;" class="cont_box">
+			<span class="adress_detailed addressChecked" data-id="{$address['id']}">{$address['address']}-{$address['room']}</span>
+			<img class="adress_delete deladdress" data-id="{$address['id']}" src="../addons/str_takeout/template/resource/images/phone.png" />
+		</li>
+		{/loop}
+
+		<div class="cont_box adress_add_wrapper"><a class="adress_add" href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid, 'r' => $_GPC['r']))}" class="add">新增地址</a></div>
+	</ul>
 </div>
 {elseif $op == 'post'}
 <div data-role="container" class="container addressedit">
 	<section data-role="body">
 		<div class="info">
-			<div class="line"><input type="text" name="realname" value="{$address['realname']}" placeholder="姓名"></div>
-			<div class="line"><input type="text" name="mobile" value="{$address['mobile']}" placeholder="手机"></div>
-			<div class="line address addr1"><input name="address" value="{$address['address']}" type="text" placeholder="详细地址">
-			<div class="line address addr1"><input name="room" value="{$address['room']}" type="text" placeholder="楼层房号">
-				<i class="getposition"></i>
+			<div class="line">
+				<input type="text" name="realname" value="{$address['realname']}" placeholder="姓名">
 			</div>
-		</div>
-		<div class="btn_div" {if !$address}style="display: none;"{/if}><a id="deladdress"><span>删除该地址</span></a></div>
+			<div class="line">
+				<input type="text" name="mobile" value="{$address['mobile']}" placeholder="手机">
+			</div>
+			<div class="line address addr1">
+				<input name="address" value="{$address['address']}" type="text" placeholder="详细地址">
+				<div class="line address addr1">
+					<input name="room" value="{$address['room']}" type="text" placeholder="楼层房号">
+					<i class="getposition"></i>
+				</div>
+			</div>
+			<div class="btn_div" {if !$address}style="display: none;" {/if}><a id="deladdress"><span>删除该地址</span></a></div>
 	</section>
 	<footer data-role="footer">
 		<nav class="nav_common">
@@ -58,82 +109,98 @@
 		</nav>
 	</footer>
 	{template 'footerbar'}
-</div>
-{/if}
-<script type="text/javascript">
-	$(function(){
-		var r = "{$_GPC['r']}";
-		var return_url1 = "{php echo $this->createMobileUrl('order', array('op' => 'get','sid' => $sid, 'r' => 1));}";
-		var return_url2 = "{php echo $this->createMobileUrl('dish', array('sid' => $sid));}";
-		$('.addressChecked').click(function(){
-			var address_id = $(this).attr('data-id');
-			if(address_id) {
-				$.post("{php echo $this->createMobileUrl('address', array('op' => 'default', 'sid' => $sid))}", {'id':address_id},function(){
-					if(r==1) {
-						location.href=return_url1 + '&address_id='+address_id;
-					} else if(r==2) {
-						location.href=return_url2 + '&address_id='+address_id;
+	</div>
+	{/if}
+	<script type="text/javascript">
+		$(function(){
+			var r = "{$_GPC['r']}";
+			var return_url1 = "{php echo $this->createMobileUrl('order', array('op' => 'get','sid' => $sid, 'r' => 1));}";
+			var return_url2 = "{php echo $this->createMobileUrl('dish', array('sid' => $sid));}";
+			$('.addressChecked').click(function(){
+				var address_id = $(this).attr('data-id');
+				if(address_id) {
+					$.post("{php echo $this->createMobileUrl('address', array('op' => 'default', 'sid' => $sid))}", {'id':address_id},function(){
+						if(r==1) {
+							location.href=return_url1 + '&address_id='+address_id;
+						} else if(r==2) {
+							location.href=return_url2 + '&address_id='+address_id;
+						} else {
+							location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
+						}
+					});
+				}
+				return false;
+			});
+	
+			$('#submit').click(function(){
+				var id = '{$id}';
+				var realname = $.trim($(':text[name="realname"]').val());
+				if(!realname) {
+					alert('预定人不能为空');
+					return false;
+				}
+				var mobile = $.trim($(':text[name="mobile"]').val());
+				if(!mobile) {
+					alert('手机号不能为空');
+					return false;
+				}
+				var address = $.trim($(':text[name="address"]').val());
+				if(!address) {
+					alert('收件地址不能为空');
+					return false;
+				}
+				var room = $.trim($(':text[name="room"]').val());
+				if(!address) {
+					alert('楼层房号不能为空');
+					return false;
+				}
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'realname':realname, 'mobile':mobile, 'address':address, 'room':room}, function(data){
+					var data = $.parseJSON(data);
+					if(!data.errorno) {
+						if(r) {
+							location.href=return_url1 + '&address_id='+data.message;
+						} else {
+							location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
+						}
 					} else {
-						location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
+						alert(data.message);
+						return false;
 					}
 				});
-			}
-			return false;
-		});
-
-		$('#submit').click(function(){
-			var id = '{$id}';
-			var realname = $.trim($(':text[name="realname"]').val());
-			if(!realname) {
-				alert('预定人不能为空');
-				return false;
-			}
-			var mobile = $.trim($(':text[name="mobile"]').val());
-			if(!mobile) {
-				alert('手机号不能为空');
-				return false;
-			}
-			var address = $.trim($(':text[name="address"]').val());
-			if(!address) {
-				alert('收件地址不能为空');
-				return false;
-			}
-			var room = $.trim($(':text[name="room"]').val());
-			if(!address) {
-				alert('楼层房号不能为空');
-				return false;
-			}
-			$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'realname':realname, 'mobile':mobile, 'address':address, 'room':room}, function(data){
-				var data = $.parseJSON(data);
-				if(!data.errorno) {
-					if(r) {
-						location.href=return_url + '&address_id='+data.message;
+			});
+	
+			$('.deladdress').click(function(){
+				var id = $(this).attr('data-id');
+				if(!id) {
+					return false;
+				}
+				if(!confirm('确定删除吗')) return false;
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(){
+					var data = $.parseJSON(data);
+					if(!data.errorno) {
+						location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'r' => $_GPC['r']));}"
 					} else {
-						location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
+						alert(data.message);
+						return false;
 					}
-				} else {
-					alert(data.message);
+				});
+			});
+			$('#deladdress').click(function(){
+				var id = '{$id}';
+				if(!id) {
 					return false;
 				}
+				if(!confirm('确定删除吗')) return false;
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(){
+					var data = $.parseJSON(data);
+					if(!data.errorno) {
+						location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'r' => $_GPC['r']));}"
+					} else {
+						alert(data.message);
+						return false;
+					}
+				});
 			});
 		});
-
-		$('#deladdress').click(function(){
-			var id = '{$id}';
-			if(!id) {
-				return false;
-			}
-			if(!confirm('确定删除吗')) return false;
-			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(){
-				var data = $.parseJSON(data);
-				if(!data.errorno) {
-					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'r' => $_GPC['r']));}"
-				} else {
-					alert(data.message);
-					return false;
-				}
-			});
-		});
-	});
-</script>
-{template 'common/footer'}
+	</script>
+	{template 'common/footer'}

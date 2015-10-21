@@ -2367,3 +2367,109 @@ input[type='tel'] {
 .notice .scrollNotice span {
 	position: relative;
 }
+.cont_userimg{
+	float: left;
+	width: 60px;
+	height: 60px;
+	margin-right: 20px;
+}
+.cont_userdec{
+	font-size: 20px;
+	position: relative;
+	top: 7px;
+}
+.cont_userdec1{
+	position: relative;
+	top: 5px;
+}
+.cont_adress{
+	padding: 10px;
+	width:90%;
+	margin: 15px 5%;
+	background-color: #FFF;
+}
+.buyrecord{
+	margin-left: 25%;
+	font-size: 150%;
+	float: left;
+	font-weight: bold;
+	padding-top: 10px;
+	}
+.run_adress{
+  margin-right: 25%;
+  font-size: 150%;
+  float: right;
+  font-weight: bold;
+  padding: 28px;
+  padding-top: 10px;
+  border-bottom-style: solid;
+  border-bottom-width: 5px;
+  border-bottom-color: rgb(243,152,1);
+  padding-bottom: 15px;
+}
+.division{
+	margin-left: -1%;
+	border-top: 2px solid#000000;
+}
+.phone{
+	float:left;
+	margin-top:20px;
+	width:28px;
+}
+.phone_number{
+	margin-left: 44%;
+	margin-top: 7px;
+	line-height: 20px;
+	font-size:20px;
+	margin-bottom: 10px;
+}
+.compiler{
+	float:right;
+	width: 28px;
+	margin-top: -32px;
+	margin-right: 3px;
+}
+.adress_name{
+	font-size: 120%;
+	font-weight: bold;
+	padding-top: 5px;
+	position: relative;
+	top: 10px;
+	line-height: 2.4;
+}
+.adress_detailed{
+font-size: 100%;
+position: relative;
+top: 28px;
+left: 20px;
+max-width: 60%;
+display: block;
+margin: 0;
+}
+.adress_delete{
+	float: right;
+	width: 28px;
+	margin-right: 16px;
+	padding-bottom: 15px;
+	margin-top: 15px;
+}
+.adress_add_wrapper{
+	text-align: center;
+	clear: both;
+	float: none;
+	padding-top:30px;
+}
+.adress_add{
+	color: #FFF!important;
+	text-decoration: none!important;
+	padding:10px 30px;
+	border-radius: 5px;
+	background-color: rgb(243,152,1);
+	font-size:16px;
+	color: #FFF;
+}
+.person_info{
+	background-color: #F1F1F1;
+	margin-top: 0;
+padding-top: 0;
+}
