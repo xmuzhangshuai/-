@@ -29,6 +29,7 @@
 <style>
 	body{background: #E5E5E5;}
 	.cont_box, .menu_list li.cont_box{float: none;}
+	.buyrecord{border-bottom-color: rgba(243,152,1,0);}
 </style>
 <div class="cont_box">
 	<div class="cont_box">
@@ -38,14 +39,17 @@
 		<span class="cont_userdec">微信昵称</span>
 		<br>
 		<br>
-		<span class="cont_userdec1">共-1个订单</span>
+		<span class="cont_userdec1">共3个订单</span>
 	</div>
 </div>
 {template 'header'}
 <div class="cont_box">
-	<p class="buyrecord">购买记录</p>
-	<p class="run_adress">地址管理</p>
-
+	<div class="nav_wrapper">
+		<div class="nav_inner">
+			<a class="buyrecord" href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}">购买记录</a>
+			<a class="run_adress">地址管理</a>
+		</div>
+	</div>
 	<hr width="102%" class="division" />
 	<div class="cont_box">
 		<div class="cont_box person_info">
@@ -53,18 +57,18 @@
 
 			<br />
 			<p class="phone_number">{$currentadd['mobile']}</p>
-			<img class="compiler" src="../addons/str_takeout/template/resource/images/phone.png" />
+			<img class="compiler" src="../addons/str_takeout/template/resource/images/edit.png" />
 		</div>
 	</div>
 	<ul class="menu_list order_list cont_box">
 
-		<li style="margin-top: 15px;margin-bottom: 4px;" class="cont_box">
-			<span class="adress_name">中关村店</span>
+		<li style="margin-top: 15px;margin-bottom: 4px;width: 100%;margin: 0;" class="cont_box">
+			<span class="adress_name">南普陀店</span>
 		</li>
 		{loop $addresses $address}
-		<li style="padding: 0;" class="cont_box">
+		<li style="padding: 0;width: 100%;margin: 0;" class="cont_box">
 			<span class="adress_detailed addressChecked" data-id="{$address['id']}">{$address['address']}-{$address['room']}</span>
-			<img class="adress_delete deladdress" data-id="{$address['id']}" src="../addons/str_takeout/template/resource/images/phone.png" />
+			<a class="adress_delete deladdress" data-id="{$address['id']}"></a>
 		</li>
 		{/loop}
 
@@ -124,6 +128,8 @@
 							location.href=return_url1 + '&address_id='+address_id;
 						} else if(r==2) {
 							location.href=return_url2 + '&address_id='+address_id;
+						} else if(r==3) {
+							return false;
 						} else {
 							location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
 						}

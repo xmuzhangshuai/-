@@ -95,7 +95,6 @@ function get_default_address() {
 	}
 	return $data;
 }
-
 function get_mine_order() {
 	global $_W;
 	$data = pdo_fetchall("SELECT * FROM " . tablename('str_order') . ' WHERE uniacid = :uniacid AND uid = :uid ORDER BY id DESC', array(':uniacid' => $_W['uniacid'], ':uid' => $_W['member']['uid']));
@@ -214,7 +213,12 @@ function get_dish($oid, $cancel = false) {
 	$data = pdo_fetchall('SELECT * FROM ' . tablename('str_stat') . ' WHERE uniacid = :aid AND oid = :oid' . $condition, array(':aid' => $_W['uniacid'], ':oid' => $oid), 'dish_id');
 	return $data;
 } 
-
+function get_dishinfo($did) {
+	global $_W;
+	$did = intval($did);
+	$data = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') . ' WHERE id = :id AND is_display = 1 ORDER BY displayorder DESC, id ASC', array(':id' => $did));
+	return $data;
+}
 function get_clerks($sid) {
 	global $_W;
 	$data = pdo_fetchall("SELECT * FROM " . tablename('str_clerk') . ' WHERE uniacid = :uniacid AND sid = :sid', array(':uniacid' => $_W['uniacid'], ':sid' => $sid));

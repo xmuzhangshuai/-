@@ -23,7 +23,7 @@
 		<input type="hidden" name="dish_str" value="{$dish_str}">
 		<section class="menu_wrap {if $store['dish_style'] == 1}skin1{/if}" id="menuWrap">
 			{if !$store['business_hours_flag']}
-				<div class="tips">企鹅休息中，接受预定~下次配送时间：<br /><span>{$hour_str}</span></div>
+				<div class="tips">企鹅休息中，接受预定~下次配送时间：<br /><span>10-23 星期五 早餐 6:00</span></div>
 			{/if}
 			<div class="menu_container">
 				{loop $category $cate_row}
@@ -31,7 +31,7 @@
 						{loop $cate_dish[$cate_row['id']] $ds}
 							<li id="{$ds['id']}" class="auto_height {if !($ds['total'] == -1 || $ds['total'] > 0)}out{/if}">
 								<div>
-									<div class="menu_type">99-99 星期九 夜宵</div>
+									<div class="menu_type">10-23 星期五 早餐</div>
 									{if $ds['thumb']}
 									<div class="slider_wrap">
 										<ul class="rslides" id="slider{$ds['id']}">
@@ -74,7 +74,7 @@
 			<div class="fixed hidden" id="fix_bar">
 				<div>
 					<span class="comm_btn disabled">还差<span id="sendCondition">{$store['send_price']}元</span>起送</span>
-					<a id="settlement" href="javascript:document.cart_form.submit();" class="comm_btn" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>样 立即下单</a>
+					<a id="settlement" href="javascript:document.cart_form.submit();" class="comm_btn" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 立即下单</a>
 				</div>
 			</div>
 		</footer>
@@ -83,7 +83,7 @@
 			<div class="fixed hidden" id="fix_bar">
 				<div>
 					<span class="comm_btn disabled"><span id="sendCondition" class="hide">0元</span>点餐</span>
-					<a id="settlement" href="javascript:document.cart_form.submit();" class="comm_btn" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>样 立即下单</a>
+					<a id="settlement" href="javascript:document.cart_form.submit();" class="comm_btn" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 立即下单</a>
 				</div>
 			</div>
 		</footer>
@@ -177,23 +177,23 @@ var menu = {
 		}
 	}
 }
-	$(function(){
-		menu.init('#menuNav');
-	});
-	function setHeight(sel){
-		var maxh = 0;
-		$(sel).css("height","auto");
-		$(sel).each(function(){
-			maxh=$(this).prop("scrollHeight")>maxh?$(this).prop("scrollHeight"):maxh;
-		});
-		maxh+=10;
-		$(sel).css("height",maxh+"px");
-		if($(".container-fill").width()<=720){$(sel).css("height","auto");}
-	}
-	function setH(){setHeight(".auto_height")}
-	$(window).resize(setH);
-	$(document).ready(setH);
-	setInterval(setH,1000);
+//	$(function(){
+//		menu.init('#menuNav');
+//	});
+//	function setHeight(sel){
+//		var maxh = 0;
+//		$(sel).css("height","auto");
+//		$(sel).each(function(){
+//			maxh=$(this).prop("scrollHeight")>maxh?$(this).prop("scrollHeight"):maxh;
+//		});
+//		maxh+=10;
+//		$(sel).css("height",maxh+"px");
+//		if($(".container-fill").width()<=720){$(sel).css("height","auto");}
+//	}
+//	function setH(){setHeight(".auto_height")}
+//	$(window).resize(setH);
+//	$(document).ready(setH);
+//	setInterval(setH,1000);
 </script>
 {template 'common'}
 {template 'common/footer'}

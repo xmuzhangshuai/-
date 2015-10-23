@@ -356,11 +356,11 @@ margin-top: 42px;
 }
 .nav_sp_back {
 background: url(../images/back.png);
-height: 30px;
+height: 20px;
 display: table-cell;
-width: 18px;
-background-size: 18px 30px;
-margin: 7px;
+width: 12px;
+background-size: 12px 20px;
+margin: 12px;
 float: left;
 }
 #nav_sp_wrap {
@@ -538,6 +538,7 @@ position: static;
 .menu_wrap .tips span{
 	border: 2px orange solid;
 	border-radius: 5px;
+	padding: 3px;
 }
 .mine-tips {
 	padding: 0 10px;
@@ -709,7 +710,7 @@ position: static;
 }
 .menu_list li strong span {
 	font-size: 22px;
-	color: #000000;
+	color: #f29801;
 }
 .menu_list .btn_n,
 .menu_list .num {
@@ -717,8 +718,8 @@ position: static;
 	background: none;
 }
 .menu_list .num{
-	padding-right: 24px;
-	font-size: 28px;
+	padding-right: 12px;
+	font-size: 22px;
 }
 .menu_list .btn_fork {
 width: 20px;
@@ -732,7 +733,7 @@ margin-top: 4px;
 }
 .menu_list .btn_n.add,.menu_list .btn_n.del {
 background: none;
-font-size: 28px;
+font-size: 22px;
 width: 25px;
 height: 100%;
 color: #FFF;
@@ -759,14 +760,14 @@ font-family: sans-serif,arial;
 }
 .menu_type{
 	position: absolute;
+	font-size: 13px;
 	top: 20px;
 	left: 20px;
 	border: 2px orange solid;
 	border-radius: 5px;
 	z-index: 20;
 	padding: 5px;
-	background: rgba(100,100,100,0.4);
-	color: #FFF;
+	color: #666;
 }
 .sales .sale_1 {
 	width: 5px;
@@ -821,7 +822,8 @@ font-family: sans-serif,arial;
 display: inline-block;
 height: 28px;
 line-height: 28px;
-padding: 0 10%;
+font-size: 14px;
+padding: 0 5%;
 vertical-align: middle;
 color: #fff;
 background-color: rgb(244, 155, 2);
@@ -865,25 +867,24 @@ a.comm_btn:visited {
 	background-color: #FFF;
 }
 .menu_list li.cont_box{
-	padding: 0 10px 20px 20px;
+	padding: 0 10px 10px 20px;
 	width:90%;
 	margin: 0 5%;
 }
 .cont_box label{
-	position: relative;
-	top:3px;
+	color: rgba(0,0,0,0.75);
 	margin-bottom: 0;
-	font-size: 20px;
+	font-size: 16px;
 	font-weight: normal;
 }
 .cont_box label:after{
 	content: ":";
 }
 .cont_box input{
-	font-size: 20px;
+	font-size: 16px;
 	width: 100%;
-	height: 30px!important;
-	line-height: 30px;
+	height: 25px!important;
+	line-height: 25px;
 	border: 1px solid #dbdbdb;
 	border-radius: 3px;
 	padding-left: 9px;
@@ -914,13 +915,15 @@ input.half[type=tel]:last-child,input.half[type=text]:last-child{
 }
 .shopping_info{
 	padding: 0;
+	padding-bottom: 5px;
 }
 .shopping_info time{
 	position:relative;
-	top:12px;
+	top:7px;
 }
 #shopName{
 	float: right;
+	font-size: 13px;
 }
 #shopName .ico_tel{
 	background: url(../images/phone.png);
@@ -928,6 +931,7 @@ input.half[type=tel]:last-child,input.half[type=text]:last-child{
 	width: 24px;
 	height: 24px;
 	margin-left: 20px;
+	margin-bottom: -5px;
 }
 .ico_forward {
 background: url(../images/back.png);
@@ -942,6 +946,9 @@ background-size: 8px 13px;
 	float: left;
 	padding-top: 10px;
 }
+ul.menu_list > li.order_item{
+	padding-top: 10px;
+}
 .menu_list li > div.order_item_count{
 	width:20%;
 	float: right;
@@ -952,32 +959,59 @@ background-size: 8px 13px;
 }
 @media (max-width: 720px) {
 	.menu_list li > div.order_item{
-		width:60%;
 		float: left;
-		padding-top: 10px;
+		padding: 10px 0;
 	}
 	.menu_list li > div.order_item_count{
-		width:40%;
 		float: right;
-		padding-top: 22px;
+		padding-top: 15px;
 	}
 	.menu_list li h3 {
 		font-weight: bold;
 		line-height: 1.7;
+		font-size: 12px;
+		color: #000000;
+		display: inline;
+	}
+	.menu_list li div.menu_desc h3 {
 		font-size: 16px;
 		color: #000000;
 		display: inline;
 	}
-	.menu_list li .order_item strong span {
+	.menu_list li div.menu_desc .info {
+		font-size: 14px;
+	}
+	.menu_list li div.info,.menu_list li span.info {
+		font-size: 9px;
+	}
+	.menu_list li strong {
+		font-size: 12px;
+		margin-top: 16px;
+	}
+	.menu_list li div.menu_desc strong {
+		font-size: 13px;
+		margin-top: 16px;
+	}
+	.menu_list li strong span {
+		font-size: 10px;
+	}
+	.menu_list li div.menu_desc strong span {
 		font-size: 16px;
 	}
-	.menu_list li .order_item strong {
+	.menu_list li .order_item strong span,.menu_list li.order_item strong span {
 		font-size: 12px;
+	}
+	.menu_list li.order_item strong{
+		font-size: 10px;
+		margin-top: 2px;
+	}
+	.menu_list li .order_item strong{
+		font-size: 10px;
 		margin-top: 4px;
 	}
 }
 .menu_list li > div.order_item_count .num{
-	font-size: 20px;
+	font-size: 16px;
 }
 .menu_list li > div.order_item_count .num:before{
 	content: "x";
@@ -1009,13 +1043,13 @@ background-size: 8px 13px;
     color: #FFF;
 }
 .order_item_count .btn_n.add{
-top: 40px;
-right: 14px;
+top: 30px;
+right: 0px;
 	background: url(../images/cyc_add.png);
 }
 .order_item_count .btn_n.del{
-top: 40px;
-right: 40px;
+top: 30px;
+right: 26px;
 	background: url(../images/cyc_del.png);
 }
 .order_item_count .btn_n.add,
@@ -1165,8 +1199,8 @@ height: 20px;
 	font-family: FontAwesome;
 	visibility: visible;
 	display: block;
-	height: 20px;
-	width: 20px;
+	height: 15px;
+	width: 15px;
 	display: inline-block;
 	background: rgba(246, 247, 247, 0.75);
 	border-radius: 100px;
@@ -1176,7 +1210,7 @@ height: 20px;
 }
 .callbacks_tabs a {
 	visibility: hidden;
-	padding-right: 1.5em;
+	padding-right: 1em;
 }
 .callbacks_tabs li {
 	display: inline-block;
@@ -1187,7 +1221,7 @@ ul.callbacks_tabs {
 	bottom: 14px;
 	z-index: 9;
 	right: 50%;
-	margin-right: -74px;
+	margin-right: -55px;
 }
 .callbacks_nav {
 	position: absolute;
@@ -2388,24 +2422,44 @@ input[type='tel'] {
 	margin: 15px 5%;
 	background-color: #FFF;
 }
-.buyrecord{
-	margin-left: 25%;
-	font-size: 150%;
-	float: left;
-	font-weight: bold;
-	padding-top: 10px;
-	}
-.run_adress{
-  margin-right: 25%;
-  font-size: 150%;
-  float: right;
-  font-weight: bold;
-  padding: 28px;
-  padding-top: 10px;
-  border-bottom-style: solid;
-  border-bottom-width: 5px;
-  border-bottom-color: rgb(243,152,1);
-  padding-bottom: 15px;
+.nav_wrapper{
+	margin-left: -220px;
+}
+.nav_inner{
+	margin-left: 50%;
+}
+.buyrecord ,.run_adress {
+font-size: 21px;
+float: left;
+font-weight: bold;
+padding: 13px;
+padding-top: 10px;
+border-bottom-style: solid;
+border-bottom-width: 5px;
+border-bottom-color: rgb(243,152,1);
+padding-bottom: 15px;
+width: 110px;
+text-decoration: none!important;
+color: #535353!important;
+}
+@media (max-width: 720px) {
+	.buyrecord ,.run_adress {
+font-size: 17px;
+float: left;
+font-weight: bold;
+padding: 13px;
+padding-top: 10px;
+border-bottom-style: solid;
+border-bottom-width: 5px;
+border-bottom-color: rgb(243,152,1);
+padding-bottom: 15px;
+width: 95px;
+text-decoration: none!important;
+color: #535353!important;
+}
+.nav_wrapper{
+	margin-left: -190px;
+}
 }
 .division{
 	margin-left: -1%;
@@ -2415,9 +2469,11 @@ input[type='tel'] {
 	float:left;
 	margin-top:20px;
 	width:28px;
+	position: absolute;
+	top:-2px;
 }
 .phone_number{
-	margin-left: 44%;
+	text-align: center;
 	margin-top: 7px;
 	line-height: 20px;
 	font-size:20px;
@@ -2440,7 +2496,7 @@ input[type='tel'] {
 .adress_detailed{
 font-size: 100%;
 position: relative;
-top: 28px;
+top: 20px;
 left: 20px;
 max-width: 60%;
 display: block;
@@ -2451,7 +2507,14 @@ margin: 0;
 	width: 28px;
 	margin-right: 16px;
 	padding-bottom: 15px;
-	margin-top: 15px;
+	margin-top: 5px;
+}
+a.deladdress.adress_delete{
+	text-decoration: none!important;
+	color: #000000!important;
+}
+a.deladdress.adress_delete:before{
+	content: "X";
 }
 .adress_add_wrapper{
 	text-align: center;
@@ -2472,4 +2535,67 @@ margin: 0;
 	background-color: #F1F1F1;
 	margin-top: 0;
 padding-top: 0;
+width: 100%;margin: 0;
+position: relative;
+}
+.food_detailed{
+font-size: 100%;
+max-width: 100%;
+display: block;
+margin: 0;
+margin-top:5px;
+}
+.food_prices{
+	float: right;
+	padding-top: 15px;
+	margin-right: 6%;
+}
+#totalPrice2 {
+	color: #f29801;
+}
+.state{
+	padding-top: 5px;
+	line-height: 2.4;
+}
+.delivery_ing{
+  font-size: 100%;
+  font-weight: bold;
+  position: relative;
+  left: 20px;
+  line-height: 2.4;
+  color: rgb(37,190,11);
+}
+.delivery_price{
+		float: right;
+	  top: 9px;
+  position: relative;
+	margin-right: 6%;
+	padding-right: 10px;
+	color: rgb(242,150,0);
+}
+.delivery_finish{
+	font-size: 100%;
+  font-weight: bold;
+  position: relative;
+  left: 20px;
+  line-height: 2.4;
+color: rgb(242,150,0);
+}
+.state1{
+	color:rgb(37,127,190);
+}
+.state1:before{
+	content: "准备中";
+}
+.state2{
+	color:rgb(37,190,10);
+}
+.state2:before{
+	content: "配送中";
+}
+.state3{
+	color:rgb(243,160,20);
+}
+.state3:before{
+	content: "订单完成";
 }

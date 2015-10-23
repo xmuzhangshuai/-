@@ -4,109 +4,65 @@
 <style type="text/css">
 	.nav div{width:80%;}
 	.nav a{width:20%;}
+	.cont_box, .menu_list li.cont_box{float: none;}
+	body{background-color: #E5E5E5;}
+	.run_adress{border-bottom-color: rgba(243,152,1,0);}
+	.menu_list.order_list.cont_box .cont_box.order_item{padding-right:6%;}
+	.menu_list li strong span.unit_price{color: #000000;}
+	.menu_list li strong span.unit_price{color: #f29801;}
 </style>
-<div class="container">
-	<div class="nav_sp">
-    	<a href="#" class="nav_sp_back"></a>
-    	<div id="nav_sp_wrap"><a href="#" class="nav_sp_logo"></a></div>
-    	<a href="#" class="nav_sp_home"></a>
-    </div>
+<div class="cont_box">
 	<div class="cont_box">
-		<div class="cont_box">
-			<img class="cont_userimg" src="../addons/str_takeout/template/resource/images/penguin.png"/>
-			<!--src="../resource/images/penguin.png"-->
-			
-			<span class="cont_userdec">dasdad</span>
-				<br>
-				<br>	
-			<span class="cont_userdec1">dsadsadsa</span>
+		<img class="cont_userimg" src="../addons/str_takeout/template/resource/images/penguin.png" />
+		<!--src="../resource/images/penguin.png"-->
+
+		<span class="cont_userdec">微信昵称</span>
+		<br>
+		<br>
+		<span class="cont_userdec1">共-1个订单</span>
+	</div>
+</div>
+{template 'header'}
+<div class="cont_box">
+	<div class="nav_wrapper">
+		<div class="nav_inner">
+			<a class="buyrecord">购买记录</a>
+			<a class="run_adress" href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 3));}">地址管理</a>
 		</div>
 	</div>
-	<div class="cont_box">
-		<p class="buyrecord">购买记录</p>
-		<p class="run_adress">地址管理</p>
-		
-		<hr width="102%" class="division" />
-		<ul class="menu_list order_list cont_box">
-			<li class="cont_box">
-				<img class="phone" src="../addons/str_takeout/template/resource/images/phone.png" />
-				
-				<br>
-				<p class="phone_number">saddsad</p>
-				<img class="compiler" src="../addons/str_takeout/template/resource/images/phone.png"/>
-			</li>
-			<li style="margin-top: 25px;" class="cont_box">
-				<span class="adress_name">中关村店</span>
-			</li>
-			<li style="margin-top: 4px;padding: 0;" class="cont_box">
-				<span class="adress_detailed">北京市不知道哪个区那个位置</span>
-				<img class="adress_delete" src="../addons/str_takeout/template/resource/images/phone.png"" />
-			</li>
-			<li style="margin-top:0;padding: 0;" class="cont_box">
-				<span class="adress_detailed">北京市不知道哪个区那个位置</span>
-				<img class="adress_delete" src="../addons/str_takeout/template/resource/images/phone.png"" />
-			</li>
-			
-			<li style="margin-top: 25px;" class="cont_box">
-				<span class="adress_name">中关村店</span>
-			</li>
-			<li style="margin-top: 4px;padding: 0;" class="cont_box">
-				<span class="adress_detailed">北京市不知道哪个区那个位置</span>
-				<img class="adress_delete" src="../addons/str_takeout/template/resource/images/phone.png"" />
-			</li>
-			<li style="margin-top:0;padding: 0;" class="cont_box">
-				<span class="adress_detailed">北京市不知道哪个区那个位置</span>
-				<img class="adress_delete" src="../addons/str_takeout/template/resource/images/phone.png"" />
-			</li>
-			
-			<p>&nbsp;</p>
-		</ul>
-	</div>
-<!--	<header class="nav menu">
-		<div>
-			<a href="{php echo $this->createMobileUrl('myorder', array('status' => '', 'sid' => $_GPC['sid']))}" {if $status == ''}class="on"{/if}>全部</a>
-			<a href="{php echo $this->createMobileUrl('myorder', array('status' => '1', 'sid' => $_GPC['sid']))}" {if $status == '1'}class="on"{/if}>待确认</a>
-			<a href="{php echo $this->createMobileUrl('myorder', array('status' => '2', 'sid' => $_GPC['sid']))}" {if $status == '2'}class="on"{/if}>处理中</a>
-			<a href="{php echo $this->createMobileUrl('myorder', array('status' => '3', 'sid' => $_GPC['sid']))}" {if $status == '3'}class="on"{/if}>已完成</a>
-			<a href="{php echo $this->createMobileUrl('myorder', array('status' => '5', 'sid' => $_GPC['sid']))}" {if $status == '5'}class="on"{/if}>待付款</a>
+
+	<hr width="102%" class="division" />
+	{if !empty($data)} {loop $data $row}
+	<ul class="menu_list order_list cont_box" style="margin-top: 15px;margin-bottom: 4px;width: 100%;margin: 0;">
+		<div class="shopping_info cont_box">
+			<time>2015-10-23</time>
+			<span id="shopName">南普陀店<a class="ico_tel" href="tel:18888888888"></a></span>
 		</div>
-	</header>
-	<section class="pay_wrap">
-		<ul class="my_order">
-			{if !empty($data)}
-				{loop $data $row}
-					<li>
-						<a href="{php echo $this->createMobileUrl('orderdetail', array('id' => $row['id'], 'sid' => $row['sid']))}">
-							<div>
-								{if $row['status'] == 1}
-									<div class="ico_status pending"><i></i>待确认</div>
-								{elseif $row['status'] == 2}
-									<div class="ico_status inhand"><i></i>处理中</div>
-								{elseif $row['status'] == 3}
-									<div class="ico_status complete"><i></i>已完成</div>
-								{elseif $row['status'] == 4}
-									<div class="ico_status cancle"><i></i>已取消</div>
-								{/if}
-							</div>
-							<div>
-								<h3 class="highlight">{$row['title']}</h3>
-								<p>{$row['num']}份/￥{$row['price']}</p>
-								<div>{php echo date('Y-m-d H:i', $row['addtime'])}</div>
-							</div>
-						</a>
-					</li>
-				{/loop}
-			{else}
-				<li class="on-info"><i class="fa fa-info-circle"></i> 暂无订单</li>
-			{/if}
-		</ul>
-	</section>	
-	<div class="page">{$pager}</div>-->
+		{php $dishs=get_dish($row['id']);} {loop $dishs $dis}
+		<li class="cont_box order_item">
+			<div>
+				<h3>{$dis['dish_title']}<strong>￥<span class="unit_price">{$dis['dish_price']}</span></strong></h3>
+			</div>
+		{php $dishinfo=get_dishinfo($dis['dish_id']);} {loop $dishinfo $dinfo}
+			<span class="food_detailed info">{$dinfo['description']}</span>
+		</li>
+		{/loop} {/loop}
+		<li class="cont_box order_item" style="margin-top: 2px;padding-bottom: 10px;">
+			<div>
+				<span class="state state{$row['status']}">
+					<strong>￥<span class="unit_price" id="totalPrice2">{$row['price']}</span></strong>
+				</span>
+			</div>
+		</li>
+	</ul>
+	{/loop} {else}
+	<li class="on-info"><i class="fa fa-info-circle"></i> 暂无订单</li>
+	{/if}
+</div>
 </div>
 <script type="text/javascript">
 	document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
 		WeixinJSBridge.call('hideOptionMenu');
 	});
 </script>
-{template 'common'}
-{template 'common/footer'}
+{template 'common'} {template 'common/footer'}
