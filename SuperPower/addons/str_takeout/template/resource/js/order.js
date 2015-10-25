@@ -67,8 +67,8 @@ $.amountCb = function(){
 			number = _cartNum.text() == '' ? 0 : parseInt(_cartNum.text()),
 			disNumber = number + parseInt(sign + 1);
 			price = parseFloat((price).toFixed(3));
-		_total.text(price);
-		_total2.text(price);
+		_total.text(price.toFixed(2));
+		_total2.text(price.toFixed(2));
 		_condition.text(parseFloat((sendCondition - price).toFixed(3)));
 		_cartNum.text(disNumber);
 		if(sendCondition - price <= 0){
