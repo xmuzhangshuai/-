@@ -32,7 +32,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		}
 		include $this->template('config');
 	}
-	//门店相关
+	//门店相关，超级管理员
 	public function doWebStore() {
 		global $_W, $_GPC;
 		$op = empty($_GPC['op']) ? 'list' : trim($_GPC['op']);
@@ -78,8 +78,13 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					unset($li[$k]);
 				}
 			}
-			if($id) {
+			if($id) {//编辑门店
 				$item = pdo_fetch('SELECT * FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $id));
+				
+				/**
+				 * 二次开发，获取其他门店的区域
+				 */
+				$otherArea = pdo_fetchall('SELECT points FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id <> :id ORDER BY id ASC', array(':aid' => $_W['uniacid'], ':id' => $id));
 				if(empty($item)) {
 					message('门店信息不存在或已删除', 'referer', 'error');
 				} else {
@@ -91,7 +96,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					$item['map'] = array('lat' => $item['location_x'], 'lng' => $item['location_y']);
 					$item['business_hours'] = iunserializer($item['business_hours']);
 				}
-			} else {
+			} else {//添加门店
 				if($config['num_limit'] > 0 && ($config['num_limit'] - $now_store_num <= 0)) {
 					message("您的公众号只能添加{$config['num_limit']}个门店，不能再添加门店，请联系管理员", referer(), 'error');
 				}
@@ -102,6 +107,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$item['is_takeout'] = 1;
 				$item['dish_style'] = 1;
 				$item['business_hours'] = array(array('s' => '8:00', 'e' => '24:00'));
+				
+				$otherArea = pdo_fetchall('SELECT points FROM ' . tablename('str_store') . ' WHERE uniacid = :aid ORDER BY id ASC', array(':aid' => $_W['uniacid']));
 			}
 			if(checksubmit('submit')) {
 				$data = array(
@@ -192,9 +199,11 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$params[':stu'] = $status;
 			}
 			$keyword = trim($_GPC['keyword']);
+			
+			$condition .= (" AND " . tablename('str_order'). '.sid=' . tablename('str_store'). '.id');
 			if(!empty($keyword)) {
 				//二次开发 需要订单共和店铺相联系
-				$condition .= (" AND " . tablename('str_order'). '.sid=' . tablename('str_store'). '.id');
+				
 				$condition .= " AND (sid LIKE '%{$keyword}%' OR title LIKE '%{$keyword}%')";
 			}
 			if(!empty($_GPC['addtime'])) {
@@ -215,6 +224,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$total = pdo_fetchcolumn('SELECT COUNT(sid) from '. tablename('str_order') . ',' . tablename('str_store') . $condition, $params);
 			//$data = pdo_fetchall('SELECT * FROM ' . tablename('str_order') . $condition . ' ORDER BY addtime DESC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
 			//二次开发:data的获取要重新搞过
+			$condition .= " GROUP BY sid";
 			$data = pdo_fetchall('SELECT title, sid, COUNT(sid) as ordernum, SUM(price) as totalmoney from '. tablename('str_order') . ',' . tablename('str_store') . $condition, $params);
 			if(!empty($data)) {
 				foreach($data as &$da) {
@@ -254,6 +264,78 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			$pager = pagination($total, $pindex, $psize);
 		 }
+		 /**
+		  * @author Lwq
+		  * 二次开发：总管理员维护菜品,该处等价于门店管理员的dish_list
+		  */
+		 if($op == 'dish_manage'){
+		 	$condition = ' uniacid = :aid';
+			$params[':aid'] = $_W['uniacid'];
+			//$params[':sid'] = $sid;
+			if(!empty($_GPC['keyword'])) {
+				$condition .= " AND title LIKE '%{$_GPC['keyword']}%'";
+			}
+			if(!empty($_GPC['cid'])) {
+				$condition .= " AND cid = :cid";
+				$params[':cid'] = intval($_GPC['cid']);
+			}
+
+			$pindex = max(1, intval($_GPC['page']));
+			$psize = 20;
+
+			$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_dish') . ' WHERE ' . $condition, $params);
+			$lists = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') . ' WHERE ' . $condition . ' ORDER BY displayorder DESC,id ASC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			$pager = pagination($total, $pindex, $psize);
+			$category = pdo_fetchall('SELECT title, id FROM ' . tablename('str_dish_category') . ' WHERE uniacid = :aid', array(':aid' => $_W['uniacid']), 'id');
+		 	
+		 }
+		 /**
+		  * @author lwq
+		  * 二次开发：总店管理员添加菜品，该处等价于门店管理员的dish_post
+		  */
+		  if($op == 'dish_post'){
+		  	load()->func('tpl');
+			$category = pdo_fetchall('SELECT title, id FROM ' . tablename('str_dish_category') . ' WHERE uniacid = :aid ORDER BY displayorder DESC, id ASC', array(':aid' => $_W['uniacid']));
+			$id = intval($_GPC['id']);
+			if($id) {
+				$item = pdo_fetch('SELECT * FROM ' . tablename('str_dish') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $id));
+				if(empty($item)) {
+					message('菜品不存在或已删除', $this->createWebUrl('store', array('dish_manage')), 'success');
+				}
+			} else {
+				$item['total'] = -1;
+				$item['unitname'] = '份';
+			}
+			if(checksubmit('submit')) {
+				$data = array(
+					'sid' => 0,
+					'uniacid' => $_W['uniacid'],
+					'title' => trim($_GPC['title']),
+					'price' => floatval($_GPC['price']),
+					'unitname' => trim($_GPC['unitname']),
+					'total' => intval($_GPC['total']),
+					'sailed' => intval($_GPC['sailed']),
+					'grant_credit' => intval($_GPC['grant_credit']),
+					'is_display' => intval($_GPC['is_display']),
+					'cid' => intval($_GPC['cid']),
+					'thumb' => trim($_GPC['thumb']),
+					'recommend' => intval($_GPC['recommend']),
+					'displayorder' => intval($_GPC['displayorder']),
+					'description' => trim($_GPC['description'])
+				);
+				if($id) {
+					pdo_update('str_dish', $data, array('uniacid' => $_W['uniacid'], 'id' => $id));
+				} else {
+					pdo_insert('str_dish', $data);
+				}
+				message('编辑菜品成功', $this->createWebUrl('store', array('op' => 'dish_manage')), 'success');
+			}
+		  }
+		  if($op == 'dish_del'){
+		  	$id = intval($_GPC['id']);
+			pdo_delete('str_dish', array('uniacid' => $_W['uniacid'], 'id' => $id));
+			message('删除菜品成功', $this->createWebUrl('store', array('op' => 'dish_manage')), 'success');
+		  }
 
 		include $this->template('store');
 	}
