@@ -1655,6 +1655,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		}
 
 		if($op == 'post') {
+			$currentadd = get_default_address();
 			$id = intval($_GPC['id']);
 			$address = get_address($id);
 			if($_W['ispost']) {
@@ -1673,6 +1674,10 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					$id = pdo_insertid();
 				}
 				exit(json_encode(array('errorno' => 0, 'message' => $id)));
+			}
+			if(empty($address)) {
+				$address['realname'] = $currentadd['realname'];
+				$address['mobile'] = $currentadd['mobile'];
 			}
 		}
 
