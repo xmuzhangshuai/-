@@ -1735,11 +1735,12 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			$addresses = get_addresses();
 		}
-
+		
 		if($op == 'post') {
 			$currentadd = get_default_address();
 			$id = intval($_GPC['id']);
 			$address = get_address($id);
+			$otherArea = pdo_fetchall('SELECT points,title,id FROM ' . tablename('str_store') . ' WHERE uniacid = :aid ORDER BY id ASC', array(':aid' => $_W['uniacid']));
 			if($_W['ispost']) {
 				$data = array(
 					'uniacid' => $_W['uniacid'],

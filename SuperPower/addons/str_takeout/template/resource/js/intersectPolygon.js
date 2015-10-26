@@ -1,58 +1,10 @@
-
-//#region 验证两个面是否相交的算法
-function intersectsPolygonAndPolygon (polygon1LinearRings, polygon2LinearRings) {
-     
-    // polygon1LinearRings : array[LinearRing,...]
-    function intersectsByPolygon (polygon1LinearRings, polygon2LinearRings) {
-        var intersect = false;
-
-        intersect = intersectsByLinearRings(polygon1LinearRings, polygon2LinearRings);
-
-        if(!intersect) {
-            // check if this poly contains points of the ring/linestring
-            for(i=0, len=polygon2LinearRings.length; i<len; ++i) {
-                var point = polygon2LinearRings[i];
-                intersect = containsPointByLinearRing(point, polygon1LinearRings);
-                if(intersect) {
-                    break;
-                }
-            }
-        }
-     
-        return intersect;
-    }
-
-    // LinearRings
-    function containsPointByPolygon (point, LinearRings) {
-        var numRings = LinearRings.length;
-        var contained = false;
-        if(numRings > 0) {
-            contained = containsPointByLinearRing(point, LinearRings[0]);
-            if( numRings > 1) {
-                // check interior rings
-                var hole;
-                for(var i=1; i<numRings; ++i) {
-                    hole = containsPointByLinearRing(point, LinearRings[i]);
-                    if(hole) {
-                        if(hole === 1) {
-                            // on edge
-                            contained = 1;
-                        } else {
-                            // in hole
-                            contained = false;
-                        }                            
-                        break;
-                    }
-                }
-            }
-        }
-        return contained;
-    }
-
     // LinearRing : array[pt]
     // point : {x:1,y:2}
     function containsPointByLinearRing (point, LinearRing) {
-
+		console.log("containsPointByLinearRing");
+		console.log(point);
+		console.log(LinearRing);
+		console.log("!!containsPointByLinearRing");
         //limitSigDigs
         function approx(num, sig) {
             var fig = 0;
@@ -126,6 +78,56 @@ function intersectsPolygonAndPolygon (polygon1LinearRings, polygon2LinearRings) 
             !!(crosses & 1);
 
         return contained;
+    }
+// LinearRings
+function containsPointByPolygon (point, LinearRings) {
+    var numRings = LinearRings.length;
+    var contained = false;
+    if(numRings > 0) {
+        contained = containsPointByLinearRing(point, LinearRings[0]);
+        if( numRings > 1) {
+            // check interior rings
+            var hole;
+            for(var i=1; i<numRings; ++i) {
+                hole = containsPointByLinearRing(point, LinearRings[i]);
+                if(hole) {
+                    if(hole === 1) {
+                        // on edge
+                        contained = 1;
+                    } else {
+                        // in hole
+                        contained = false;
+                    }                            
+                    break;
+                }
+            }
+        }
+    }
+    return contained;
+}
+
+
+//#region 验证两个面是否相交的算法
+function intersectsPolygonAndPolygon (polygon1LinearRings, polygon2LinearRings) {
+     
+    // polygon1LinearRings : array[LinearRing,...]
+    function intersectsByPolygon (polygon1LinearRings, polygon2LinearRings) {
+        var intersect = false;
+
+        intersect = intersectsByLinearRings(polygon1LinearRings, polygon2LinearRings);
+
+        if(!intersect) {
+            // check if this poly contains points of the ring/linestring
+            for(i=0, len=polygon2LinearRings.length; i<len; ++i) {
+                var point = polygon2LinearRings[i];
+                intersect = containsPointByLinearRing(point, polygon1LinearRings);
+                if(intersect) {
+                    break;
+                }
+            }
+        }
+     
+        return intersect;
     }
 
 

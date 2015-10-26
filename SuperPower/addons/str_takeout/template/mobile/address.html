@@ -2,6 +2,7 @@
 <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6E7C75E41980283b39d3c61e81f16a39"></script>
 <link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css">
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
+<script src="../addons/str_takeout/template/resource/js/intersectPolygon.js"></script>
 <div id="allmap"></div>
 {if $op == 'list'}
 <style>
@@ -74,7 +75,18 @@
 }
 .nav_sp_logo,.nav_sp_home{display:none;}
 .nav_sp{border: none;}
-input#location_input{text-align:center;width: 100%;height:52px!important;line-height:52px;font-size:23px;border: none;color: #FFF;background-color: #F7B74D;border-radius: 3px;}
+input#location_input{
+	text-align:center;
+	width: 100%;
+	height:52px!important;
+	line-height:52px;
+	font-size:23px;
+	border: none;
+	color: #FFF;
+	background-color: #F7B74D;
+	border-radius: 3px;
+	padding: 0px 20px;
+}
 .line{
 	margin: 10px 0;
 }
@@ -82,6 +94,7 @@ input#location_input{text-align:center;width: 100%;height:52px!important;line-he
 	line-height: 30px;
 	height: 30px!important;
 	font-size: 20px;
+	text-align:center ;
 }
 @media (max-width: 720px) {
 	input#location_input{
@@ -139,6 +152,14 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 	var user_point=null;
 	var ha_detail=null;
 	var user_detail=null;
+	{php $max=0;}
+	{loop $otherArea $one}
+		{php $max=intval($one['id'])>$max?intval($one['id']):$max;}
+	{/loop}
+	var storePoints=new Array({$max});
+	var storeNames=new Array({$max});
+	var storeCount={$max};
+	var sid=-1;
 	$(function(){
 		var r = "{$_GPC['r']}";
 		var return_url1 = "{php echo $this->createMobileUrl('order', array('op' => 'get','sid' => $sid, 'r' => 1));}";
@@ -159,15 +180,17 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 			$("#location_input").value = user_loc;
 			$("#location_input").change();
 		});
-		$("#location_input").focus(function (){
-			$(this).css("position","fixed").css("top","0").css("left","0").css("z-index","1000");
-			$("#search").addClass("hidden");
-			$(this).change();
-		}).blur(function (){
-			$("#search").removeClass("hidden");
-			$(this).css("position","static");
-			$(this).change();
-		});
+		if(1){
+			$("#location_input").focus(function (){
+				$(this).css("position","fixed").css("top","0").css("left","0").css("z-index","1000");
+				$("#search").addClass("hidden");
+				$(this).change();
+			}).blur(function (){
+				$("#search").removeClass("hidden");
+				$(this).css("position","static");
+				$(this).change();
+			});
+		}
 		$("#location_input").change(function() {
 			user_loc = this.value;
 			myGeo.getPoint(user_loc, function(point){
@@ -176,6 +199,7 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 			}, user_iploc.content.address);
 		});
 		$(".home-position").click(function(){
+			if($(this).hasClass("hdisabled")){return false;}
 			var geolocation = new BMap.Geolocation();
 			geolocation.getCurrentPosition(function(r){
 				user_detail=r;
@@ -192,8 +216,7 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 				user_point=r.point;
 				checkPointAvail();
 			},{enableHighAccuracy: true});
-			$(this).text("定位成功");
-			setTimeout(function (){$(".home-position").text("定位到我所在的楼宇");},3000);
+
 		});
 		
 		function checkPointAvail(){
@@ -208,6 +231,8 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 				}
 				//显示输入框
 				showInput();
+				sid=-1;
+				checkStore();
 			}else{
 				hideInput();
 				//隐藏输入框
@@ -226,6 +251,36 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 			$(".line").addClass("hidden");
 			$("#fix_bar").addClass("hidden");
 		}
+		function checkStore(){
+			var storePoint="";
+			{loop $otherArea $one}
+			storePoint= '{$one['points']}';
+			storePoints[{$one['id']}]  = eval(storePoint.replace(/&quot;/g,"\""));
+			storeNames[{$one['id']}] = '{$one['title']}';
+			{/loop}
+			for(var i=0;i<storeCount;++i) {
+				console.log("checking"+i);
+				if((storePoints[i])&&(isIn(storePoints[i],{x:user_point.lng,y:user_point.lat}))){
+					sid=i;
+					break;
+				}
+			}
+			if(sid>=0){$(".home-position").text("定位成功，门店"+storeNames[sid]+"将为您服务");}
+			else{$(".home-position").text("很抱歉，您暂时不在我们的配送范围");}
+			$(".home-position").addClass("hdisabled");
+			setTimeout(function (){$(".home-position").text("定位到我所在的楼宇").removeClass("hdisabled");},10000);
+		}
+		function isIn(storePoints,point){
+		    var p1 = [];
+		    for(var i = 0; i < storePoints.length; i++){
+		        p1.push({x:storePoints[i].lng,y:storePoints[i].lat});
+		    }
+		    if(containsPointByLinearRing(point,p1)){
+		        return true;
+		    }else{
+		        return false;
+		    }
+	 	}
 		{/if}
 		$('.addressChecked').click(function(){
 			var address_id = $(this).attr('data-id');
