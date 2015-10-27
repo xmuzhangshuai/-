@@ -1,5 +1,74 @@
 {php session_start();}
 {template 'common/header'}
+<!-- 引入图片上传文件js和css等 -->
+<link rel="stylesheet" type="text/css" href="./resource/css/uploadify.css"/>
+<script src="./resource/js/uploadify/jquery.uploadify.v2.1.4.min.js"></script>
+<script src="./resource/js/uploadify/swfobject.js"></script>
+<script src="./resource/js/uploadify/json2.js"></script>
+<!-- 上传图片js -->
+<script type="text/javascript">
+$(function(){
+	//每次上传文件过程的各种信息的存储容器，存储生存周期是从选择文件到下次选择文件
+	var path = "dish/";
+	var imagesPaths = [];
+	var responseDataObjContainer=[],queueIdObjContainer=[],fileObjContainer=[],dataObjContainer=[];
+	 $('#file_upload').uploadify({
+    'uploader'  : './resource/uploadify.swf',
+    'script'    : './upload.php?kind=type_1',
+    'fileDataName':'upfiledata',//就是<input type="file" name="upfiledata" />
+    'cancelImg' : './resource/images/cancel.png',//取消按钮的小图片
+    'wmode'     : 'transparent',//flash透明
+    'hideButton': true,//隐藏按钮 必须设置flash透明，
+    	               //隐藏的目的是自己可以弄个图片按钮做背景，防止中文乱码 如果直接设置buttonText为中文会出现乱码
+    	               //设置背景的CSS #file_uploadUploader {background: url('bag.gif') no-repeat;}
+    	               //#file_uploadUploader就是动态生成的flash的id
+    'width'     :60,//flash宽 由于设置的背景图片的宽是60 高是22 所以这里和下面设置60 22
+    'height'    :22,//flash高
+    'queueID'   :'myinfo',//上传提示信息的层的id，默认是 file_uploadQueue
+    	                   //如果不想显示提示把提示层的display设为none
+    'queueSizeLimit':2,//当设置允许同时选择多个上传时，设置最大的文件数
+    'sizeLimit':1024*1024*1,//单位bit
+    'displayData': 'percentage',//显示进度提示为百分比 还可以是速度 speed
+    'multi'      :false,//是否允许同时选择多个文件上传
+    'removeCompleted':false,//上传完成是否隐藏提示信息
+    'fileExt'     : '*.jpg;*.gif;*.png',//允许的扩展名默认*.*
+    'fileDesc'    : '图片文件(*.jpg;*.gif;*.png)',//文件选择对话框扩展名下面的提示信息
+    'onComplete':function(event,queueId,fileObj,response,data){//每个文件上传完成时执行的函数 response是服务器返回的数据
+    	         var _msg=eval("("+response+")");
+    	         queueIdObjContainer.push(queueId);
+    	         fileObjContainer.push(fileObj);
+    	         responseDataObjContainer.push(_msg);
+    	         dataObjContainer.push(data);
+    	         //hint("#hint",info);
+                 },
+    'onAllComplete':function(event,data){//所有上传完成执行的函数 response是服务器返回的数据
+    	         var info='';
+    	         for(var i=0;i<responseDataObjContainer.length;i++){//当一次上传操作完成时，处理各种数据
+    	         	 info+=responseDataObjContainer[i].msg+JSON.stringify(dataObjContainer[i])+'<br/>';
+    	         	 imagesPaths.push(responseDataObjContainer[i].save_name);
+    	         }
+    	         hint("#hint",info);
+    	         //执行操作
+                 },             	 
+    'onError':function(event,queueId,fileObj,errorObj){//上传发生错误执行的函数
+                  hint("#hint",errorObj.type+":"+errorObj.info);
+                  },
+    'onSelectOnce' : function(event,data) {//每选择一次文件就触发该函数
+    	           responseDataObjContainer=[];
+    	           queueIdObjContainer=[];
+    	           fileObjContainer=[];
+    	           dataObjContainer=[];
+			      },
+    'auto'      : true
+    });
+
+
+
+
+});//end ready
+function hint(slector,str){$(slector).html(str);}
+</script>
+<!-- 上传图片js结束 -->
 <style type="text/css">
 	.require{color:red;}
 	.highlight{font-size:18px;font-color:#FFF;}
@@ -392,11 +461,11 @@
 	}
   	//画出其他门店的配送范
   	if(otherStoresLen > 0){
-	'{loop $otherArea $one}'
+	{loop $otherArea $one}
 		var storePoints = '{$one['points']}';
 		storePoints = eval(storePoints.replace(/&quot;/g,"\""));
 		drawArea(storePoints, 'blue', 'otherStore');
-	'{/loop}'
+	{/loop}
 		
   	}
     //划区结束后的函数
@@ -404,16 +473,16 @@
 		//TODO:判断是否和多边形相交
 		var cross = false;
 		var drawPoints = e.overlay.getPath();//获取多边形的顶点
-		'{loop $otherArea $one}'
-		
-		var storePoints = '{$one['points']}';
+		var crossed = 0;var storePoints = '';
+		{loop $otherArea $one}
+		storePoints = '{$one['points']}';
 		storePoints = eval(storePoints.replace(/&quot;/g,"\""));
 		cross = isCross(drawPoints,storePoints);
 		if(cross)
-			'{php break;}';
-		'{/loop}'
+			crossed=1;
+		{/loop}
 		
-		if(cross){
+		if(crossed){
 			alert('选定配送区域与其他门店重叠，请重新选择');
 			map.removeOverlay(overlays[0]);//清除上一次的多边形
 		    overlays = [];
@@ -908,13 +977,13 @@
 					<input type="hidden" name="c" value="site">
 					<input type="hidden" name="a" value="entry">
 					<input type="hidden" name="m" value="str_takeout">
-					<input type="hidden" name="do" value="manage"/>
-					<input type="hidden" name="op" value="dish_list"/>
+					<input type="hidden" name="do" value="store"/>
+					<input type="hidden" name="op" value="dish_manage"/>
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>菜品分类</label>
 						<div class="col-sm-9 col-xs-9 col-md-9">
 							<select name="cid" id="cid" class="form-control">
-								<option value="">不限</option>
+								<option value="0">不限</option>
 								{loop $category $li}
 									<option value="{$li['id']}" {if $li['id'] == $_GPC['cid']}selected{/if}>{$li['title']}</option>
 								{/loop}
@@ -1076,15 +1145,22 @@
 							<input type="text" class="form-control" name="unitname" value="" disable="true" readOnly="true">
 						</div>	
 						<div class="col-sm-3 col-xs-3 col-md-3">
-							<button class="btn btn-primary" onclick="showCompriseChoice()">请选择套餐组合</button>
+							<button class="btn btn-primary"  onclick="showCompriseChoice()">请选择套餐组合</button>
 						</div>
 					</div>
+					<!-- 套餐组合对话框 -->
+					<!-- 套餐组合对话框结束 -->
 					<!-- 套餐组合结束 -->
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>菜品图片</label>
 						<div class="col-sm-9 col-xs-12">
+						<input name="file_upload" id="file_upload" type="file"/>
+						<span id="hint"></span>
+						<div id="myinfo"></div>
+						 <!-- 
 							{php echo tpl_form_field_image('thumb', $item['thumb']);}
 							<div class="help-block">推荐大小为720x400</div>
+						 -->	 
 						</div>
 					</div>
 					<div class="form-group">
