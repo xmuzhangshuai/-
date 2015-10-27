@@ -127,13 +127,13 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 		<a name="#ddress"></a>
 		<input type="text" name="address" id="location_input" style="padding:0;" autocomplete="off" placeholder="请输入您所在的楼宇" /><img id="search" style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/search.png" /></div>
 	<div style="position: relative;text-align: center;"><a class="home-position">定位到我所在的楼宇</a><img style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/position.png" /></div>
-<!--	<div class="line hidden">
+	<div class="hidden">
 		<input type="text" name="realname" value="{$address['realname']}" placeholder="姓名">
 	</div>
-	<div class="line hidden">
+	<div class="hidden">
 		<input type="text" name="mobile" value="{$address['mobile']}" placeholder="手机">
-	</div>-->
-	<div class="line address addr1 hidden">
+	</div>
+	<div class="address addr1 hidden">
 		<input name="room" value="{$address['room']}" type="text" placeholder="楼层房号">
 	</div>
 </div>
@@ -180,7 +180,7 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 			$("#location_input").value = user_loc;
 			$("#location_input").change();
 		});
-		if(1){
+		if(0){
 			$("#location_input").focus(function (){
 				$(this).css("position","fixed").css("top","0").css("left","0").css("z-index","1000");
 				$("#search").addClass("hidden");
@@ -267,8 +267,10 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 			}
 			if(sid>=0){$(".home-position").text("定位成功，门店"+storeNames[sid]+"将为您服务");}
 			else{$(".home-position").text("很抱歉，您暂时不在我们的配送范围");}
-			$(".home-position").addClass("hdisabled");
-			setTimeout(function (){$(".home-position").text("定位到我所在的楼宇").removeClass("hdisabled");},10000);
+			if(!$(this).hasClass("hdisabled")){
+				$(".home-position").addClass("hdisabled");
+				setTimeout(function (){$(".home-position").text("定位到我所在的楼宇").removeClass("hdisabled");},10000);
+			}
 		}
 		function isIn(storePoints,point){
 		    var p1 = [];
@@ -303,6 +305,9 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 		$('#submit').click(function(){
 			
 			var id = '{$id}';
+			var room = $.trim($(':text[name="room"]').val());
+			var realname = $.trim($(':text[name="realname"]').val());
+			var mobile = $.trim($(':text[name="mobile"]').val());
 /*			var realname = $.trim($(':text[name="realname"]').val());
 			if(!realname) {
 				alert('预定人不能为空');
@@ -324,14 +329,14 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 				alert('收件地址不能为空');
 				return false;
 			}
-			var room = $.trim($(':text[name="room"]').val());
+			/*var room = $.trim($(':text[name="room"]').val());
 			if(!room) {
 				alert('楼层房号不能为空');
 				return false;
-			}
+			}*/
 			if(!$(this).hasClass('disabled')){
 				$(this).addClass('disabled');	
-				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'address':address, 'room':room}, function(data){
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname}, function(data){
 					var data = $.parseJSON(data);
 					if(!data.errorno) {
 						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default', 'sid' => $sid))}", {'id':data.message},function(){
@@ -361,7 +366,7 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(data){
 				var data = $.parseJSON(data);
 				if(!data.errorno) {
-					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'r' => $_GPC['r']));}"
+					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid, 'r' => $_GPC['r']));}";
 				} else {
 					alert(data.message);
 					return false;
@@ -377,7 +382,7 @@ input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
 			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(data){
 				var data = $.parseJSON(data);
 				if(!data.errorno) {
-					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'r' => $_GPC['r'], 'sid' => $sid));}"
+					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid, 'r' => $_GPC['r']));}";
 				} else {
 					alert(data.message);
 					return false;

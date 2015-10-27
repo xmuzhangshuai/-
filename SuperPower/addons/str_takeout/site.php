@@ -1362,20 +1362,23 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$data['sid'] = $sid;
 			$data['uid'] = $_W['member']['uid'];
 			$data['openid'] = $_W['openid'];
-			$data['order_type'] = intval($_GPC['order_type']);
-			if($data['order_type'] == 1) {
-				$data['mobile'] = trim($_GPC['mobile']);
-				$data['username'] = trim($_GPC['username']);
-				$data['person_num'] = intval($_GPC['person_num']);
-				$data['table_num'] = trim($_GPC['table_num']);
-			} elseif($data['order_type'] == 2) {
-				$address = get_address($_GPC['address_id']);
-				$data['mobile'] = trim($address['mobile']);
-				$data['username'] = trim($address['realname']);
-				$data['address'] = trim($address['address']);
-				$data['delivery_time'] = trim($_GPC['delivery_time']) ? trim($_GPC['delivery_time']) : '尽快送出';
-				$data['delivery_fee'] = $store['delivery_price'];
-			}
+			$data['order_type'] = 2;
+
+			$addrdata = array(
+				'uniacid' => $_W['uniacid'],
+				'uid' => $_W['member']['uid'],
+				'realname' => trim($_GPC['realname']),
+				'mobile' => trim($_GPC['mobile']),
+				'room' => trim($_GPC['room']),
+			);
+			pdo_update('str_address', $addrdata, array('uniacid' => $_W['uniacid'], 'id' => $_GPC['address_id']));
+			$address = get_address($_GPC['address_id']);
+			$data['address'] = trim($address['address']);
+			$data['mobile'] = trim($address['mobile']);
+			$data['username'] = trim($address['realname']);
+			
+			$data['delivery_time'] = trim($_GPC['delivery_time']) ? trim($_GPC['delivery_time']) : '尽快送出';
+			$data['delivery_fee'] = $store['delivery_price'];
 			$data['note'] = trim($_GPC['note']);
 			$data['pay_type'] = '';
 			$cart = get_order_cart($sid);

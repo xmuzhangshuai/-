@@ -131,11 +131,39 @@
 				$(this).removeClass('disabled');
 				return false;
 			}
+			var room = $("#showNumber").val();
+			if(!room) {
+				alert('请输入楼层房号');
+				$(this).removeClass('disabled');
+				return false;
+			}
+			var mobile = $("#showTel").val();
+			if(!mobile) {
+				alert('请输入手机号');
+				$(this).removeClass('disabled');
+				return false;
+			}else{
+				var valid = !!mobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
+				if(!valid){
+					alert('手机号格式不正确');
+					$(this).removeClass('disabled');
+					return false;
+				}
+			}
+			var orderer = $("#showName").val();
+			if(!address_id) {
+				alert('请选择姓名');
+				$(this).removeClass('disabled');
+				return false;
+			}
 			var param = {
 				'order_type' :2,
 				'address_id':address_id,
 				'note':'',
 				'delivery_time':'',
+				'realname':orderer,
+				'mobile':mobile,
+				'room':room
 			}
 			$.post("{php echo $this->createMobileUrl('order', array('sid' => $sid));}", param, function(e){
 				if(e.errno == 0) {

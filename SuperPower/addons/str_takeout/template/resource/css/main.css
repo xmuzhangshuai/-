@@ -393,6 +393,13 @@ body>div:first-child {
 	font-size: 16px;
 	line-height: 38px;
 	padding-left: 20px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+.nav_address span {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
 }
 .nav_sp_location {
 	background: url(../images/location.png);
