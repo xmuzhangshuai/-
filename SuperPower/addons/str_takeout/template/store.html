@@ -461,11 +461,11 @@ function hint(slector,str){$(slector).html(str);}
 	}
   	//画出其他门店的配送范
   	if(otherStoresLen > 0){
-	'{loop $otherArea $one}'
+	{loop $otherArea $one}
 		var storePoints = '{$one['points']}';
 		storePoints = eval(storePoints.replace(/&quot;/g,"\""));
 		drawArea(storePoints, 'blue', 'otherStore');
-	'{/loop}'
+	{/loop}
 		
   	}
     //划区结束后的函数
@@ -473,16 +473,16 @@ function hint(slector,str){$(slector).html(str);}
 		//TODO:判断是否和多边形相交
 		var cross = false;
 		var drawPoints = e.overlay.getPath();//获取多边形的顶点
-		'{loop $otherArea $one}'
-		
-		var storePoints = '{$one['points']}';
+		var crossed = 0;var storePoints = '';
+		{loop $otherArea $one}
+		storePoints = '{$one['points']}';
 		storePoints = eval(storePoints.replace(/&quot;/g,"\""));
 		cross = isCross(drawPoints,storePoints);
 		if(cross)
-			'{php break;}';
-		'{/loop}'
+			crossed=1;
+		{/loop}
 		
-		if(cross){
+		if(crossed){
 			alert('选定配送区域与其他门店重叠，请重新选择');
 			map.removeOverlay(overlays[0]);//清除上一次的多边形
 		    overlays = [];
