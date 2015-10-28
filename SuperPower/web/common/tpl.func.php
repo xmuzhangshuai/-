@@ -412,6 +412,80 @@ function tpl_form_field_image($name, $value = '', $default = '', $options = arra
 	return $s;
 }
 
+//二次开发显示dish图片
+function tpl_form_dish_image($name, $value = '', $default = '', $options = array()) {
+	global $_W;
+
+	$s = '';
+	if (!defined('TPL_INIT_IMAGE')) {
+		$s = '
+		<script type="text/javascript">
+			function showImageDialog(elm, opts, options) {
+				require(["util"], function(util){
+					var btn = $(elm);
+					var ipt = btn.parent().prev();
+					var val = ipt.val();
+					var img = ipt.parent().next().children();
+					util.image(val, function(url){
+						if(url.url){
+							if(img.length > 0){
+								img.get(0).src = url.url;
+							}
+							ipt.val(url.filename);
+							ipt.attr("filename",url.filename);
+							ipt.attr("url",url.url);
+						}
+						if(url.media_id){
+							if(img.length > 0){
+								img.get(0).src = "";
+							}
+							ipt.val(url.media_id);
+						}
+					}, opts, options);
+				});
+			}
+		</script>';
+
+		define('TPL_INIT_IMAGE', true);
+	}
+	if(empty($default)) {
+		$default = './resource/images/nopic.jpg';
+	}
+	$val = $default;
+	if(!empty($value)) {
+		$val = tomedia($value);
+	}
+	if(empty($options['tabs'])){
+		$options['tabs'] = array('browser'=>'', 'upload'=>'active');
+	}
+	if(!empty($options['global'])){
+		$options['global'] = true;
+	} else {
+		$options['global'] = false;
+	}
+	if(empty($options['class_extra'])) {
+		$options['class_extra'] = '';
+	}
+	if (isset($options['dest_dir']) && !empty($options['dest_dir'])) {
+		if (!preg_match('/^\w+([\/]\w+)?$/i', $options['dest_dir'])) {
+			exit('图片上传目录错误,只能指定最多两级目录,如: "we7_store","we7_store/d1"');
+		}
+	}
+
+	if(isset($options['thumb'])){
+		$options['thumb'] = !empty($options['thumb']);
+	}
+
+
+	if(!empty($options['tabs']['browser']) || !empty($options['tabs']['upload'])){
+		$s .=
+		'<div class="input-group '. $options['class_extra'] .'" style="margin-top:.5em;">
+	<img src="' . $val . '" onerror="this.src=\''.$default.'\'; this.title=\'图片未找到.\'" class="img-responsive img-thumbnail" '.($options['extras']['image'] ? $options['extras']['image'] : '').' width="150" />
+</div>';
+	}
+	return $s;
+}
+
 
 
 function tpl_form_field_multi_image($name, $value = array(), $options = array()) {

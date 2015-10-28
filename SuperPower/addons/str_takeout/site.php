@@ -299,6 +299,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$id = intval($_GPC['id']);
 			if($id) {
 				$item = pdo_fetch('SELECT * FROM ' . tablename('str_dish') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $id));
+				if($item['thumb'] != ''){
+					$item['thumb'] = explode(';',$item['thumb']);
+				}
 				if(empty($item)) {
 					message('菜品不存在或已删除', $this->createWebUrl('store', array('dish_manage')), 'success');
 				}
@@ -307,6 +310,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$item['unitname'] = '份';
 			}
 			if(checksubmit('submit')) {
+				$type = intval($_GPC['cid']) == 3?'DANPIN':'TAOCAN';
 				$data = array(
 					'sid' => 0,
 					'uniacid' => $_W['uniacid'],
@@ -318,10 +322,11 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					'grant_credit' => intval($_GPC['grant_credit']),
 					'is_display' => intval($_GPC['is_display']),
 					'cid' => intval($_GPC['cid']),
-					'thumb' => trim($_GPC['thumb']),
+					'thumb' => trim($_GPC['imgsPath']),
 					'recommend' => intval($_GPC['recommend']),
 					'displayorder' => intval($_GPC['displayorder']),
-					'description' => trim($_GPC['description'])
+					'description' => trim($_GPC['description']),
+					'dish_type' => $type
 				);
 				if($id) {
 					pdo_update('str_dish', $data, array('uniacid' => $_W['uniacid'], 'id' => $id));

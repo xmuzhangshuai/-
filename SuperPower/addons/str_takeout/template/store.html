@@ -18,7 +18,7 @@ $(function(){
     'fileDataName':'upfiledata',//就是<input type="file" name="upfiledata" />
     'cancelImg' : './resource/images/cancel.png',//取消按钮的小图片
     'wmode'     : 'transparent',//flash透明
-    'hideButton': true,//隐藏按钮 必须设置flash透明，
+    'hideButton': false,//隐藏按钮 必须设置flash透明，
     	               //隐藏的目的是自己可以弄个图片按钮做背景，防止中文乱码 如果直接设置buttonText为中文会出现乱码
     	               //设置背景的CSS #file_uploadUploader {background: url('bag.gif') no-repeat;}
     	               //#file_uploadUploader就是动态生成的flash的id
@@ -26,10 +26,10 @@ $(function(){
     'height'    :22,//flash高
     'queueID'   :'myinfo',//上传提示信息的层的id，默认是 file_uploadQueue
     	                   //如果不想显示提示把提示层的display设为none
-    'queueSizeLimit':2,//当设置允许同时选择多个上传时，设置最大的文件数
+    'queueSizeLimit':5,//当设置允许同时选择多个上传时，设置最大的文件数
     'sizeLimit':1024*1024*1,//单位bit
     'displayData': 'percentage',//显示进度提示为百分比 还可以是速度 speed
-    'multi'      :false,//是否允许同时选择多个文件上传
+    'multi'      :true,//是否允许同时选择多个文件上传
     'removeCompleted':false,//上传完成是否隐藏提示信息
     'fileExt'     : '*.jpg;*.gif;*.png',//允许的扩展名默认*.*
     'fileDesc'    : '图片文件(*.jpg;*.gif;*.png)',//文件选择对话框扩展名下面的提示信息
@@ -45,8 +45,11 @@ $(function(){
     	         var info='';
     	         for(var i=0;i<responseDataObjContainer.length;i++){//当一次上传操作完成时，处理各种数据
     	         	 info+=responseDataObjContainer[i].msg+JSON.stringify(dataObjContainer[i])+'<br/>';
-    	         	 imagesPaths.push(responseDataObjContainer[i].save_name);
+    	         	 imagesPaths.push("dish/" + responseDataObjContainer[i].save_name);
     	         }
+    	         //将里面的路劲存到hidden中
+    	         if(imagesPaths.length>0)
+    	         	$("#imgsPath").val(imagesPaths.join(';')); 
     	         hint("#hint",info);
     	         //执行操作
                  },             	 
@@ -1155,12 +1158,15 @@ function hint(slector,str){$(slector).html(str);}
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>菜品图片</label>
 						<div class="col-sm-9 col-xs-12">
 						<input name="file_upload" id="file_upload" type="file"/>
+						<input type="hidden" name="imgsPath" id="imgsPath" value=""/>
 						<span id="hint"></span>
 						<div id="myinfo"></div>
-						 <!-- 
-							{php echo tpl_form_field_image('thumb', $item['thumb']);}
-							<div class="help-block">推荐大小为720x400</div>
-						 -->	 
+						<div id="showImgs">
+						 {loop $item['thumb'] $onethumb}
+							{php echo tpl_form_dish_image('thumb', $onethumb);}
+						 {/loop}	
+						 </div>
+						 <div class="help-block">推荐大小为720x400</div> 
 						</div>
 					</div>
 					<div class="form-group">
@@ -1250,10 +1256,6 @@ function hint(slector,str){$(slector).html(str);}
 					u.message("请选择菜品分类");
 					return false;					
 				}
-				if($.trim($(':text[name="thumb"]').val()) == '') {
-					u.message('请添加菜品图片');
-					return false;
-				}
 				if($("#cid option:selected").val() == '0'){
 					u.message("请选择菜品类型");
 					return false;
@@ -1265,6 +1267,10 @@ function hint(slector,str){$(slector).html(str);}
 						}
 					}
 				}
+				//图片可以为空
+				//if($("#imgsPath").val == ''){
+				//	u.message("请上传菜品图片");
+				//}
 			});
 		});
 		//二次开发：
