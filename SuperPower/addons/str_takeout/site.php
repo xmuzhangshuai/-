@@ -296,11 +296,12 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		  if($op == 'dish_post'){
 		  	load()->func('tpl');
 			$category = pdo_fetchall('SELECT title, id FROM ' . tablename('str_dish_category') . ' WHERE uniacid = :aid ORDER BY displayorder DESC, id ASC', array(':aid' => $_W['uniacid']));
+			$lists = pdo_fetchall('SELECT id,title,cid FROM' . tablename('str_dish') . ' WHERE uniacid = :aid and cid = :cid  ORDER BY displayorder DESC, id ASC', array(':aid' => $_W['uniacid'], ':cid' => 3));
 			$id = intval($_GPC['id']);
 			if($id) {
 				$item = pdo_fetch('SELECT * FROM ' . tablename('str_dish') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $id));
 				if($item['thumb'] != ''){
-					$item['thumb'] = explode(';',$item['thumb']);
+					$item['thumbs'] = explode(';',$item['thumb']);
 				}
 				if(empty($item)) {
 					message('菜品不存在或已删除', $this->createWebUrl('store', array('dish_manage')), 'success');

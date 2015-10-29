@@ -11,6 +11,7 @@ $(function(){
 	//每次上传文件过程的各种信息的存储容器，存储生存周期是从选择文件到下次选择文件
 	var path = "dish/";
 	var imagesPaths = [];
+	var clear = true;
 	var responseDataObjContainer=[],queueIdObjContainer=[],fileObjContainer=[],dataObjContainer=[];
 	 $('#file_upload').uploadify({
     'uploader'  : './resource/uploadify.swf',
@@ -39,6 +40,7 @@ $(function(){
     	         fileObjContainer.push(fileObj);
     	         responseDataObjContainer.push(_msg);
     	         dataObjContainer.push(data);
+    	         document.getElementById('showImgs').style.display= 'none' ;
     	         //hint("#hint",info);
                  },
     'onAllComplete':function(event,data){//所有上传完成执行的函数 response是服务器返回的数据
@@ -1145,24 +1147,65 @@ function hint(slector,str){$(slector).html(str);}
 					<div class="form-group" id='choiceBox' style="display:none">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>套餐组合</label>
 						<div class="col-sm-6 col-xs-6 col-md-6">
-							<input type="text" class="form-control" name="unitname" value="" disable="true" readOnly="true">
+							<input type="text" class="form-control" id="danpinzuhe" name="danpinzuhe" value="" disable="true" readOnly="true">
 						</div>	
 						<div class="col-sm-3 col-xs-3 col-md-3">
 							<button class="btn btn-primary"  onclick="showCompriseChoice()">请选择套餐组合</button>
 						</div>
+						<input type="hidden" id="danpinidzuhe" name="danpinidzuhe" value=""/>
 					</div>
+					<!-- 模态框 -->
+					<div class="modal fade" id="taocanModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="exampleModalLabel">套餐组合选择</h4>
+      </div>
+      <div class="modal-body">
+        <div class="panel panel-default">
+						<div class="panel-body table-responsive">
+							<table class="table table-hover">
+								<thead class="navbar-inner">
+									<tr>
+								<th>选择</th>
+								<th>菜品名称</th>
+							</tr>
+						</thead>
+						<tbody>
+							{loop $lists $one}
+							<tr>
+								<td class="row-first"><input class="singledanpin" type="checkbox" value="{$one['id']};{$one['title']}" /></td>
+								<td class='danpintitle'>{$one['title']}</td>
+							</tr>
+							{/loop}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			{$pager}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" id="btn-revo" class="btn btn-primary">确认</button>
+      </div>
+    </div>
+  </div>
+</div>
+					<!-- 模态框结束 -->
 					<!-- 套餐组合对话框 -->
+					
 					<!-- 套餐组合对话框结束 -->
 					<!-- 套餐组合结束 -->
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>菜品图片</label>
 						<div class="col-sm-9 col-xs-12">
 						<input name="file_upload" id="file_upload" type="file"/>
-						<input type="hidden" name="imgsPath" id="imgsPath" value=""/>
+						<input type="hidden" name="imgsPath" id="imgsPath" value="{$item['thumb']}"/>
 						<span id="hint"></span>
 						<div id="myinfo"></div>
-						<div id="showImgs">
-						 {loop $item['thumb'] $onethumb}
+						<div id="showImgs" style="display:block">
+						 {loop $item['thumbs'] $onethumb}
 							{php echo tpl_form_dish_image('thumb', $onethumb);}
 						 {/loop}	
 						 </div>
@@ -1281,6 +1324,25 @@ function hint(slector,str){$(slector).html(str);}
 				document.getElementById('choiceBox').style.display = 'none';
 			}
 		}
+		//二次开发，显示套餐组合模态框
+		function showCompriseChoice(){
+			$("#taocanModal").modal('show');
+		}
+		$('#btn-revo').click(function(){
+			$chks = $(':checkbox.singledanpin:checked');
+			if($chks.length >0){
+				var ids = [];
+				var names = [];
+				$chks.each(function(){
+					ids.push(this.value.split(";")[0]);
+					names.push(this.value.split(";")[1]);
+				});
+				
+			}
+			var zuhe = names.join("+");
+			$("#danpinzuhe").val(zuhe);
+			$("#taocanModal").modal('hide');
+		});
 	</script>
 {/if}
 {template 'common'}

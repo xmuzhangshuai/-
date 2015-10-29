@@ -11,5 +11,6 @@ encoding//addons/str_takeout/template/table.html=UTF-8
 encoding//addons/str_takeout/template/trash.html=UTF-8
 encoding//data/config.php=UTF-8
 encoding//payment/unionpay/upacp_sdk_php/utf8/func/SDKConfig.php=UTF-8
+encoding//web/themes/default/account/permission.html=UTF-8
 encoding/<project>=UTF-8
 separateDerivedEncodings=true
