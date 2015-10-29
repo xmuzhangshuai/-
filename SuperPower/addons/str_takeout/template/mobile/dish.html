@@ -33,17 +33,14 @@
 								<div>
 									<div class="menu_type">10-23 星期五 早餐</div>
 									{if $ds['thumb']}
+									{php $ds['thumb'] = explode(';',$ds['thumb']); }
 									<div class="slider_wrap">
 										<ul class="rslides" id="slider{$ds['id']}">
+											{loop $ds['thumb'] $thu}
 											<li>
-												<img src="{php echo tomedia($ds['thumb']);}" alt="" />
+												<img src="{php echo tomedia($thu);}" alt="" />
 											</li>
-											<li>
-												<img src="{php echo tomedia($ds['thumb']);}" alt="" />
-											</li>
-											<li>
-												<img src="{php echo tomedia($ds['thumb']);}" alt="" />
-											</li>
+											{/loop}
 										</ul>
 										<div class="mask"><div><p>售完</p></div></div>
 									</div>
