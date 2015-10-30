@@ -571,10 +571,8 @@ function hint(slector,str){$(slector).html(str);}
 	         p2.push({x:points2[j].lng,y:points2[j].lat});
 	     }
 	     if(intersectsPolygonAndPolygon(p1,p2)){
-	    	 alert('重叠');
 	         return true;
 	     }else{
-	    	 alert('不重叠');
 	         return false;
 	     }
 	 }
@@ -972,7 +970,7 @@ function hint(slector,str){$(slector).html(str);}
 	<!-- 二次开发：超级管理员菜品维护 -->
 	{elseif $op == 'dish_manage'}
 	<style type="text/css">
-		.status-toggle,.recommend-toggle{cursor:pointer;}
+		.status-toggle,.recommend-toggle,.share_toggle{cursor:pointer;}
 	</style>
 	<div class="main">
 		<div class="panel panel-info">
@@ -1023,22 +1021,28 @@ function hint(slector,str){$(slector).html(str);}
 								<th>所属分类</th>
 								<th>单位</th>
 								<th>价格</th>
+								<th>内容</th>
+								<!-- 二次开发，隐藏这些字段 -->
+								<!-- 
 								<th>总库存</th>
 								<th>已售出</th>
 								<th>赠送积分</th>
 								<th>是否上架</th>
-								<th>是否推送</th>
+								<th>是否推送</th> -->
+								<th>是否分享给门店</th>
 								<th style="width:150px; text-align:right;">操作</th>
 							</tr>
 						</thead>
 						<tbody>
 							{loop $lists $item}
 							<tr>
-								<td><img src="{php echo tomedia($item['thumb']);}" width="38" style="border-radius: 3px;"></td>
+								<td><img src="{php $thumb = explode(';',$item['thumb']); echo tomedia($thumb[0])}" width="38" style="border-radius: 3px;"></td>
 								<td>{$item['title']}</td>
 								<td>{$category[$item['cid']]['title']}</td>
 								<td>{$item['unitname']}</td>
 								<td>{$item['price']} 元</td>
+								<!-- 二次开发，隐藏字段 -->
+								<!-- 
 								<td>{if $item['total'] == -1}无限库存{else}{$item['total']}份{/if}</td>
 								<td>{$item['sailed']} 份</td>
 								<td>{$item['grant_credit']} 积分</td>
@@ -1054,6 +1058,16 @@ function hint(slector,str){$(slector).html(str);}
 										<span class="btn btn-sm btn-success recommend-toggle" id="{$item['id']}" data-toggle="2" title="点击修改">推送</span>
 									{else}
 										<span class="btn btn-sm btn-warning recommend-toggle" id="{$item['id']}" data-toggle="1" title="点击修改">不推送</span>
+									{/if}
+								</td> -->
+								<td>
+								{$item['zuhe']}
+								</td>
+								<td>
+									{if $item['share'] == 1}
+										<span class="btn btn-sm btn-success share-toggle" id="{$item['id']}" data-toggle="2" title="点击修改">已分享</span>
+									{else}
+										<span class="btn btn-sm btn-warning share-toggle" id="{$item['id']}" data-toggle="1" title="点击修改">不分享</span>
 									{/if}
 								</td>
 								<td style="text-align:right;">
@@ -1095,6 +1109,18 @@ function hint(slector,str){$(slector).html(str);}
 						location.reload();
 					} else {
 						u.message('编辑菜品是否推荐失败');
+					}
+				});
+			});
+			
+			$('.share-toggle').click(function(){
+				var id = $(this).attr('id');
+				var dvalue = $(this).attr('data-toggle');
+				$.post('{php echo $this->createWebUrl('ajax', array('op' => 'share_dish'))}', {'id':id, 'value':dvalue}, function(data){
+					if(data == 'success') {
+						location.reload();
+					} else {
+						u.message('编辑菜品显示状态失败');
 					}
 				});
 			});
@@ -1144,17 +1170,18 @@ function hint(slector,str){$(slector).html(str);}
 						</div>	
 					</div>
 					<!-- 二次开发：套餐组合 -->
-					<div class="form-group" id='choiceBox' style="display:none">
+					<div class="form-group" id='choiceBox' {if $item['cid'] == 3}style="display:none"{else}style="display:block"{/if}>
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>套餐组合</label>
 						<div class="col-sm-6 col-xs-6 col-md-6">
-							<input type="text" class="form-control" id="danpinzuhe" name="danpinzuhe" value="" disable="true" readOnly="true">
+							<input type="text" class="form-control" id="danpinzuhe" name="danpinzuhe" value="{$item['zuhe']}" disable="true" readOnly="true">
 						</div>	
 						<div class="col-sm-3 col-xs-3 col-md-3">
-							<button class="btn btn-primary"  onclick="showCompriseChoice()">请选择套餐组合</button>
+							<a class="btn btn-primary" href="javascript:void"  onclick="showCompriseChoice()">请选择套餐组合</a>
 						</div>
 						<input type="hidden" id="danpinidzuhe" name="danpinidzuhe" value=""/>
+						<input type="hidden" id="comprise" name="comprise" value=""/>
 					</div>
-					<!-- 模态框 -->
+					<!-- 模态框 --><!-- 套餐组合对话框 -->
 					<div class="modal fade" id="taocanModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -1192,10 +1219,7 @@ function hint(slector,str){$(slector).html(str);}
     </div>
   </div>
 </div>
-					<!-- 模态框结束 -->
-					<!-- 套餐组合对话框 -->
-					
-					<!-- 套餐组合对话框结束 -->
+					<!-- 模态框结束 --><!-- 套餐组合对话框结束 -->
 					<!-- 套餐组合结束 -->
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>菜品图片</label>
@@ -1212,6 +1236,8 @@ function hint(slector,str){$(slector).html(str);}
 						 <div class="help-block">推荐大小为720x400</div> 
 						</div>
 					</div>
+					<!-- 二次开发，隐藏这些内容 -->
+					<!-- 
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>设为推送</label>
 						<div class="col-sm-9 col-xs-9 col-md-9">
@@ -1219,7 +1245,17 @@ function hint(slector,str){$(slector).html(str);}
 							<label class="radio-inline"><input type="radio" name="recommend" value="2" {if $item['recommend'] == 2 || !$item['recommend']}checked{/if}> 不推送</label>
 							<div class="help-block">设置为推送后,当客人没有点该菜品时,提交订单之前,系统会提示客人</div>
 						</div>
+					</div> -->
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>分享给门店</label>
+						<div class="col-sm-9 col-xs-9 col-md-9">
+							<label class="radio-inline"><input type="radio" name="share" value="1" {if $item['share'] == 1}checked{/if}> 分享</label>
+							<label class="radio-inline"><input type="radio" name="share" value="2" {if $item['share'] == 2 || !$item['share']}checked{/if}> 不分享</label>
+							<div class="help-block">设置为分享后，其他门店的菜单中包含该菜品</div>
+						</div>
 					</div>
+					<!-- 二次开发，隐藏内容 -->
+					<!-- 
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>总库存</label>
 						<div class="col-sm-9 col-xs-9 col-md-9">
@@ -1248,7 +1284,7 @@ function hint(slector,str){$(slector).html(str);}
 							<label class="radio-inline"><input type="radio" name="is_display" value="2" {if $item['is_display'] == 2}checked{/if}> 下架</label>
 						</div>	
 					</div>
-
+ -->
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label">排序</label>
 						<div class="col-sm-9 col-xs-12">
@@ -1290,11 +1326,12 @@ function hint(slector,str){$(slector).html(str);}
 					u.message('请填写菜品单位');
 					return false;
 				}
-				var total = parseInt($.trim($(':text[name="total"]').val()));
-				if(isNaN(total)) {
-					u.message("总库存必须为整数");
-					return false;
-				}
+				
+				//var total = parseInt($.trim($(':text[name="total"]').val()));
+				//if(isNaN(total)) {
+				//	u.message("总库存必须为整数");
+				//	return false;
+				//}
 				if(!$('#cid').val()) {
 					u.message("请选择菜品分类");
 					return false;					
@@ -1308,6 +1345,10 @@ function hint(slector,str){$(slector).html(str);}
 							u.message("请选择套餐组合");
 							return false;
 						}
+					}else{//单品
+						var comprise = {};
+						comprise[$.trim($(':text[name="title"]').val())] = 1;
+						$("#comprise").val(JSON.stringify(comprise));
 					}
 				}
 				//图片可以为空
@@ -1327,21 +1368,26 @@ function hint(slector,str){$(slector).html(str);}
 		//二次开发，显示套餐组合模态框
 		function showCompriseChoice(){
 			$("#taocanModal").modal('show');
+			return false;
 		}
 		$('#btn-revo').click(function(){
 			$chks = $(':checkbox.singledanpin:checked');
 			if($chks.length >0){
 				var ids = [];
 				var names = [];
+				var comprise = {};
 				$chks.each(function(){
 					ids.push(this.value.split(";")[0]);
 					names.push(this.value.split(";")[1]);
+					comprise[this.value.split(";")[1]] = 1;
 				});
 				
 			}
 			var zuhe = names.join("+");
 			$("#danpinzuhe").val(zuhe);
+			$("#comprise").val(JSON.stringify(comprise));
 			$("#taocanModal").modal('hide');
+			
 		});
 	</script>
 {/if}

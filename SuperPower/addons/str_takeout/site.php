@@ -327,8 +327,13 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					'recommend' => intval($_GPC['recommend']),
 					'displayorder' => intval($_GPC['displayorder']),
 					'description' => trim($_GPC['description']),
-					'dish_type' => $type
+					'dish_type' => $type,
+					'share' => intval($_GPC['share']),
+					'zuhe' => trim($_GPC['danpinzuhe']),
+					'comprise' => trim($_GPC['comprise'])
 				);
+				if($data['dish_type'] == 'DANPIN')
+					$data['zuhe'] = $data['title'];
 				if($id) {
 					pdo_update('str_dish', $data, array('uniacid' => $_W['uniacid'], 'id' => $id));
 				} else {
@@ -371,6 +376,19 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$id = intval($_GPC['id']);
 			$value = intval($_GPC['value']);
 			$state = pdo_update('str_dish', array('recommend' => $value), array('uniacid' => $_W['uniacid'], 'id' => $id));
+			if($state !== false) {
+				exit('success');
+			}
+			exit('error');
+		}
+		/**
+		 * 二次开发，分享菜品
+		 * 
+		 */
+		 if($op == 'share_dish') {
+			$id = intval($_GPC['id']);
+			$value = intval($_GPC['value']);
+			$state = pdo_update('str_dish', array('share' => $value), array('uniacid' => $_W['uniacid'], 'id' => $id));
 			if($state !== false) {
 				exit('success');
 			}
@@ -1062,6 +1080,126 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				exit($status['message']);
 			}
 			exit('success');
+		} elseif($op == 'zong_dish'){
+			/**
+			 * 二次开发：从总店菜品库中拉取菜品
+			 */
+			$condition = ' uniacid = :aid AND share = 1';
+			$params[':aid'] = $_W['uniacid'];
+			//$params[':sid'] = $sid;
+			if(!empty($_GPC['keyword'])) {
+				$condition .= " AND title LIKE '%{$_GPC['keyword']}%'";
+			}
+			if(!empty($_GPC['cid'])) {
+				$condition .= " AND cid = :cid";
+				$params[':cid'] = intval($_GPC['cid']);
+			}
+
+			$pindex = max(1, intval($_GPC['page']));
+			$psize = 20;
+
+			$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_dish') . ' WHERE ' . $condition, $params);
+			$lists = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') . ' WHERE ' . $condition . ' ORDER BY displayorder DESC,id ASC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			
+			$pager = pagination($total, $pindex, $psize);
+			$category = pdo_fetchall('SELECT title, id FROM ' . tablename('str_dish_category') . ' WHERE uniacid = :aid', array(':aid' => $_W['uniacid']), 'id');
+			
+			$store_dishes = pdo_fetchall('SELECT * FROM ' . tablename('str_store_dish') . ' WHERE uniacid = :aid AND store_id = :sid', array(':aid' => $_W['uniacid'], ':sid' => $sid));
+			//判断菜品是否已经加入该门店菜单
+			for($i = 0 ; $i < count($lists) ;$i++){
+				$lists[$i]['in'] = 0;//默认是不在菜单里面
+				for($j=0; $j < count($store_dishes); $j++){
+					if($lists[$i]['id'] == $store_dishes[$j]['dish_id']){
+						$lists[$i]['in'] = 1;//某个菜品在该门店菜单内
+						break;
+					}
+				}
+			}
+			load()->func('tpl');
+			include $this->template('zongdish');
+		} elseif($op == 'add_dish'){
+			/**
+			 * 二次开发，从总店中加入菜单，或者移除菜单
+			 */			
+			$do = intval($_GPC['value']);
+			$state = false;
+			if($do == 1){//移除菜单
+				$id = intval($_GPC['id']);
+				$state = pdo_delete('str_store_dish', array('uniacid' => $_W['uniacid'], 'store_id' => $sid, 'dish_id' => $id));
+			}else if($do == 2){//加入菜单
+				$insert['dish_id'] = intval($_GPC['id']);
+				$insert['store_id'] = $sid;
+				$insert['uniacid'] = $_W['uniacid'];
+				$state = pdo_insert('str_store_dish',$insert);
+			}
+			if($state !== false) {
+				exit('success');
+			}
+			exit('error');
+		} elseif($op == 'store_dish'){
+			/**
+			 * 二次开发：获取门店的菜单
+			 */
+			 $str_store_dish = tablename('str_store_dish');
+			 $str_dish = tablename('str_dish');
+			$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id';
+			$params[':aid'] = $_W['uniacid'];
+			$params[':sid'] = $sid;
+			if(!empty($_GPC['keyword'])) {
+				$condition .= (" AND " . $str_dish .".title LIKE '%{$_GPC['keyword']}%'");
+			}
+			if(!empty($_GPC['cid'])) {
+				$condition .= (" AND " . $str_dish . ".cid = :cid");
+				$params[':cid'] = intval($_GPC['cid']);
+			}
+
+			$pindex = max(1, intval($_GPC['page']));
+			$psize = 20;
+
+			$total = pdo_fetchcolumn('SELECT ' . $str_dish . '.* FROM ' . $str_dish . ',' .$str_store_dish .' WHERE ' . $condition , $params);
+			$lists = pdo_fetchall('SELECT ' . $str_dish . '.*,'. $str_store_dish . '.selling,'. $str_store_dish .'.kucun FROM ' . $str_dish . ',' .$str_store_dish 
+			.' WHERE ' . $condition . ' ORDER BY displayorder DESC,'. $str_dish .'.id ASC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			
+			$pager = pagination($total, $pindex, $psize);
+			$category = pdo_fetchall('SELECT title, id FROM ' . tablename('str_dish_category') . ' WHERE uniacid = :aid', array(':aid' => $_W['uniacid']), 'id');
+			
+			$store_dishes = pdo_fetchall('SELECT * FROM ' . tablename('str_store_dish') . ' WHERE uniacid = :aid AND store_id = :sid', array(':aid' => $_W['uniacid'], ':sid' => $sid));
+			load()->func('tpl');
+			include $this->template('dish');
+		} elseif($op == 'update_kucun'){
+			/**
+			 * 二次开发：修改菜单库存
+			 */
+			 $data['kucun'] = intval($_GPC['kucun']);			 
+			 $dish_id = intval($_GPC['dish_id']);
+
+			 $state = pdo_update('str_store_dish', $data, array('uniacid' => $_W['uniacid'], 'store_id' => $sid, 'dish_id' => $dish_id));
+			
+			if($state !== false){
+				exit('success');
+			}
+			exit('error');
+		} elseif($op == 'sell_status'){
+			/**
+			 * 二次开发，上下架
+			 */
+			 $dish_id = intval($_GPC['dish_id']);
+			 
+			 $status = intval($_GPC['state']);
+			 $data;
+			 if($status == 0){//下架
+			 	$data['selling'] = 0;
+			 }elseif($status == 1){//上架
+			 	$data['selling'] = 1;
+			 }else{
+			 	$data['selling'] = 0;
+			 }
+			 
+			 $state = pdo_update('str_store_dish', $data, array('uniacid' => $_W['uniacid'], 'store_id' => $sid, 'dish_id' => $dish_id));
+			 if($state !== false){
+				exit('success');
+			}
+			exit('error');
 		}
 		if($op == 'clerk_post') {
 			$accounts = uni_accounts();

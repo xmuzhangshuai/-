@@ -141,6 +141,9 @@ function user_update($user) {
 	if (isset($user['groupid'])) {
 		$record['groupid'] = $user['groupid'];
 	}
+	if (isset($user['storeid'])) {
+		$record['storeid'] = $user['storeid'];
+	}
 	if(empty($record)) {
 		return false;
 	}
