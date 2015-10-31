@@ -25,7 +25,8 @@
 							<input type="checkbox" value="true" name="rember"> 记住用户名
 						</label>
 						<div class="pull-right">
-							<?php  if(!$_W['siteclose']) { ?><a href="<?php  echo url('user/register');?>" class="btn btn-link btn-lg">注册</a><?php  } ?>
+						<!--  
+							<?php  if(!$_W['siteclose']) { ?><a href="<?php  echo url('user/register');?>" class="btn btn-link btn-lg">注册</a><?php  } ?>-->
 							<input type="submit" name="submit" value="登录" class="btn btn-primary btn-lg" />
 							<input name="token" value="<?php  echo $_W['token'];?>" type="hidden" />
 						</div>
@@ -35,12 +36,7 @@
 		</div>
 	</div>
 	<div class="center-block footer" role="footer">
-		<div class="text-center">
-			<?php  if(empty($_W['setting']['copyright']['footerright'])) { ?><a href="http://www.we7.cc">关于微擎</a>&nbsp;&nbsp;<a href="http://bbs.we7.cc">微擎帮助</a><?php  } else { ?><?php  echo $_W['setting']['copyright']['footerright'];?><?php  } ?> &nbsp; &nbsp; <?php  if(!empty($_W['setting']['copyright']['statcode'])) { ?><?php  echo $_W['setting']['copyright']['statcode'];?><?php  } ?>
-		</div>
-		<div class="text-center">
-			<?php  if(empty($_W['setting']['copyright']['footerleft'])) { ?>Powered by <a href="http://www.we7.cc"><b>微擎</b></a> v<?php echo IMS_VERSION;?> &copy; 2014 <a href="http://www.we7.cc">www.we7.cc</a><?php  } else { ?><?php  echo $_W['setting']['copyright']['footerleft'];?><?php  } ?>
-		</div>
+		
 	</div>
 </div>
 <script>

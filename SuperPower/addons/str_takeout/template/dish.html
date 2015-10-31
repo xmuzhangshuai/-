@@ -221,7 +221,7 @@
 								</td>
 								<td style="width:150px; text-align:right;">
 								{if $item['cid'] == 3}
-									<input style="width:80px" class="dishcucun" name="dish{$item['id']}" id="dish;{$item['id']}" type='num' value="{$item['kucun']}"/>
+									<input style="width:80px" class="dishcucun" name="dish{$item['id']}" id="dish;{$item['id']}" type='num' {if $item['kucun']!=null}value="{$item['kucun']}"{else}value="0"{/if}/>
 									<span style="width:80px" class="btn btn-sm btn-success dishkucun" id="dish;{$item['id']}">设置库存</span>
 									{else}
 									<span class="btn btn-sm btn-warning" id="{$item['id']}" data-toggle="1">套餐库存由系统计算得出</span>

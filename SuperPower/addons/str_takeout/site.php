@@ -1142,7 +1142,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			 */
 			 $str_store_dish = tablename('str_store_dish');
 			 $str_dish = tablename('str_dish');
-			$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id';
+			$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id AND '. $str_dish . '.share = 1';
 			$params[':aid'] = $_W['uniacid'];
 			$params[':sid'] = $sid;
 			if(!empty($_GPC['keyword'])) {

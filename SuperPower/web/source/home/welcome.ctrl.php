@@ -6,7 +6,10 @@
 defined('IN_IA') or exit('Access Denied');
 
 $dos = array('platform', 'site', 'mc', 'setting', 'ext', 'solution');
-$do = in_array($do, $dos) ? $do : 'platform';
+/**
+ * 二次开发，默认进来到扩展功能
+ */
+$do = in_array($do, $dos) ? $do : 'ext';
 $title = array('platform'=>'公众平台','site'=>'微站功能','mc'=>'会员及会员营销','setting'=>'功能选项','ext'=>'扩展功能','solution'=>'行业功能');
 $_W['page']['title'] = $title[$do];
 
@@ -221,7 +224,11 @@ if($do == 'ext') {
 	foreach ($installedmodulelist as $k => &$value) {
 		$value['official'] = empty($value['issystem']) && (strexists($value['author'], 'WeEngine Team') || strexists($value['author'], '微擎团队'));
 	}
-	$m = $_GPC['m'];
+	/**
+	 * 二次开发， m默认为str_takeout
+	 */
+	$m = empty($_GPC['m'])?'str_takeout':$_GPC['m'];
+	
 	if(empty($m)) {
 		foreach($installedmodulelist as $name => $module) {
 			if (!empty($showmodules) && !in_array($name, $showmodules)) {

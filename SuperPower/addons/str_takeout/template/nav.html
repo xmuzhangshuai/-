@@ -6,7 +6,7 @@
 	<li {if $op == 'cate_list' || $op == 'cate_post'}class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'cate_list'));}">菜品分类</a></li>
  	-->
 	<li {if $op == 'zong_dish'}class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'zong_dish'));}">总店菜品库</a></li>
-	<li {if $op == 'dish_list' || $op == 'dish_post'}class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'store_dish'));}">门店菜单</a></li>
+	<li {if $op == 'store_dish'}class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'store_dish'));}">门店菜单</a></li>
 
 	{if $op == 'dish_post' && $id} <li><a href="{php echo $this->createWebUrl('manage', array('op' => 'dish_post', array('id' => $id)));}">编辑菜品</a></li>{/if}
 	<li {if $op == 'order' || $op == 'orderdetail'}class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', array('id' => $id)));}">订单管理</a></li>
