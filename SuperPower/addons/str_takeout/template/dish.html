@@ -148,9 +148,9 @@
 			});
 		});
 	</script>
-{elseif $op == 'dish_list'}
+{elseif $op == 'store_dish'}
 	<style type="text/css">
-		.status-toggle,.recommend-toggle{cursor:pointer;}
+		.sell-toggle{cursor:pointer;}
 	</style>
 	<div class="main">
 		<div class="panel panel-info">
@@ -161,12 +161,12 @@
 					<input type="hidden" name="a" value="entry">
 					<input type="hidden" name="m" value="str_takeout">
 					<input type="hidden" name="do" value="manage"/>
-					<input type="hidden" name="op" value="dish_list"/>
+					<input type="hidden" name="op" value="store_dish"/>
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>菜品分类</label>
 						<div class="col-sm-9 col-xs-9 col-md-9">
 							<select name="cid" id="cid" class="form-control">
-								<option value="">不限</option>
+								<option value="0">不限</option>
 								{loop $category $li}
 									<option value="{$li['id']}" {if $li['id'] == $_GPC['cid']}selected{/if}>{$li['title']}</option>
 								{/loop}
@@ -186,11 +186,6 @@
 			</div>
 		</div>
 		<form class="form-horizontal" action="" method="post">
-			<div class="form-group">
-				<div class="col-sm-12">
-					<a class="btn btn-success col-lg-1" href="{php echo $this->createWebUrl('manage', array('op' => 'dish_post'));}"/><i class="fa fa-plus-circle"> </i> 添加菜品</a>
-				</div>
-			</div>
 			<div class="panel panel-default">
 				<div class="panel-body table-responsive">
 					<table class="table table-hover">
@@ -201,42 +196,36 @@
 								<th>所属分类</th>
 								<th>单位</th>
 								<th>价格</th>
-								<th>总库存</th>
-								<th>已售出</th>
-								<th>赠送积分</th>
-								<th>是否上架</th>
-								<th>是否推送</th>
-								<th style="width:150px; text-align:right;">操作</th>
+								<th>内容</th>
+								<th>上下架</th>
+								<th style="width:350px; text-align:right;">设置库存</th>
 							</tr>
 						</thead>
 						<tbody>
 							{loop $lists $item}
 							<tr>
-								<td><img src="{php echo tomedia($item['thumb']);}" width="38" style="border-radius: 3px;"></td>
+								<td><img src="{php $thumb = explode(';',$item['thumb']); echo tomedia($thumb[0])}" width="38" style="border-radius: 3px;"></td>
 								<td>{$item['title']}</td>
 								<td>{$category[$item['cid']]['title']}</td>
 								<td>{$item['unitname']}</td>
 								<td>{$item['price']} 元</td>
-								<td>{if $item['total'] == -1}无限库存{else}{$item['total']}份{/if}</td>
-								<td>{$item['sailed']} 份</td>
-								<td>{$item['grant_credit']} 积分</td>
 								<td>
-									{if $item['is_display'] == 1}
-										<span class="btn btn-sm btn-success status-toggle" id="{$item['id']}" data-toggle="2" title="点击修改">已上架</span>
-									{else}
-										<span class="btn btn-sm btn-warning status-toggle" id="{$item['id']}" data-toggle="1" title="点击修改">已下架</span>
-									{/if}
+								{$item['zuhe']}
 								</td>
 								<td>
-									{if $item['recommend'] == 1}
-										<span class="btn btn-sm btn-success recommend-toggle" id="{$item['id']}" data-toggle="2" title="点击修改">推送</span>
-									{else}
-										<span class="btn btn-sm btn-warning recommend-toggle" id="{$item['id']}" data-toggle="1" title="点击修改">不推送</span>
+									{if $item['selling']==0}
+										<span class="btn btn-sm btn-success sell-toggle" id="{$item['id']}" data-toggle="1" title="点击修改">上架</span>
+									{elseif $item['selling']==1}
+										<span class="btn btn-sm btn-warning sell-toggle" id="{$item['id']}" data-toggle="0" title="点击修改">下架</span>
 									{/if}
 								</td>
-								<td style="text-align:right;">
-									<a href="{php echo $this->createWebUrl('manage', array('op' => 'dish_post', 'id' => $item['id']))}" class="btn btn-default btn-sm" title="编辑" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"> </i></a>
-									<a href="{php echo $this->createWebUrl('manage', array('op' => 'dish_del', 'id' => $item['id']))}" class="btn btn-default btn-sm" title="删除" data-toggle="tooltip" data-placement="top" onclick="if(!confirm('删除后将不可恢复，确定删除吗?')) return false;"><i class="fa fa-times"> </i></a>
+								<td style="width:150px; text-align:right;">
+								{if $item['cid'] == 3}
+									<input style="width:80px" class="dishcucun" name="dish{$item['id']}" id="dish;{$item['id']}" type='num' {if $item['kucun']!=null}value="{$item['kucun']}"{else}value="0"{/if}/>
+									<span style="width:80px" class="btn btn-sm btn-success dishkucun" id="dish;{$item['id']}">设置库存</span>
+									{else}
+									<span class="btn btn-sm btn-warning" id="{$item['id']}" data-toggle="1">套餐库存由系统计算得出</span>
+									{/if}
 								</td>
 							</tr>
 							{/loop}
@@ -254,31 +243,37 @@
 			},function(){
 				$(this).tooltip('hide');
 			});
-			$('.status-toggle').click(function(){
-				var id = $(this).attr('id');
-				var dvalue = $(this).attr('data-toggle');
-				$.post('{php echo $this->createWebUrl('ajax', array('op' => 'status_dish'))}', {'id':id, 'value':dvalue}, function(data){
-					if(data == 'success') {
-						location.reload();
-					} else {
-						u.message('编辑菜品显示状态失败');
-					}
-				});
+			$('.dishkucun').click(function(){
+				var re = /^([1-9]\d*|[0]{1,1})$/;
+				var id = $(this).prev().attr('id').split(";")[1];
+				var kucun = $(this).prev().val();//获取输入的值
+				if(!re.test($.trim(kucun))){
+					u.message('请输入大于等于0的整数');
+					return false;
+				}else{
+					$.post('{php echo $this->createWebUrl('manage', array('op' => 'update_kucun'))}', {'dish_id':id, 'kucun':kucun}, function(data){
+						if(data == 'success') {
+							u.message('设置成功');
+							//location.reload();
+						} else {
+							u.message('上下架失败');
+						}
+					});
+				}
 			});
-			$('.recommend-toggle').click(function(){
+			$('.sell-toggle').click(function(){
 				var id = $(this).attr('id');
 				var dvalue = $(this).attr('data-toggle');
-				$.post('{php echo $this->createWebUrl('ajax', array('op' => 'recommend_dish'))}', {'id':id, 'value':dvalue}, function(data){
+				$.post('{php echo $this->createWebUrl('manage', array('op' => 'sell_status'))}', {'dish_id':id, 'state':dvalue}, function(data){
 					if(data == 'success') {
 						location.reload();
 					} else {
-						u.message('编辑菜品是否推荐失败');
+						u.message('上下架失败');
 					}
 				});
 			});
 
 		});
-
 	</script>
 {/if}
 {template 'common'}

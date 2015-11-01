@@ -11,26 +11,31 @@
 				<li{if $row['name'] == $solution['name']} class="active"{/if}><a href="{url 'home/welcome/solution' array('m' => $row['name'])}"><i class="fa fa-cog"></i>{$row['title']}</a></li>
 				{/loop}
 				{if IMS_FAMILY != 'x'}
-				<li><a href="http://bbs.we7.cc"><i class="fa fa-comment"></i>微擎论坛</a></li>
-				<li><a href="http://manual.we7.cc"><i class="fa fa-suitcase"></i>帮助</a></li>
+				<!-- 
+				<li><a href=""><i class="fa fa-comment"></i></a></li>
+				<li><a href=""><i class="fa fa-suitcase"></i></a></li>
+				 -->
 				{/if}
 			</ul>
 			{else}
 			<ul class="nav navbar-nav">
+							<!-- 
 				<li><a href="./?refresh"><i class="fa fa-reply-all"></i>返回系统</a></li>
+
 				{if !empty($_W['isfounder']) || empty($_W['setting']['permurls']['sections']) || in_array('platform', $_W['setting']['permurls']['sections'])}<li{if FRAME == 'platform'} class="active"{/if}><a href="{url 'home/welcome/platform'}"><i class="fa fa-cog"></i>基础设置</a></li>{/if}
 				{if !empty($_W['isfounder']) || empty($_W['setting']['permurls']['sections']) || in_array('site', $_W['setting']['permurls']['sections'])}<li{if FRAME == 'site'} class="active"{/if}><a href="{url 'home/welcome/site'}"><i class="fa fa-life-bouy"></i>微站功能</a></li>{/if}
 				{if !empty($_W['isfounder']) || empty($_W['setting']['permurls']['sections']) || in_array('mc', $_W['setting']['permurls']['sections'])}<li{if FRAME == 'mc'} class="active"{/if}><a href="{url 'home/welcome/mc'}"><i class="fa fa-gift"></i>粉丝营销</a></li>{/if}
-				{if !empty($_W['isfounder']) || empty($_W['setting']['permurls']['sections']) || in_array('setting', $_W['setting']['permurls']['sections'])}<li{if FRAME == 'setting'} class="active"{/if}><a href="{url 'home/welcome/setting'}"><i class="fa fa-umbrella"></i>功能选项</a></li>{/if}
+				{if !empty($_W['isfounder']) || empty($_W['setting']['permurls']['sections']) || in_array('setting', $_W['setting']['permurls']['sections'])}<li{if FRAME == 'setting'} class="active"{/if}><a href="{url 'home/welcome/setting'}"><i class="fa fa-umbrella"></i>功能选项</a></li>{/if} -->
 				{if !empty($_W['isfounder']) || empty($_W['setting']['permurls']['sections']) || in_array('ext', $_W['setting']['permurls']['sections'])}<li{if FRAME == 'ext'} class="active"{/if}><a href="{url 'home/welcome/ext'}"><i class="fa fa-cubes"></i>扩展功能</a></li>{/if}
 				{if FRAME == 'solution'}<li class="active"><a href="{url 'home/welcome/solution' array('m' => $m)}"><i class="fa fa-comments"></i>行业功能 - {$solution['title']}</a></li>{/if}
 				{if IMS_FAMILY != 'x'}
-				<li><a href="http://bbs.we7.cc"><i class="fa fa-comment"></i>微擎论坛</a></li>
-				<li><a href="http://manual.we7.cc"><i class="fa fa-suitcase"></i>帮助</a></li>
+				<!-- 
+				 -->
 				{/if}
 			</ul>
 			{/if}
 			<ul class="nav navbar-nav navbar-right">
+			<!-- 
 				<li class="dropdown">
 					<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" style="display:block; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "><i class="fa fa-group"></i>{$_W['account']['name']} <b class="caret"></b></a>
 					<ul class="dropdown-menu">
@@ -41,14 +46,17 @@
 						<li><a href="{url 'utility/emulator'}" target="_blank"><i class="fa fa-mobile fa-fw"></i> 模拟测试</a></li>
 					</ul>
 				</li>
+				 -->
 				<li class="dropdown">
 					<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" style="display:block; max-width:185px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "><i class="fa fa-user"></i>{$_W['user']['username']} ({if $_W['role'] == 'founder'}系统管理员{elseif $_W['role'] == 'manager'}公众号管理员{else}公众号操作员{/if}) <b class="caret"></b></a>
 					<ul class="dropdown-menu">
 						<li><a href="{url 'user/profile/profile'}" target="_blank"><i class="fa fa-weixin fa-fw"></i> 我的账号</a></li>
 						{if $_W['role'] != 'operator'}
 						<li class="divider"></li>
+						<!-- 
 						<li><a href="{url 'system/welcome'}" target="_blank"><i class="fa fa-sitemap fa-fw"></i> 系统选项</a></li>
 						<li><a href="{url 'system/welcome'}" target="_blank"><i class="fa fa-cloud-download fa-fw"></i> 自动更新</a></li>
+						 -->
 						<li><a href="{url 'system/updatecache'}" target="_blank"><i class="fa fa-refresh fa-fw"></i> 更新缓存</a></li>
 						<li class="divider"></li>
 						{/if}

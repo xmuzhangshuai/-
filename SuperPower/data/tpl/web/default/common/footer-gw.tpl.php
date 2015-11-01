@@ -32,10 +32,10 @@
 		</script>
 		<div class="center-block footer" role="footer">
 			<div class="text-center">
-				<?php  if(empty($_W['setting']['copyright']['footerright'])) { ?><a href="http://www.we7.cc">关于微擎</a>&nbsp;&nbsp;<a href="http://bbs.we7.cc">微擎帮助</a><?php  } else { ?><?php  echo $_W['setting']['copyright']['footerright'];?><?php  } ?><?php  if(!empty($_W['setting']['copyright']['statcode'])) { ?>&nbsp; &nbsp; <?php  echo $_W['setting']['copyright']['statcode'];?><?php  } ?>
+				<?php  if(empty($_W['setting']['copyright']['footerright'])) { ?><a href=""></a>&nbsp;&nbsp;<a href=""></a><?php  } else { ?><?php  echo $_W['setting']['copyright']['footerright'];?><?php  } ?><?php  if(!empty($_W['setting']['copyright']['statcode'])) { ?>&nbsp; &nbsp; <?php  echo $_W['setting']['copyright']['statcode'];?><?php  } ?>
 			</div>
 			<div class="text-center">
-				<?php  if(empty($_W['setting']['copyright']['footerleft'])) { ?>Powered by <a href="http://www.we7.cc"><b>微擎</b></a> v<?php echo IMS_VERSION;?> &copy; 2014 <a href="http://www.we7.cc">www.we7.cc</a><?php  } else { ?><?php  echo $_W['setting']['copyright']['footerleft'];?><?php  } ?>
+				<?php  if(empty($_W['setting']['copyright']['footerleft'])) { ?>Powered by <a href=""><b></b></a> v<?php echo IMS_VERSION;?> &copy; 2014 <a href=""></a><?php  } else { ?><?php  echo $_W['setting']['copyright']['footerleft'];?><?php  } ?>
 			</div>
 		</div>
 	</div>

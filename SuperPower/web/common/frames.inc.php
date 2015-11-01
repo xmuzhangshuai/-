@@ -182,11 +182,14 @@ $ms['setting'][] = array(
 	'items' => array(
 			)
 );
-
+/**
+ * 二次开发，不让显示扩展功能管理
+ */
+/**
 $ms['ext'][] = array(
 	'title' => '管理',
 	'items' => array(
 		array('title' => '扩展功能管理', 'url' => url('profile/module'))
 	)
-);
+);*/
 return $ms;

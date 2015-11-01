@@ -4,14 +4,18 @@
 	<div class="navbar navbar-inverse navbar-static-top" role="navigation" style="z-index:1001; margin-bottom:0;">
 		<div class="container-fluid">
 			<ul class="nav navbar-nav">
+			<!--  -->
 				<li class="active"><a href="./?refresh"><i class="fa fa-cogs"></i>系统管理</a></li>
 				<li><a href="<?php  echo url('home/welcome/platform');?>" target="_blank"><i class="fa fa-share"></i>继续管理公众号（<?php  echo $_W['account']['name'];?>）</a></li>
 				<?php  if(IMS_FAMILY != 'x') { ?>
-				<li><a href="http://bbs.we7.cc"><i class="fa fa-comment"></i>微擎论坛</a></li>
-				<li><a href="http://manual.we7.cc"><i class="fa fa-suitcase"></i>帮助</a></li>
+				<!-- 
+				<li><a href=""><i class="fa fa-comment"></i></a></li>
+				<li><a href=""><i class="fa fa-suitcase"></i></a></li>
+				 -->
 				<?php  } ?>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
+			<!-- 
 				<li class="dropdown">
 					<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"  style="display:block; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "><i class="fa fa-group"></i><?php  echo $_W['account']['name'];?> <b class="caret"></b></a>
 					<ul class="dropdown-menu">
@@ -22,14 +26,17 @@
 						<li><a href="<?php  echo url('utility/emulator');?>" target="_blank"><i class="fa fa-mobile fa-fw"></i> 模拟测试</a></li>
 					</ul>
 				</li>
+				 -->
 				<li class="dropdown">
 					<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" style="display:block; max-width:185px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "><i class="fa fa-user"></i><?php  echo $_W['user']['username'];?> (<?php  if($_W['role'] == 'founder') { ?>系统管理员<?php  } else if($_W['role'] == 'manager') { ?>公众号管理员<?php  } else { ?>公众号操作员<?php  } ?>) <b class="caret"></b></a>
 					<ul class="dropdown-menu">
 						<li><a href="<?php  echo url('user/profile/profile');?>" target="_blank"><i class="fa fa-weixin fa-fw"></i> 我的账号</a></li>
 						<?php  if($_W['role'] != 'operator') { ?>
 						<li class="divider"></li>
+						<!-- 
 						<li><a href="<?php  echo url('system/welcome');?>" target="_blank"><i class="fa fa-sitemap fa-fw"></i> 系统选项</a></li>
 						<li><a href="<?php  echo url('system/welcome');?>" target="_blank"><i class="fa fa-cloud-download fa-fw"></i> 自动更新</a></li>
+						 -->
 						<li><a href="<?php  echo url('system/updatecache');?>" target="_blank"><i class="fa fa-refresh fa-fw"></i> 更新缓存</a></li>
 						<li class="divider"></li>
 						<?php  } ?>
@@ -49,10 +56,12 @@
 					<i class="fa fa-comments"></i>
 					<span>公众号管理</span>
 				</a>
+				<!-- 
 				<a href="<?php  echo url('system/welcome');?>" class="tile img-rounded<?php  if($controller == 'system') { ?> active<?php  } ?>">
 					<i class="fa fa-sitemap"></i>
 					<span>系统</span>
 				</a>
+				 -->
 				<?php  if($_W['uid']) { ?>
 				<a href="<?php  echo url('user/logout');?>" class="tile img-rounded">
 					<i class="fa fa-sign-out"></i>
