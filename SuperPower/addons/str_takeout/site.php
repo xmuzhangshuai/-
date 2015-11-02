@@ -1337,9 +1337,16 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		global $_W, $_GPC;
 		$sid = intval($_GPC['sid']);
 		checkauth();
+		
+		$str_store_dish = tablename('str_store_dish');
+		$str_dish = tablename('str_dish');
+		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id AND '. $str_dish . '.share = 1';
+		$params[':aid'] = $_W['uniacid'];
+		$params[':sid'] = $sid;
+		
 		checkclerk($sid);
 		check_trash($sid);
-		$store = pdo_fetch('SELECT title,logo,id,content,delivery_price,business_hours,send_price,dish_style,is_meal,is_takeout,comment_status,notice FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
+		$store = pdo_fetch('SELECT title,logo,id,content,delivery_price,business_hours,send_price,dish_style,is_meal,is_takeout,comment_status,notice,open FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
 		$title = $store['title'];
 		$_share = get_share($store);
 		if($store['comment_status'] == 1) {
@@ -1378,12 +1385,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		}
 		//获取购物车的信息
 		$cart = get_order_cart($sid);
-		$category = pdo_fetchall('SELECT title, id FROM ' . tablename('str_dish_category') . ' WHERE uniacid = :aid AND sid = :sid ORDER BY displayorder DESC, id ASC', array(':aid' => $_W['uniacid'], ':sid' => $sid));
-		$dish = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') . ' WHERE uniacid = :aid AND sid = :sid AND is_display = 1 ORDER BY displayorder DESC, id ASC', array(':aid' => $_W['uniacid'], ':sid' => $sid));
-		$cate_dish = array();
-		foreach($dish as $di) {
-			$cate_dish[$di['cid']][] = $di;
-		}
+		$dish = pdo_fetchall('SELECT ' . $str_dish . '.*,'. $str_store_dish . '.selling,'. $str_store_dish .'.kucun FROM ' . $str_dish . ',' .$str_store_dish .' WHERE ' . $condition . ' ORDER BY displayorder DESC,'. $str_dish .'.id ASC', $params);
+			
 		include $this->template('dish');
 	}
 
@@ -1457,6 +1460,12 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$sid = intval($_GPC['sid']);
 			checkclerk($sid);
 			check_trash($sid);
+			$str_store_dish = tablename('str_store_dish');
+			$str_dish = tablename('str_dish');
+			$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id AND '. $str_dish . '.share = 1';
+			$params[':aid'] = $_W['uniacid'];
+			$params[':sid'] = $sid;
+		
 			$store = pdo_fetch('SELECT * FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
 			$title = $store['title'];
 			$_share = get_share($store);
@@ -1476,22 +1485,18 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$dishes = $cart['data'];
 			//提醒客户需要点的菜品（比如：米饭）
 			$is_add = 0;
-			$recommend = pdo_fetchall('SELECT id FROM ' . tablename('str_dish') . ' WHERE uniacid = :uniacid AND sid = :sid AND recommend = 1 AND is_display = 1', array(':uniacid' => $_W['uniacid'], ':sid' => $sid), id);
-			$add = array_keys($recommend);
-			$add_arr = array_diff($add, array_keys($dishes));
+
+
+
 			$address_id = intval($_GPC['address_id']);
 			$address = get_address($address_id);
 			if(empty($address)) {
 				$address = get_default_address();
 			}
-			if(!empty($add_arr)) {
-				$is_add = 1;
-				$add_str = implode(',', $add_arr);
-				$dish_add = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') ." WHERE uniacid = :aid AND sid = :sid AND id IN ($add_str)", array(':aid' => $_W['uniacid'], ':sid' => $sid), 'id');
-			}
 			if(!empty($dishes)) {
 				$ids_str = implode(',', array_keys($dishes));
-				$dish_info = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') ." WHERE uniacid = :aid AND sid = :sid AND id IN ($ids_str)", array(':aid' => $_W['uniacid'], ':sid' => $sid), 'id');
+				$dish_info = pdo_fetchall('SELECT ' . $str_dish . '.*,'. $str_store_dish . '.selling,'. $str_store_dish .'.kucun FROM ' . $str_dish . ',' .$str_store_dish .' WHERE ' . $condition . ' AND '.$str_dish.'.id IN ('.$ids_str.') ORDER BY displayorder DESC,'. $str_dish .'.id ASC', $params);
+				//$dish_info = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') ." WHERE uniacid = :aid AND sid = :sid AND id IN ($ids_str)", array(':aid' => $_W['uniacid'], ':sid' => $sid), 'id');
 			}
 		} else {
 			$sid = intval($_GPC['sid']);
@@ -1540,10 +1545,16 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$data['is_grant'] = 0;
 			pdo_insert('str_order', $data);
 			$id = pdo_insertid();
+			
+			$str_store_dish = tablename('str_store_dish');
+			$str_dish = tablename('str_dish');
+			$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id AND '. $str_dish . '.share = 1';
+			$params[':aid'] = $_W['uniacid'];
+			$params[':sid'] = $sid;
 
 			if(!empty($cart['data'])) {
 				$ids_str = implode(',', array_keys($cart['data']));
-				$dish_info = pdo_fetchall('SELECT id,title,price,grant_credit FROM ' . tablename('str_dish') ." WHERE uniacid = :aid AND sid = :sid AND id IN ($ids_str)", array(':aid' => $_W['uniacid'], ':sid' => $sid), 'id');
+				$dish_info = pdo_fetchall('SELECT ' . $str_dish . '.*,'. $str_store_dish . '.selling,'. $str_store_dish .'.kucun FROM ' . $str_dish . ',' .$str_store_dish .' WHERE ' . $condition . ' AND '.$str_dish.'.id IN ('.$ids_str.') ORDER BY displayorder DESC,'. $str_dish .'.id ASC', $params);
 			}
 			foreach($cart['data'] as $k => $v) {
 				$k = intval($k);
@@ -1556,8 +1567,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					$stat['sid'] = $sid;
 					$stat['dish_id'] = $k;
 					$stat['dish_num'] = $v;
-					$stat['dish_title'] = $dish_info[$k]['title'];
-					$stat['dish_price'] = ($v * $dish_info[$k]['price']);
+					$d_info = pdo_fetchall('SELECT ' . $str_dish . '.* FROM ' . $str_dish . ',' .$str_store_dish .' WHERE '.$str_dish.'.id='.$k.' ORDER BY displayorder DESC,'. $str_dish .'.id ASC', $params);
+					$stat['dish_title'] = $d_info[0]['title'];
+					$stat['dish_price'] = ($v * $d_info[0]['price']);
 					$stat['addtime'] = TIMESTAMP;
 					pdo_insert('str_stat', $stat);
 				}

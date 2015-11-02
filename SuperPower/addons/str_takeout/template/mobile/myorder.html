@@ -19,7 +19,7 @@
 		<span class="cont_userdec">微信昵称</span>
 		<br>
 		<br>
-		<span class="cont_userdec1">共-1个订单</span>
+		<span class="cont_userdec1">共{$total}个订单</span>
 	</div>
 </div>
 {template 'header'}
@@ -35,8 +35,14 @@
 	{if !empty($data)} {loop $data $row}
 	<ul class="menu_list order_list cont_box" style="margin-top: 15px;margin-bottom: 4px;width: 100%;margin: 0;">
 		<div class="shopping_info cont_box">
-			<time>2015-10-23</time>
-			<span id="shopName">南普陀店<a class="ico_tel" href="tel:18888888888"></a></span>
+			<time>
+				{php echo date('Y-m-d',$row['addtime']);}
+			</time>
+			<span id="shopName">
+				{php $sname=pdo_fetchall('SELECT title FROM ' . tablename('str_store').' WHERE id='.$row['sid']);}
+				{$sname[0]['title']}
+				<a class="ico_tel" href="tel:18888888888"></a>
+			</span>
 		</div>
 		{php $dishs=get_dish($row['id']);} {loop $dishs $dis}
 		<li class="cont_box order_item">

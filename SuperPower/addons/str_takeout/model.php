@@ -107,7 +107,12 @@ function set_order_cart($sid) {
 		$num = 0;
 		$price = 0;
 		$ids_str = implode(',', array_keys($_GPC['dish']));
-		$dish_info = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') ." WHERE uniacid = :aid AND sid = :sid AND id IN ($ids_str)", array(':aid' => $_W['uniacid'], ':sid' => $sid), 'id');
+		$str_store_dish = tablename('str_store_dish');
+		$str_dish = tablename('str_dish');
+		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND '. $str_dish . '.share = 1';
+		$params[':aid'] = $_W['uniacid'];
+		$params[':sid'] = $sid;
+		$dish_info = pdo_fetchall('SELECT ' . $str_dish . '.* FROM ' . $str_dish . ',' .$str_store_dish .' WHERE ' . $condition . ' AND '.$str_dish.'.id IN ('.$ids_str.') ORDER BY displayorder DESC,'. $str_dish .'.id ASC', $params);
 		$grant_credit = 0;
 		foreach($_GPC['dish'] as $k => $v) {
 			$k = intval($k);
@@ -115,8 +120,9 @@ function set_order_cart($sid) {
 			if($k && $v) {
 				$dishes[$k] = $v;
 				$num += $v;
-				$price += ($dish_info[$k]['price'] * $v); 
-				$grant_credit += ($dish_info[$k]['grant_credit'] * $v); 
+				$d_info = pdo_fetchall('SELECT ' . $str_dish . '.* FROM ' . $str_dish . ',' .$str_store_dish .' WHERE '.$str_dish.'.id='.$k.' ORDER BY displayorder DESC,'. $str_dish .'.id ASC', $params);
+				$price += ($d_info[0]['price'] * $v); 
+				$grant_credit += ($d_info[0]['grant_credit'] * $v); 
 			}
 		}
 		$isexist = pdo_fetchcolumn('SELECT id FROM ' . tablename('str_order_cart') . " WHERE uniacid = :aid AND sid = :sid AND uid = :uid", array(':aid' => $_W['uniacid'], ':sid' => $sid, ':uid' => $_W['member']['uid']));
