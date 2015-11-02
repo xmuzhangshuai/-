@@ -23,9 +23,11 @@
 				</div>
 			</div>
 		</form>
+		<!-- 
 		<div class="input-group">
 			<a class="btn btn-primary" href="{url 'account/post-step'}"><i class="fa fa-plus"></i> 添加公众号</a>
 		</div>
+		 -->
 		<ul class="list-unstyled account">
 			{loop $list $uni}
 			<li>
@@ -33,13 +35,13 @@
 					<div class="panel-heading">
 						<div class="row" style="font-size:16px; line-height:40px; color:#666;">
 							<div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">主公众号名称：<span>{$uni['name']}</span></div>
-							<div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 edit-group">服务套餐：<span  id="{$uni['group']['id']}">{$uni['group']['name']}</span> <i class="fa fa-pencil" id="{$uni['uniacid']}" style="cursor:pointer"></i></div>
-							<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 text-right" style="position:static;">
+							<!-- <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 edit-group">服务套餐：<span  id="{$uni['group']['id']}">{$uni['group']['name']}</span> <i class="fa fa-pencil" id="{$uni['uniacid']}" style="cursor:pointer"></i></div> -->
+							<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 text-right" style="position:static;text-align:right;float:right">
 								{if $uni['role'] == 'founder'}
-									<a href="{php echo url('account/post-acid', array('uniacid' => $uni['uniacid']))}" data-toggle="tooltip" data-placement="bottom" title="添加子公众号"><i class="fa fa-plus"></i></a> 
+									<!-- <a href="{php echo url('account/post-acid', array('uniacid' => $uni['uniacid']))}" data-toggle="tooltip" data-placement="bottom" title="添加子公众号"><i class="fa fa-plus"></i></a> --> 
 									<a href="{php echo url('account/permission', array('uniacid' => $uni['uniacid']))}" data-toggle="tooltip" data-placement="bottom" title="添加操作用户"><i class="fa fa-user"></i></a>
-									<a href="{php echo url('account/post', array('uniacid' => $uni['uniacid']))}" data-toggle="tooltip" data-placement="bottom" title="编辑帐号信息"><i class="fa fa-pencil"></i></a>
-									<a href="{php echo url('account/delete', array('uniacid' => $uni['uniacid']))}" onclick="return confirm('删除主公众号其所属的子公众号及其它数据会全部删除，确认吗？');return false;" data-toggle="tooltip" data-placement="bottom" title="删除"><i class="fa fa-times"></i></a>
+									<!-- <a href="{php echo url('account/post', array('uniacid' => $uni['uniacid']))}" data-toggle="tooltip" data-placement="bottom" title="编辑帐号信息"><i class="fa fa-pencil"></i></a> -->
+									<!-- <a href="{php echo url('account/delete', array('uniacid' => $uni['uniacid']))}" onclick="return confirm('删除主公众号其所属的子公众号及其它数据会全部删除，确认吗？');return false;" data-toggle="tooltip" data-placement="bottom" title="删除"><i class="fa fa-times"></i></a> -->
 									<a href="{php echo url('account/switch', array('uniacid' => $uni['uniacid']))}" class="manage" target="_balnk" data-toggle="tooltip" data-placement="bottom" title="管理" style="border-left:1px #DDD dashed; padding-left:10px; margin-left:10px;"><i class="fa fa-cog fa-spin"></i></a>
 								{elseif $uni['role'] == 'manager'}
 									<a href="{php echo url('account/post-acid', array('uniacid' => $uni['uniacid']))}" data-toggle="tooltip" data-placement="bottom" title="添加子公众号"><i class="fa fa-plus"></i></a> 
@@ -67,8 +69,10 @@
 							</div>
 							<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 text-right" style="padding-bottom:5px;">
 								{if $uni['role'] <> 'operator'}
+								<!-- 
 									<a href="{php echo url('account/bind/details', array('acid' => $account['acid'], 'uniacid' => $account['uniacid']))}" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="查看详细信息"><i class="fa fa-bar-chart-o"></i></a>
 									<a href="{php echo url('account/bind/post', array('acid' => $account['acid'], 'uniacid' => $account['uniacid']))}" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="编辑"><i class="fa fa-pencil"></i></a>
+									 -->
 									{if count($uni['details']) > 1}
 										<a href="{php echo url('account/bind/delete', array('acid' => $account['acid'], 'uniacid' => $account['uniacid']))}" onclick="return confirm('确认删除吗？');return false;" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="删除"><i class="fa fa-times"></i></a>
 									{/if}

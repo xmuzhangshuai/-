@@ -4,9 +4,9 @@
 	<div class="navbar navbar-inverse navbar-static-top" role="navigation" style="z-index:1001; margin-bottom:0;">
 		<div class="container-fluid">
 			<ul class="nav navbar-nav">
-			<!--  -->
+			<!--  
 				<li class="active"><a href="./?refresh"><i class="fa fa-cogs"></i>系统管理</a></li>
-				<li><a href="<?php  echo url('home/welcome/platform');?>" target="_blank"><i class="fa fa-share"></i>继续管理公众号（<?php  echo $_W['account']['name'];?>）</a></li>
+				<li><a href="<?php  echo url('home/welcome/platform');?>" target="_blank"><i class="fa fa-share"></i>继续管理公众号（<?php  echo $_W['account']['name'];?>）</a></li>-->
 				<?php  if(IMS_FAMILY != 'x') { ?>
 				<!-- 
 				<li><a href=""><i class="fa fa-comment"></i></a></li>
