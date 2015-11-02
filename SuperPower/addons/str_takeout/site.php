@@ -1874,7 +1874,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 	public function doMobileAddress() {
 		global $_W, $_GPC;
 		checkauth();
+		$id = intval($_GPC['id']);
 		$sid = intval($_GPC['sid']);
+		$uid = $_W['member']['uid'];
 		$store = get_store($sid);
 		$_share = get_share($store);
 		if(empty($store)) {
@@ -1892,7 +1894,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			if(empty($currentadd)) {
 				$currentadd = get_default_address();
 			}
-			$addresses = get_addresses();
+			$addressesgroup = get_addressesgroup();
+			$stores=pdo_fetchall('SELECT distinct(sid),title FROM ' . tablename('str_address').',' .tablename('str_store').' WHERE '.tablename('str_address').'.sid='.tablename('str_store').'.id'.' AND '.tablename('str_address').'.uniacid = :aid AND uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));
 		}
 		
 		if($op == 'post') {
@@ -1907,7 +1910,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					'realname' => trim($_GPC['realname']),
 					'mobile' => trim($_GPC['mobile']),
 					'address' => trim($_GPC['address']),
-					'room'=> trim($_GPC['room'])
+					'room'=> trim($_GPC['room']),
+					'sid'=> trim($_GPC['sid'])
 				);
 				if(!empty($address)) {
 					pdo_update('str_address', $data, array('uniacid' => $_W['uniacid'], 'id' => $id));

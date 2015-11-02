@@ -86,7 +86,11 @@ function get_addresses() {
 	$data = pdo_fetchall("SELECT * FROM " . tablename('str_address') . ' WHERE uniacid = :uniacid AND uid = :uid ORDER BY is_default DESC,id DESC', array(':uniacid' => $_W['uniacid'], ':uid' => $_W['member']['uid']));
 	return $data;
 }
-
+function get_addressesgroup() {
+	global $_W;
+	$data = pdo_fetchall("SELECT sid,GROUP_CONCAT(address) as add_list FROM " . tablename('str_address') . ' WHERE uniacid = :uniacid AND uid = :uid GROUP BY sid', array(':uniacid' => $_W['uniacid'], ':uid' => $_W['member']['uid']));
+	return $data;
+}
 function get_default_address() {
 	global $_W;
 	$data = pdo_fetch("SELECT * FROM " . tablename('str_address') . ' WHERE uniacid = :uniacid AND uid = :uid AND is_default = 1', array(':uniacid' => $_W['uniacid'], ':uid' => $_W['member']['uid']));

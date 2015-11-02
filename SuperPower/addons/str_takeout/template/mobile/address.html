@@ -43,15 +43,19 @@
 		</div>
 	</div>
 	<ul class="menu_list order_list cont_box">
-
+		{loop $stores $store}
 		<li style="margin-top: 15px;margin-bottom: 4px;width: 100%;margin: 0;" class="cont_box">
-			<span class="adress_name">南普陀店</span>
+			<span class="adress_name">
+				{$store['title']}
+			</span>
 		</li>
-		{loop $addresses $address}
-		<li style="padding: 0;width: 100%;margin: 0;" class="cont_box">
-			<span class="adress_detailed addressChecked" data-id="{$address['id']}">{$address['address']}</span>
-			<a class="adress_delete deladdress" data-id="{$address['id']}"></a>
-		</li>
+			{php $addinstore=pdo_fetchall('SELECT * FROM ' . tablename('str_address').' WHERE sid='.$store['sid']);}
+			{loop $addinstore $address}
+			<li style="padding: 0;width: 100%;margin: 0;" class="cont_box">
+				<span class="adress_detailed addressChecked" data-id="{$address['id']}">{$address['address']}</span>
+				<a class="adress_delete deladdress" data-id="{$address['id']}"></a>
+			</li>
+			{/loop}
 		{/loop}
 
 		<div class="cont_box adress_add_wrapper"><a class="adress_add" href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid ,'r'=> $_GPC['r']))}" class="add">新增地址</a></div>
@@ -354,7 +358,7 @@
 			}*/
 			if(!$(this).hasClass('disabled')){
 				$(this).addClass('disabled');	
-				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname}, function(data){
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid}, function(data){
 					var data = $.parseJSON(data);
 					if(!data.errorno) {
 						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default', 'sid' => $sid))}", {'id':data.message},function(){

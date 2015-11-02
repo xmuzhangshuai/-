@@ -31,8 +31,11 @@
 			</div>
 			<div class="cont_box">
 				<div class="shopping_info cont_box">
-					<time>2015-10-23</time>
-					<span id="shopName">南普陀店<a class="ico_tel" href="tel:18888888888"></a></span>
+					<time>{php echo date('Y-m-d',time());}</time>
+					<span id="shopName">
+						{php $sname=pdo_fetchall('SELECT title FROM ' . tablename('str_store').' WHERE id='.$address['sid']);}
+						{$sname[0]['title']}
+					<a class="ico_tel" href="tel:18888888888"></a></span>
 				</div>
 				<ul class="menu_list order_list" id="orderList">
 					{loop $dish_info $li}
