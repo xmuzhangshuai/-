@@ -861,7 +861,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					       "4" => "已取消订单",
 					       "6" => "问题订单"
 			);
-			$name = $title["{$status}"];
+			$name = $title["{$status}"].date("Y-m-d");
 			$params[':aid'] = $_W['uniacid'];
 			$params[':sid'] = $sid;
 			$condition = " WHERE uniacid=:aid AND sid=:sid";
@@ -1126,13 +1126,19 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			if($do == 1){//移除菜单
 				$id = intval($_GPC['id']);
 				$state = pdo_delete('str_store_dish', array('uniacid' => $_W['uniacid'], 'store_id' => $sid, 'dish_id' => $id));
+				if($_GPC['type'] == 'TAOCAN')
+					$tstate = pdo_delete('str_store_taocan', array('uniacid' => $_W['uniacid'], 'store_id' => $sid, 'dish_id' => $id));
 			}else if($do == 2){//加入菜单
 				$insert['dish_id'] = intval($_GPC['id']);
 				$insert['store_id'] = $sid;
 				$insert['uniacid'] = $_W['uniacid'];
+				$insert['dish_name'] = $_GPC['name'];
 				$state = pdo_insert('str_store_dish',$insert);
+				if($_GPC['type'] == 'TAOCAN')
+					$tstate = pdo_insert('str_store_taocan', $insert);
+				
 			}
-			if($state !== false) {
+			if($state !== false && $tstate !== false) {
 				exit('success');
 			}
 			exit('error');

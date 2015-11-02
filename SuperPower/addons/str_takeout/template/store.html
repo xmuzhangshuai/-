@@ -117,6 +117,7 @@ function hint(slector,str){$(slector).html(str);}
 			<div class="panel panel-default">
 				<div class="panel-heading">点餐设置</div>
 				<div class="panel-body">
+				<!-- 
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label">店内点餐</label>
 						<div class="col-sm-9 col-xs-9 col-md-9">
@@ -124,6 +125,8 @@ function hint(slector,str){$(slector).html(str);}
 							<label class="radio-inline"><input type="radio" name="is_meal" value="2" {if $item['is_meal'] == 2}checked{/if}> 关闭</label>
 						</div>	
 					</div>
+					 -->
+					 <!-- 
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label">外卖订餐</label>
 						<div class="col-sm-9 col-xs-9 col-md-9">
@@ -131,6 +134,7 @@ function hint(slector,str){$(slector).html(str);}
 							<label class="radio-inline"><input type="radio" name="is_takeout" value="2" {if $item['is_takeout'] == 2}checked{/if} onclick="$('#takeout').hide();"> 关闭</label>
 						</div>
 					</div>
+					 -->
 					<div id="takeout" {if $item['is_takeout'] == 2}style="display:none"{/if}>
 						<div class="form-group">
 							<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>起送价</label>
@@ -196,7 +200,7 @@ function hint(slector,str){$(slector).html(str);}
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>门店描述</label>
 						<div class="col-sm-9 col-xs-12">
 							<textarea class="form-control" name="content">{$item['content']}</textarea>
-							<div class="help-block">粉丝分享时调用</div>
+							
 						</div>
 					</div>
 					<div class="form-group">
@@ -205,6 +209,7 @@ function hint(slector,str){$(slector).html(str);}
 							<input type="text" class="form-control" name="telephone" value="{$item['telephone']}">
 						</div>
 					</div>
+<!-- 
 					<div id="hour">
 						<div id="hour-tpl">
 							{if !empty($item['business_hours'])}
@@ -239,14 +244,15 @@ function hint(slector,str){$(slector).html(str);}
 								</div>
 							{/if}
 						</div>
-					</div>
+					</div>-->
+					<!--  
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"></label>
 						<div class="col-sm-9 col-xs-9 col-md-9">
 							<a href="javascript:;" id="hour-add"><i class="fa fa-plus-circle"></i> 添加营业时间</a>
 							<div class="help-block">请完善营业时间信息。最多可添加3个时间段</div>
 						</div>	
-					</div>
+					</div>-->
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>门店特色</label>
 						<div class="col-sm-9 col-xs-9 col-md-9">
@@ -279,13 +285,15 @@ function hint(slector,str){$(slector).html(str);}
 							{php echo tpl_form_field_coordinate('map', $item['map']);}
 						</div>	
 					</div>
+					<!-- 
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label">菜品分类风格</label>
 						<div class="col-sm-9 col-xs-9 col-md-9">
 							<label class="radio-inline"><input type="radio" name="dish_style" value="1" {if $item['dish_style'] == 1}checked{/if}> 默认风格</label>
 							<label class="radio-inline"><input type="radio" name="dish_style" value="2" {if $item['dish_style'] == 2}checked{/if}> 风格1</label>
 						</div>	
-					</div>
+					</div> -->
+					<!-- 
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require"> </span>打印订单设置</label>
 						<div class="col-sm-9 col-xs-12">
@@ -296,7 +304,8 @@ function hint(slector,str){$(slector).html(str);}
 								<input type="radio" value="2" name="print_type" {if $item['print_type'] == 2}checked{/if}> 打印已付款的订单
 							</label>
 						</div>
-					</div>
+					</div> -->
+		<!-- 
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label">排序</label>
 						<div class="col-sm-9 col-xs-9 col-md-9">
@@ -310,9 +319,10 @@ function hint(slector,str){$(slector).html(str);}
 							<label class="radio-inline"><input type="radio" name="status" value="1" {if $item['status'] == 1 || !$item['status']}checked{/if}> 显示</label>
 							<label class="radio-inline"><input type="radio" name="status" value="2" {if $item['status'] === 2}checked{/if}> 隐藏</label>
 						</div>	
-					</div>
+					</div> -->
 				</div>
 			</div>
+			<!-- 
 			<div class="panel panel-default">
 				<div class="panel-heading">门店公告设置</div>
 				<div class="panel-body">
@@ -379,7 +389,8 @@ function hint(slector,str){$(slector).html(str);}
 						</div>
 					</div>
 				</div>
-			</div>
+			</div>-->
+			<!--
 			<div class="panel panel-default">
 				<div class="panel-heading">会员评论设置</div>
 				<div class="panel-body">
@@ -408,7 +419,7 @@ function hint(slector,str){$(slector).html(str);}
 						</div>
 					</div>
 				</div>
-			</div>
+			</div>-->
 			<!-- 二次开发：范围管理 -->
 			<div class="panel panel-default">
 				<div class="panel-heading">配送范围设置（<span style="color:red">红色</span>为当前门店配送区域，<span style="color:blue">蓝色</span>为其他门店配送区域）</div>
@@ -623,16 +634,16 @@ function hint(slector,str){$(slector).html(str);}
 					u.message('请填写门店电话');
 					return false;
 				}
-				var hour_flag = false;
-				$(':text[name="business_start_hours[]"]').each(function(i){
-					if($.trim($(this).val()) != '' && $.trim($(this).next().next().val()) != '') {
-						hour_flag = true;
-					} 
-				});
-				if(!hour_flag) {
-					u.message('请填写有效的营业时间段');
-					return false;
-				}
+				//var hour_flag = false;
+				//$(':text[name="business_start_hours[]"]').each(function(i){
+				//	if($.trim($(this).val()) != '' && $.trim($(this).next().next().val()) != '') {
+				//		hour_flag = true;
+				//	} 
+				//});
+				//if(!hour_flag) {
+				//	u.message('请填写有效的营业时间段');
+				//	return false;
+				//}
 				if($.trim(u.editor($('.richtext')[0]).getContent()) == "") {
 					u.message('请填写门店特色说明');
 					return false;				

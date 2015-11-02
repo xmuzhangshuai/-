@@ -73,9 +73,9 @@
 								</td>
 								<td style="width:150px; text-align:right;">
 									{if $item['in']==0}
-										<span class="btn btn-sm btn-success add-toggle" id="{$item['id']}" data-toggle="2" title="点击修改">加入菜单</span>
+										<span class="btn btn-sm btn-success add-toggle" id="{$item['id']};{$item['dish_type']};{$item['title']}" data-toggle="2" title="点击修改">加入菜单</span>
 									{elseif $item['in']==1}
-										<span class="btn btn-sm btn-warning add-toggle" id="{$item['id']}" data-toggle="1" title="点击修改">移除菜单</span>
+										<span class="btn btn-sm btn-warning add-toggle" id="{$item['id']};{$item['dish_type']};{$item['title']}" data-toggle="1" title="点击修改">移除菜单</span>
 									{/if}
 								</td>
 							</tr>
@@ -94,9 +94,11 @@
 			});
 		});
 		$('.add-toggle').click(function(){
-			var id = $(this).attr('id');
+			var id = $(this).attr('id').split(";")[0];
+			var type = $(this).attr('id').split(";")[1];
+			var name = $(this).attr('id').split(";")[2];
 			var dvalue = $(this).attr('data-toggle');
-			$.post('{php echo $this->createWebUrl('manage', array('op' => 'add_dish'))}', {'id':id, 'value':dvalue}, function(data){
+			$.post('{php echo $this->createWebUrl('manage', array('op' => 'add_dish'))}', {'id':id, 'value':dvalue, 'type':type, 'name':name}, function(data){
 				if(data == 'success') {
 					location.reload();
 				} else {

@@ -12,14 +12,14 @@ a:focus{outline:none; -moz-outline:none}
 /*登录注册*/
 .login,.register{background:#3a3a3a url('../images/gw-bg.jpg') no-repeat fixed; background-size:cover; -webkit-background-size:cover; -o-background-size:cover;padding-top:5em;}
 .login .logo,.register .logo{width:100%; text-align:center; margin-bottom:2em;}
-.login .logo a,.register .logo a{background:url('../images/gw-logo.png') no-repeat; display:inline-block;width:420px;height:95px;margin-left:0 !important;}
+.login .logo a,.register .logo a{background:url('../images/super.png') no-repeat; display:inline-block;width:420px;height:95px;margin-left:0 !important;}
 .login .panel,.register .panel{padding:30px 15px;}
 .login i,.register i{color:#999999;}
 .login .footer,.register .footer{padding:2em 0;}
 .login .footer,.register .footer,.login .footer a,.register .footer a{color:#ffffff;}
 /*首页*/
 .home .head{background:#3a3a3a url('../images/gw-bg.jpg') no-repeat fixed; background-size:cover; height:95px; width:100%;}
-.home .head .head_logo{background:url('../images/gw-logo.png') no-repeat; display:inline-block;width:420px; height:95px; margin-left:0 !important;}
+.home .head .head_logo{background:url('../images/super.png') no-repeat; display:inline-block;width:420px; height:95px; margin-left:0 !important;}
 .home .head .btns{height:95px; line-height:95px;}
 .home .content .banner{background-image: url(../images/banner-bg.png); background-size: 990px 380px; background-position: center 15px; border-top: 1px solid #EEEEEE; border-bottom: 1px solid #EEEEEE; background-repeat: no-repeat; height:380px; background-color:#FFFFFF; min-width: 1014px; min-height: 180px;}
 .home .content .con{padding-top:20px;}
@@ -58,7 +58,7 @@ a:focus{outline:none; -moz-outline:none}
 .modal-dialog .file-browser i{display:block;font-size:6em;padding:5px;}
 .modal-dialog .file-browser em{display:table-cell;vertical-align:middle;height:98px;}
 
-.gw-logo{background:url('../images/gw-logo.png') no-repeat;display:inline-block;width:420px;height:95px;margin-left:0 !important;}
+.gw-logo{background:url('../images/super.png') no-repeat;display:inline-block;width:420px;height:95px;margin-left:0 !important;}
 .gw-container .footer{font-size:1.1em;padding:2em 0;}
 .gw-container{background:#3a3a3a url('../images/gw-bg.jpg') no-repeat fixed; background-size:cover; -webkit-background-size:cover; -o-background-size:cover;}
 .gw-container .page-header{border:none; border-left:0.3em #333 solid; padding-left:1em;}
