@@ -50,7 +50,7 @@
 				<h3>{$dis['dish_title']}<strong>￥<span class="unit_price">{$dis['dish_price']}</span></strong></h3>
 			</div>
 		{php $dishinfo=get_dishinfo($dis['dish_id']);} {loop $dishinfo $dinfo}
-			<span class="food_detailed info">{$dinfo['description']}</span>
+			<span class="food_detailed info">{$dinfo['zuhe']}</span>
 		</li>
 		{/loop} {/loop}
 		<li class="cont_box order_item" style="margin-top: 2px;padding-bottom: 10px;">
