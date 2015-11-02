@@ -689,6 +689,7 @@ function hint(slector,str){$(slector).html(str);}
 		});
 	</script>
 {elseif $op == 'list'}
+ <link href="./resource/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
 <style type="text/css">
 	.status-toggle{cursor:pointer;}
 </style>
@@ -733,7 +734,7 @@ function hint(slector,str){$(slector).html(str);}
 							<th>点餐类型</th>
 							<th>是否显示</th>
 							 -->
-							<th style="width:200px; text-align:right;">操作</th>
+							<th style="width:270px; text-align:right;">操作</th>
 							<th style="text-align:right;">开关店</th>
 						</tr>
 					</thead>
@@ -763,7 +764,7 @@ function hint(slector,str){$(slector).html(str);}
 							 -->
 							<td style="text-align:right;">
 							<!-- 开关闭管理 二次开发 by lwq -->
-								
+								<a href="javascript:void" onclick="closeEdit()" class="btn btn-default btn-sm" title="设置关店信息" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"> </i> 设置关店信息</a>
 								<a href="{php echo $this->createWebUrl('store', array('op' => 'post', 'id' => $item['id']))}" class="btn btn-default btn-sm" title="编辑" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"> </i> 编辑</a>
 								<!-- 二次开发 只有超级管理员才能删除门店 -->
 								{if $_SESSION['role'] == 'manager'}
@@ -806,8 +807,57 @@ function hint(slector,str){$(slector).html(str);}
     				
   				</div>
 			</div>
+			<!-- 二次开发，点击关店之后设置门店关店信息 -->
+			<div id="closeEdit" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+  				<div class="modal-dialog modal-sm">
+    				<div class="modal-content">
+    					<div class="modal-header">
+          					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+          						<h4 class="modal-title" id="mySmallModalLabel">门店关闭信息设置</h4>
+      					</div>
+      					<div class="modal-body">
+            <div class="form-group">
+                <label class="control-label">下次开始日期及时间</label>
+                <div class="controls input-append date form_datetime" data-link-field="dtp_input1">
+                    <input size="16" type="text" id="beginDate" value="" readonly>
+                    <span class="add-on"><i class="icon-remove"></i></span>
+					<span class="add-on"><i class="icon-th"></i></span>
+                </div>
+				<input type="hidden" id="dtp_input1" value="" /><br/>
+            </div>
+            <div class="control-group">
+                <label class="control-label">选择用餐类型</label>
+               	<select id="canType" name="canType">
+               	<option value="1" checked>早餐</option>
+               	<option value="2">午餐</option>
+               	<option value="3">晚餐</option>
+               	</select>
+            </div>
+
+
+
+      					</div>
+     				 	<div class="modal-footer">
+     				 		<a href="javascript:void" id="closeEditOK" class="btn btn-primary">确认</a>
+        					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      					</div>
+    				</div>
+    				
+  				</div>
+			</div>
+			<!-- 二次开发，点击关店之后设置门店关店信息结束 -->
 </div>
+<script type="text/javascript" src="./resource/js/lib/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="./resource/js/lib/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
 <script type="text/javascript">
+$('.form_datetime').datetimepicker({
+		format: "yyyy-MM-dd hh:ii",
+		language:  'zh-CN',
+        autoclose: true,
+        todayBtn: true,
+        pickerPosition: "bottom-left"
+    });
+
 	require(['util'], function(u){
 		$('.btn').hover(function(){
 			$(this).tooltip('show');
@@ -826,6 +876,28 @@ function hint(slector,str){$(slector).html(str);}
 				}
 			});
 		});
+		
+		$('#closeEditOK').click(function(){
+			var datetime = $('#dtp_input1').val();
+			
+			var canType = $('#canType').val();
+			if(datetime==''){
+				u.message('您还未选择时间');
+				return false;
+			}
+			var day = new Date(datetime).getDay();
+			var xingqi = new Array('星期天','星期一','星期二','星期三','星期四','星期五','星期六')[day];
+			
+			$.post('{php echo $this->createWebUrl('manage', array('op' => 'close_edit'))}', {'date':datetime, 'cantype':canType, 'xingqi':xingqi}, function(data){
+				if(data == 'success') {
+					u.message('编辑成功');
+					$("#closeEdit").modal('hide');
+				} else {
+					u.message(data);
+					$("#closeEdit").modal('hide');
+				}
+			});
+		})
 		
 	});
 	//二次开发：修改门店开关闭状态
@@ -848,6 +920,10 @@ function hint(slector,str){$(slector).html(str);}
 	$("#closeTip").on("hidden.bs.modal", function(e){
 		location.reload(true);
 	})
+	
+	function closeEdit(){
+		$("#closeEdit").modal('show');
+	}
 	
 </script>
 <!-- 二次开发 超级管理员拥有查看所有门店的订单 -->

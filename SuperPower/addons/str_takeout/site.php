@@ -1206,6 +1206,20 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				exit('success');
 			}
 			exit('error');
+		}elseif($op == 'close_edit'){
+		/**
+		 * 二次开发-新增门店关闭信息编辑
+		 */
+			$data['nextStartTime'] = $_GPC['date'];
+			$data['cantype'] = intval($_GPC['cantype']);
+			$data['xingqi'] = $_GPC['xingqi'];
+
+			$state = pdo_update('str_store',$data,array('uniacid' => $_W['uniacid'], 'id' => $sid));
+
+			if($state !== false){
+				exit('success');
+			}
+			exit('error');
 		}
 		if($op == 'clerk_post') {
 			$accounts = uni_accounts();
@@ -1273,6 +1287,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			pdo_delete('str_clerk', array('uniacid' => $_W['uniacid'], 'sid' => $sid, 'id' => $id));
 			message('删除店员成功', referer(), 'success');
 		}
+		
 	}
 
 	//宏信物联打印机扫描接口
