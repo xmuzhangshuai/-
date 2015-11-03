@@ -411,6 +411,21 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$open = pdo_fetchcolumn('SELECT open FROM ' . tablename('str_store') . ' WHERE ' . 'id=:id and uniacid=:uniacid', array(':id'=>id, ':uniacid'=>$_W['uniacid']));
 			exit($open);
 		}
+		if($op == 'close_edit'){
+		/**
+		 * 二次开发-新增门店关闭信息编辑
+		 */
+			$data['nextStartTime'] = $_GPC['date'];
+			$data['cantype'] = intval($_GPC['cantype']);
+			$data['xingqi'] = $_GPC['xingqi'];
+			$store_id = intval($_GPC['sid']);
+			$state = pdo_update('str_store',$data,array('uniacid' => $_W['uniacid'], 'id' => $store_id));
+
+			if($state !== false){
+				exit('success');
+			}
+			exit('error');
+		}
 	}
 
 	public function doWebSwitch() {
@@ -425,7 +440,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		global $_W, $_GPC;
 		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'cate_list';
 		$sid = intval($_GPC['__sid']);
+		//exit($sid);
 		$store = pdo_fetch('SELECT id, title FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
+
 		if(empty($store)) {
 			message('门店信息不存在或已删除', $this->createWebUrl('store'), 'error');
 		}
@@ -1203,20 +1220,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			 
 			 $state = pdo_update('str_store_dish', $data, array('uniacid' => $_W['uniacid'], 'store_id' => $sid, 'dish_id' => $dish_id));
 			 if($state !== false){
-				exit('success');
-			}
-			exit('error');
-		}elseif($op == 'close_edit'){
-		/**
-		 * 二次开发-新增门店关闭信息编辑
-		 */
-			$data['nextStartTime'] = $_GPC['date'];
-			$data['cantype'] = intval($_GPC['cantype']);
-			$data['xingqi'] = $_GPC['xingqi'];
-
-			$state = pdo_update('str_store',$data,array('uniacid' => $_W['uniacid'], 'id' => $sid));
-
-			if($state !== false){
 				exit('success');
 			}
 			exit('error');

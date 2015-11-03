@@ -33,6 +33,7 @@
 						<li><a href="<?php  echo url('user/profile/profile');?>" target="_blank"><i class="fa fa-weixin fa-fw"></i> 我的账号</a></li>
 						<?php  if($_W['role'] != 'operator') { ?>
 						<li class="divider"></li>
+						<li><a href="<?php  echo url('account/display');?>" target="_blank"><i class="fa fa-sitemap fa-fw"></i> 管理公众号</a></li>
 						<!-- 
 						<li><a href="<?php  echo url('system/welcome');?>" target="_blank"><i class="fa fa-sitemap fa-fw"></i> 系统选项</a></li>
 						<li><a href="<?php  echo url('system/welcome');?>" target="_blank"><i class="fa fa-cloud-download fa-fw"></i> 自动更新</a></li>

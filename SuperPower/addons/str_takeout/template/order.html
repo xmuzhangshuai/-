@@ -50,7 +50,7 @@
 		<form class="form-horizontal" action="" method="post">
 			<ul class="order-nav order-nav-tabs" style="background:none;float: left;margin-left: 0px;padding-left: 0px;border-bottom:1px #c5d0dc solid;">
 				<li{if empty($status)} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', 'status' => 0))}">全部订单</a></li>
-				<li{if $status == 1} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', 'status' => 1))}">待确认</a></li>
+				<!-- <li{if $status == 1} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', 'status' => 1))}">待确认</a></li> -->
 				<li{if $status == 2} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', 'status' => 2))}">处理中</a></li>
 				<li{if $status == 3} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', 'status' => 3))}">已完成</a></li>
 				<li{if $status == 4} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', 'status' => 4))}">已取消</a></li>
