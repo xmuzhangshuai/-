@@ -412,6 +412,26 @@ body>div:first-child {
 	float: right;
 	position: static;
 }
+i.cantype1,
+i.cantype2,
+i.cantype3,
+.menu_wrap .tips i.cantype1,
+.menu_wrap .tips i.cantype2,
+.menu_wrap .tips i.cantype3{
+	display: inline;
+}
+.cantype1:before{
+	display: inline;
+	content: "早餐";
+}
+.cantype2:before{
+	display: inline;
+	content: "午餐";
+}
+.cantype3:before{
+	display: inline;
+	content: "晚餐";
+}
 .img_swipe {
 	position: relative;
 	overflow: hidden;

@@ -20,21 +20,21 @@
     {if $address['address']}
     <div class="nav_address"><span>送货到：</span><span>{$address['address']}</span>-<span>{$address['room']}</span><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a></div>
     {else}
-        <div class="nav_address"><span>添加送餐地址才能点餐哟</span><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a></div>
+    <div class="nav_address"><span>添加送餐地址才能点餐哟</span><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'op' =>'post', 'r' => 2));}" class="nav_sp_location"></a></div>
     {/if}
 	<form name="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
 		<input type="hidden" name="more" value="{$_GPC['more']}">
 		<input type="hidden" name="dish_str" value="{$dish_str}">
-		<section class="menu_wrap {if $store['dish_style'] == 1}skin1{/if}" id="menuWrap">
+		<section class="menu_wrap" id="menuWrap">
 			{if $store['open']==0}
-				<div class="tips">企鹅休息中，接受预定~下次配送时间：<br /><span>10-23 星期五 早餐 6:00</span></div>
+				<div class="tips">企鹅休息中，接受预定~下次配送时间：<br /><span>{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></span></div>
 			{/if}
 			<div class="menu_container">
 					<ul class="menu_list">
 						{loop $dish $ds}
 							<li id="{$ds['id']}" class="auto_height {if !($ds['total'] == -1 || $ds['total'] > 0)}out{/if}">
 								<div>
-									<div class="menu_type">10-23 星期五 早餐</div>
+									<div class="menu_type">{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></div>
 									{if $ds['thumb']}
 									{php $ds['thumb'] = explode(';',$ds['thumb']); }
 									<div class="slider_wrap">
@@ -82,7 +82,7 @@
 			<div class="fixed hidden" id="fix_bar">
 				<div>
 					<span class="comm_btn disabled"><span id="sendCondition" class="hide">0元</span>点餐</span>
-					<a id="settlement" href="javascript:document.cart_form.submit();" class="comm_btn" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 立即下单</a>
+					<a id="settlement" class="comm_btn {if !$address['address']}disabled{/if}" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 {if $address['address']}立即下单{else}请添加地址{/if}</a>
 				</div>
 			</div>
 		</footer>
@@ -98,6 +98,11 @@
 					speed: 500,
 					namespace: "callbacks",
 					pager: true,
+				});
+				$("#settlement").click(function(){
+					if(!$("#settlement").hasClass("disabled")){
+						document.cart_form.submit();
+					}					
 				});
 			});
 var menu = {

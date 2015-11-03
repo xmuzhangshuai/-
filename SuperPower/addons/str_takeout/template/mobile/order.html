@@ -26,7 +26,7 @@
 					<input type="text" id="showNumber" name="room" value="{$address['room']}"></input>
 				</div>
 				<br />
-				<input type="text" id="showName" name="username" value="{$address['realname']}" class="half"  placeholder="姓名"></input>
+				<input type="text" id="showName" name="realname" value="{$address['realname']}" class="half"  placeholder="姓名"></input>
 				<input type="tel" id="showTel" name="mobile" value="{$address['mobile']}" class="half" placeholder="手机号"></input>
 			</div>
 			<div class="cont_box">
@@ -49,7 +49,7 @@
 							<div class="fr" max="{$li['total']}">
 								<a href="javascript:void(0);" class="btn_n add active"></a>
 							</div>
-							<input autocomplete="off" class="number" type="hidden" name="dish[{$li['id']}]" value="{$dishes[$li['id']]}">
+							<input autocomplete="off" class="number" type="hidden" name="dish{$li['id']}" value="{$dishes[$li['id']]}">
 							<span class="count">{$dishes[$li['id']]}</span>
 						</div>
 
@@ -155,7 +155,7 @@
 			}
 			var orderer = $("#showName").val();
 			if(!address_id) {
-				alert('请选择姓名');
+				alert('请输入姓名');
 				$(this).removeClass('disabled');
 				return false;
 			}
@@ -168,7 +168,7 @@
 				'mobile':mobile,
 				'room':room
 			}
-			$.post("{php echo $this->createMobileUrl('order', array('sid' => $sid));}", param, function(e){
+			$.post("{php echo $this->createMobileUrl('order', array('sid' => $sid));}", $('#cart_confirm_form').serialize(), function(e){
 				if(e.errno == 0) {
 					$(".submit_order").html('已提交');
 					$(".submit_order").addClass('disabled');
