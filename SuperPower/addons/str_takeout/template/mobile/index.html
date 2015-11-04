@@ -2,6 +2,8 @@
 <script>
 {if $address['address']}
 location.href = "{php echo $this->createMobileUrl('dish', array('sid' => $address['sid']));}"
+{else}
+location.href = "{php echo $this->createMobileUrl('address', array('op' => 'init'));}"
 {/if}
 </script>
 {template 'common'}

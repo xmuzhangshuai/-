@@ -1910,8 +1910,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		$sid = intval($_GPC['sid']);
 		$uid = $_W['member']['uid'];
 		$store = get_store($sid);
+		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'list';
 		$_share = get_share($store);
-		if(empty($store)) {
+		if(empty($store)&&($op!='init')) {
 			message('商家不存在', '', 'error');
 		}
 		$where = ' WHERE uniacid = :aid AND sid = :sid AND uid = :uid';
@@ -1922,7 +1923,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		);
 		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') . $where, $params);
 		$title = $store['title'];
-		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'list';
 		$return_url = '';
 		if(!empty($_GPC['return_url'])) {
 			$return_url = urldecode($_GPC['return_url']);
@@ -1936,8 +1936,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$addressesgroup = get_addressesgroup();
 			$stores=pdo_fetchall('SELECT distinct(sid),title FROM ' . tablename('str_address').',' .tablename('str_store').' WHERE '.tablename('str_address').'.sid='.tablename('str_store').'.id'.' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));
 		}
-		
-		if($op == 'post') {
+		if($op == 'post'||$op == 'init') {
 			$currentadd = get_default_address();
 			$id = intval($_GPC['id']);
 			$address = get_address($id);

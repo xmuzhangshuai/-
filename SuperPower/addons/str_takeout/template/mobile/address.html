@@ -67,7 +67,7 @@
 		<div class="cont_box adress_add_wrapper"><a class="adress_add" href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid ,'r'=> $_GPC['r']))}" class="add">新增地址</a></div>
 	</ul>
 </div>
-{elseif $op == 'post'}
+{elseif $op == 'post'||$op == 'init'}
 <style>
 	.home-position {
 		margin-top: 30px;
@@ -182,7 +182,7 @@
 		var map = new BMap.Map("allmap");
 		var myGeo = new BMap.Geocoder();
 		map.centerAndZoom(user_iploc.content.address,12);
-		{if $op == 'post'}
+		{if $op == 'post'|| $op == 'init'}
 		var ac = new BMap.Autocomplete(    //建立一个自动完成的对象
 			{"input" : "location_input"
 			,"location" : map
