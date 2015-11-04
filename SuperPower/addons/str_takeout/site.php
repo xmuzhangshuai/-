@@ -452,7 +452,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			'credit' => '余额支付',
 			'delivery' => '餐到付款',
 		);
-
+		/**
+		 * 二次开发
+		 */
 		//订单详细统计
 		if($op == 'stat_detail') {
 			load()->func('tpl');
@@ -1051,7 +1053,11 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			include $this->template('print');
 		} elseif($op == 'print_list') {
-			$data = pdo_fetchall('SELECT * FROM ' . tablename('str_print') . ' WHERE uniacid = :uniacid AND sid = :sid', array(':uniacid' => $_W['uniacid'], ':sid' => $sid));
+			/**
+			 * 二次开发：打印机
+			 */
+			//$data = pdo_fetchall('SELECT * FROM ' . tablename('str_print') . ' WHERE uniacid = :uniacid AND sid = :sid', array(':uniacid' => $_W['uniacid'], ':sid' => $sid));
+			$store = pdo_fetch('SELECT * FROM ' . tablename('str_store') . ' WHERE uniacid = :uniacid AND id = :sid', array(':uniacid' => $_W['uniacid'], ':sid' => $sid));
 			include $this->template('print');
 		} elseif($op == 'print_del') {
 			$id = intval($_GPC['id']);
@@ -1223,6 +1229,16 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				exit('success');
 			}
 			exit('error');
+		}elseif($op == 'set_printer'){
+			/**
+			 * 二次开发：设置打印机名称
+			 */
+			 $data['printer_name'] = $_GPC['name'];
+			 $state = pdo_update('str_store',$data,array('uniacid' => $_W['uniacid'], 'id' => $sid));
+			 if($state !== false)
+			 	exit('success');
+			 else
+			 	exit('error');
 		}
 		if($op == 'clerk_post') {
 			$accounts = uni_accounts();

@@ -101,12 +101,16 @@
 	</script>
 {elseif $op == 'print_list'}
 	<div class="clearfix">
-		<form class="form-horizontal" action="" method="post">
+		<form class="form-inline" method="" action="">
 			<div class="form-group">
 				<div class="col-sm-12">
-					<a class="btn btn-success col-lg-1" href="{php echo $this->createWebUrl('manage', array('op' => 'print_post'));}"/><i class="fa fa-plus-circle"> </i>  添加打印机</a>
+					<!-- <a class="btn btn-success col-lg-1" href="{php echo $this->createWebUrl('manage', array('op' => 'print_post'));}"/><i class="fa fa-plus-circle"> </i>  添加打印机</a> -->
+					<lable for="printername">请输入打印机名称</lable>
+					&nbsp;&nbsp;<input type="text" size="36" id="printername" class="form-control" value="{$store['printer_name']}" placeholder="请设置打印机名称"/>
+					<a href="javascript:void();" id="setPrinter" class="btn btn-primary">设置</a>
 				</div>
 			</div>
+			<!-- 
 			<div class="panel panel-default">
 				<div class="panel-body table-responsive">
 					<table class="table table-hover">
@@ -152,9 +156,35 @@
 						</tbody>
 					</table>
 				</div>
-			</div>
-		</form>
+			</div> -->
+			</form>
 	</div>
+	<br/><br/><br/><br/>
+	<script type="text/javascript">
+	require(['util'], function(u){
+		$("#setPrinter").click(function(){
+			if(!confirm('您正在设置打印机名称，请注意和电脑上的小票打印机名称一致！')){
+				location.reload();
+			}
+			var printerName = $('#printername').val();
+			printerName = $.trim(printerName);
+			if(printerName == ''){
+				u.message('请输入打印机名称');
+				return false;
+			}else{
+				$.post('{php echo $this->createWebUrl('manage', array('op' => 'set_printer'))}', {'name':printerName}, function(data){
+					if(data == 'success') {
+						u.message('设置成功，请确认和电脑上接入的小票打印机名称一致，否则将无法打印订单！！！');
+					} else {
+						u.message('设置失败');
+						location.reload();
+					}
+				});
+			}
+				
+		});
+	});
+</script>
 {elseif $op == 'print_log'} 
 	<div class="clearfix">
 		{if $item['type'] == '1'}
