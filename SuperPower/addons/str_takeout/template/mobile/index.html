@@ -1,9 +1,9 @@
 {template 'common/header'}
 <script>
 {if $address['address']}
-location.href = "{php echo $this->createMobileUrl('dish', array('sid' => $address['sid']));}"
+location.href = "{php echo $this->createMobileUrl('dish', array('sid' => $address['sid']));}";
 {else}
-location.href = "{php echo $this->createMobileUrl('address', array('op' => 'init'));}"
+location.href = "{php echo $this->createMobileUrl('address', array('op' => 'init','r' => 2));}";
 {/if}
 </script>
 {template 'common'}

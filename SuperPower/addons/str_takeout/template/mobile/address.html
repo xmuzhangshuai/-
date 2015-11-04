@@ -378,14 +378,14 @@
 			}*/
 			if(!$(this).hasClass('disabled')){
 				$(this).addClass('disabled');	
-				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid}, function(data){
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post'))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid}, function(data){
 					var data = $.parseJSON(data);
 					if(!data.errorno) {
-						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default', 'sid' => $sid))}", {'id':data.message},function(){
+						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default'))}", {'id':data.message,'sid':sid},function(){
 							if(r==1) {
 								location.href=return_url1 + '&address_id='+data.message;
 							} else if(r==2) {
-								location.href=return_url2 + '&address_id='+data.message;
+								location.href=return_url2 + '&address_id='+data.message+'&sid='+sid;
 							} else {
 								location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid));}"
 							}

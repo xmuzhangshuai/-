@@ -719,6 +719,13 @@ i.cantype3,
 .menu_list li h3 span {
 	color: #ff510c;
 }
+.menu_list li h3 span.order_item_count {
+	color: #333;
+	font-size: 70%;
+	font-style: normal;
+	font-weight: normal;
+}
+
 .menu_list li p {
 	font-size: 12px;
 	line-height: 1.8;

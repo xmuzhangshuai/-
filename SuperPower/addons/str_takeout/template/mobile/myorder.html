@@ -47,7 +47,7 @@
 		{php $dishs=get_dish($row['id']);} {loop $dishs $dis}
 		<li class="cont_box order_item">
 			<div>
-				<h3>{$dis['dish_title']}<strong>￥<span class="unit_price">{$dis['dish_price']}</span></strong></h3>
+				<h3>{$dis['dish_title']}  <span class="order_item_count">x{$dis['dish_num']}</span><strong>￥<span class="unit_price">{$dis['dish_price']}</span></strong></h3>
 			</div>
 		{php $dishinfo=get_dishinfo($dis['dish_id']);} {loop $dishinfo $dinfo}
 			<span class="food_detailed info">{$dinfo['zuhe']}</span>
