@@ -2653,3 +2653,15 @@ a.deladdress.adress_delete:before {
 .state3:before {
 	content: "订单完成";
 }
+.state4 {
+	color: rgb(100, 100, 100);
+}
+.state4:before {
+	content: "已取消";
+}
+.state6 {
+	color: rgb(243, 0, 0);
+}
+.state6:before {
+	content: "问题订单";
+}

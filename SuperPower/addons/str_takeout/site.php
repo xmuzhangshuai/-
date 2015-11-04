@@ -1587,6 +1587,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$v = intval($v);
 				if($_GPC['dish'.$k]){
 					$v=intval($_GPC['dish'.$k]);
+				}else{
+					$v=0;
 				}
 				pdo_query('UPDATE ' . tablename('str_dish') . " set sailed = sailed + {$v} WHERE uniacid = :aid AND id = :id", array(':aid' => $_W['uniacid'], ':id' => $k));
 				$stat = array();
@@ -1637,11 +1639,10 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			message('门店不存在', referer(), 'error');
 		}
 		$title = $store['title'];
-		$where = ' WHERE uniacid = :aid AND sid = :sid AND uid = :uid';
+		$where = ' WHERE uniacid = :aid AND uid = :uid';
 		$params = array(
 			':aid' => $_W['uniacid'],
-			':uid' => $_W['member']['uid'],
-			':sid' => $sid,
+			':uid' => $_W['member']['uid']
 		);
 		$status = intval($_GPC['status']);
 
@@ -1911,15 +1912,15 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		$uid = $_W['member']['uid'];
 		$store = get_store($sid);
 		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'list';
+		$r = trim($_GPC['r']) ? trim($_GPC['r']) : '';
 		$_share = get_share($store);
 		if(empty($store)&&($op!='init')) {
 			message('商家不存在', '', 'error');
 		}
-		$where = ' WHERE uniacid = :aid AND sid = :sid AND uid = :uid';
+		$where = ' WHERE uniacid = :aid AND uid = :uid';
 		$params = array(
 			':aid' => $_W['uniacid'],
-			':uid' => $_W['member']['uid'],
-			':sid' => $sid,
+			':uid' => $_W['member']['uid']
 		);
 		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') . $where, $params);
 		$title = $store['title'];
@@ -1934,7 +1935,11 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$currentadd = get_default_address();
 			}
 			$addressesgroup = get_addressesgroup();
-			$stores=pdo_fetchall('SELECT distinct(sid),title FROM ' . tablename('str_address').',' .tablename('str_store').' WHERE '.tablename('str_address').'.sid='.tablename('str_store').'.id'.' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));
+			if($r=='1'){
+				$stores=pdo_fetchall('SELECT sid,title FROM ' . tablename('str_address').',' .tablename('str_store').' WHERE '.tablename('str_address').'.sid='.$sid.' AND '.tablename('str_store').'.id='.$sid.' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));
+			}else{
+				$stores=pdo_fetchall('SELECT distinct(sid),title FROM ' . tablename('str_address').',' .tablename('str_store').' WHERE '.tablename('str_address').'.sid='.tablename('str_store').'.id'.' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));
+			}
 		}
 		if($op == 'post'||$op == 'init') {
 			$currentadd = get_default_address();
