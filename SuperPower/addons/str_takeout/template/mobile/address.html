@@ -337,7 +337,7 @@
 			var newmobile=$("#mobileipt").val();
 			var valid = !!newmobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
 			if(!valid){
-				$("#mobileipt").val($("#mobile span").html());
+				$("#mobileipt").val($("#mobile span").text());
 				alert('手机号格式不正确');
 			}else{
 				$("#mobile span").html(newmobile);
@@ -345,7 +345,6 @@
 			}
 		});
 		$('#submit').click(function(){
-			
 			var id = '{$id}';
 			var room = $.trim($(':text[name="room"]').val());
 			var realname = $.trim($(':text[name="realname"]').val());
