@@ -390,11 +390,12 @@ body>div:first-child {
 	height: 38px;
 	width: 100%;
 	background-color: #d9d9d9;
-	font-size: 16px;
+	font-size: 14px;
 	line-height: 38px;
 	padding-left: 20px;
 	text-overflow: ellipsis;
 	overflow: hidden;
+	position: relative;
 }
 .nav_address span {
 	text-overflow: ellipsis;
@@ -410,7 +411,10 @@ body>div:first-child {
 	margin-top: 5px;
 	margin-right: 12px;
 	float: right;
-	position: static;
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 100;
 }
 i.cantype1,
 i.cantype2,
