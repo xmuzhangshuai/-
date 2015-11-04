@@ -497,7 +497,8 @@ function hint(slector,str){$(slector).html(str);}
 		if(cross)
 			crossed=1;
 		{/loop}
-		
+		//二次开发，由于交叉判断还有问题，这里不做交叉判断
+		crossed = 0;
 		if(crossed){
 			alert('选定配送区域与其他门店重叠，请重新选择');
 			map.removeOverlay(overlays[0]);//清除上一次的多边形
@@ -734,7 +735,7 @@ function hint(slector,str){$(slector).html(str);}
 							<th>点餐类型</th>
 							<th>是否显示</th>
 							 -->
-							<th style="width:270px; text-align:right;">操作</th>
+							<th style="width:400px; text-align:right;">操作</th>
 							<th style="text-align:right;">开关店</th>
 						</tr>
 					</thead>
@@ -764,7 +765,8 @@ function hint(slector,str){$(slector).html(str);}
 							 -->
 							<td style="text-align:right;">
 							<!-- 开关闭管理 二次开发 by lwq -->
-								<a href="javascript:void" onclick="closeEdit()" class="btn btn-default btn-sm" title="设置关店信息" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"> </i> 设置关店信息</a>
+								<a href="javascript:void" onclick="closeEdit({$item['id']})" class="btn btn-danger btn-sm closeEditbtn" title="设置关店信息" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"> </i> 设置关店信息</a>
+								<input type="hidden" value='' id="store{$item['id']}"/>
 								<a href="{php echo $this->createWebUrl('store', array('op' => 'post', 'id' => $item['id']))}" class="btn btn-default btn-sm" title="编辑" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"> </i> 编辑</a>
 								<!-- 二次开发 只有超级管理员才能删除门店 -->
 								{if $_SESSION['role'] == 'manager'}
@@ -782,6 +784,8 @@ function hint(slector,str){$(slector).html(str);}
 							</td>
 						</tr>
 						{/loop}
+						<!-- 门店下次开始时间 -->
+						<input type='hidden' value='' id='sid'/>
 					</tbody>
 				</table>
 			</div>
@@ -825,7 +829,7 @@ function hint(slector,str){$(slector).html(str);}
                 </div>
 				<input type="hidden" id="dtp_input1" value="" /><br/>
             </div>
-            <div class="control-group">
+            <div class="form-group">
                 <label class="control-label">选择用餐类型</label>
                	<select id="canType" name="canType">
                	<option value="1" checked>早餐</option>
@@ -855,7 +859,7 @@ $('.form_datetime').datetimepicker({
 		language:  'zh-CN',
         autoclose: true,
         todayBtn: true,
-        pickerPosition: "bottom-left"
+        pickerPosition: "bottom-right"
     });
 
 	require(['util'], function(u){
@@ -881,27 +885,41 @@ $('.form_datetime').datetimepicker({
 			var datetime = $('#dtp_input1').val();
 			
 			var canType = $('#canType').val();
+			
+			var sid = $('#sid').val();
 			if(datetime==''){
 				u.message('您还未选择时间');
+				return false;
+			}
+			if(sid == ''){
+				u.message('请选择一门店再进行操作');
 				return false;
 			}
 			var day = new Date(datetime).getDay();
 			var xingqi = new Array('星期天','星期一','星期二','星期三','星期四','星期五','星期六')[day];
 			
-			$.post('{php echo $this->createWebUrl('manage', array('op' => 'close_edit'))}', {'date':datetime, 'cantype':canType, 'xingqi':xingqi}, function(data){
+			$.post('{php echo $this->createWebUrl('ajax', array('op' => 'close_edit'))}', {'date':datetime, 'cantype':canType, 'xingqi':xingqi, 'sid':sid}, function(data){
 				if(data == 'success') {
 					u.message('编辑成功');
 					$("#closeEdit").modal('hide');
+					$('#store'+sid).val(datetime);
 				} else {
-					u.message(data);
+					u.message('编辑失败');
 					$("#closeEdit").modal('hide');
 				}
+				$('#sid').val('');
 			});
 		})
 		
 	});
 	//二次开发：修改门店开关闭状态
 	function openClose(openStatus, storeID){
+		var closeSet = $('#store'+storeID).val();
+		if(closeSet == ''&&openStatus == '0'){
+			alert('请先在关店信息设置中设置下次的用餐时段');
+			return false;
+			
+		}
 		//请求链接：./index.php?c=site&a=entry&op=open_store&do=ajax&m=str_takeout
 		$.post('{php echo $this->createWebUrl('ajax', array('op' => 'open_store'))}', {'id':storeID, 'open':openStatus}, function(data){
 			if(data == 'success') {
@@ -921,7 +939,8 @@ $('.form_datetime').datetimepicker({
 		location.reload(true);
 	})
 	
-	function closeEdit(){
+	function closeEdit(sid){
+		$("#sid").val(sid);
 		$("#closeEdit").modal('show');
 	}
 	
@@ -1257,7 +1276,7 @@ $('.form_datetime').datetimepicker({
 						</div>	
 					</div>
 					<!-- 二次开发：套餐组合 -->
-					<div class="form-group" id='choiceBox' {if $item['cid'] == 3}style="display:none"{else}style="display:block"{/if}>
+					<div class="form-group" id='choiceBox' {if $item['cid'] == 4}style="display:block"{else}style="display:none"{/if}>
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>套餐组合</label>
 						<div class="col-sm-6 col-xs-6 col-md-6">
 							<input type="text" class="form-control" id="danpinzuhe" name="danpinzuhe" value="{$item['zuhe']}" disable="true" readOnly="true">
@@ -1320,7 +1339,7 @@ $('.form_datetime').datetimepicker({
 							{php echo tpl_form_dish_image('thumb', $onethumb);}
 						 {/loop}	
 						 </div>
-						 <div class="help-block">推荐大小为720x400</div> 
+						 <div class="help-block">推荐大小为500x500</div> 
 						</div>
 					</div>
 					<!-- 二次开发，隐藏这些内容 -->
