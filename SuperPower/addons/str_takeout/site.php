@@ -438,10 +438,10 @@ class Str_takeoutModuleSite extends WeModuleSite {
 	//二次开发：设置问题订单
 	public function doWebManage() {
 		global $_W, $_GPC;
-		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'cate_list';
+		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'order';
 		$sid = intval($_GPC['__sid']);
 		//exit($sid);
-		$store = pdo_fetch('SELECT id, title FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
+		$store = pdo_fetch('SELECT id, title, printer_name FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
 
 		if(empty($store)) {
 			message('门店信息不存在或已删除', $this->createWebUrl('store'), 'error');
@@ -1239,6 +1239,43 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			 	exit('success');
 			 else
 			 	exit('error');
+		}elseif($op == 'print_order'){
+			/**
+			 * 二次开发：浩顺打印机打印订单
+			 * @author lwq
+			 */
+			//获取要打印但是未打印的已支付订单（处理中订单），一条订单
+			$order = pdo_fetch('SELECT * FROM ' . tablename('str_order') . ' WHERE uniacid = :aid AND sid = :sid AND print = 0 AND status = 2 ORDER BY addtime ASC', array(':aid' => $_W['uniacid'], ':sid' => $sid));
+			if(empty($order)) {
+				message('订单不存在或已经删除', $this->createWebUrl('manage', array('op' => 'order')), 'error');
+			} else {
+				$order['dish'] = get_dish($order['id']);
+				//时间戳转成日期
+				$order['addtime'] = date('Y-m-d h:i:s', $order['addtime']);
+				exit(json_encode($order));
+			}
+			//转成json返回
+		}elseif($op == 'update_print'){
+			/**
+			 * 二次开发：打印成功后，更新订单打印状态
+			 * @author LWQ
+			 */
+			 $id = intval($_GPC['id']);
+			 $data['print'] = 1;//设为已打印
+			 $state = pdo_update('str_order', $data, array('uniacid' => $_W['uniacid'], 'id' => $id, 'sid' => $sid));
+			 if($state !== false)
+			 	exit('success');
+			 exit('error');
+			
+		}elseif($op == 'reprint'){
+			/**
+			 * 二次开发：重新打印
+			 */
+			 
+		}elseif($op == 'cancelprint'){
+			/**
+			 * 二次开发：取消打印
+			 */
 		}
 		if($op == 'clerk_post') {
 			$accounts = uni_accounts();
@@ -1825,6 +1862,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				exit('success');
 			}
 			exit('error');
+		} elseif($op == 'auto_print'){
+			
 		}
 	}
 	public function doWebSystem() {

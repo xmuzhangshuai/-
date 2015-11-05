@@ -220,7 +220,7 @@ function get_dish($oid, $cancel = false) {
 	if(!$cancel) {
 		$condition = ' AND is_complete != 2';
 	}
-	$data = pdo_fetchall('SELECT * FROM ' . tablename('str_stat') . ' WHERE uniacid = :aid AND oid = :oid' . $condition, array(':aid' => $_W['uniacid'], ':oid' => $oid), 'dish_id');
+	$data = pdo_fetchall('SELECT * FROM ' . tablename('str_stat') . ' WHERE uniacid = :aid AND oid = :oid' . $condition, array(':aid' => $_W['uniacid'], ':oid' => $oid));
 	return $data;
 } 
 function get_dishinfo($did) {

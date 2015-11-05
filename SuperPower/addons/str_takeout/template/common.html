@@ -1,20 +1,189 @@
 <audio id="musicClick" src="../addons/str_takeout/template/resource/click.mp3" preload="auto"></audio>
+<object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0> 
+	<embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0 pluginspage="install_lodop.exe"></embed>
+</object>
+<script src="./resource/js/lib/LodopFuncs.js"></script>
 <script>
-	function log_update() {
-		$.post("{php echo $this->createWebUrl('cron', array('op' => 'print'));}", function(){
-			setTimeout(log_update, 10000);
-		});
+//打印机打印订单
+var LODOP; //声明为全局变量 
+var count = getPrinterCount();//获取个数
+var name = '{$store['printer_name']}';//打印机名称
+var index;
+var i;
+for(i = 0; i<count; i++){//获取匹配打印机
+	if(name == getPrinterName(i)){
+		index = i;
+		break;
 	}
-	function order_notice() {
-		$.post("{php echo $this->createWebUrl('cron', array('op' => 'order'));}", function(data){
-			if(data == 'success') {
-				$("#musicClick")[0].play();
-			}
-			setTimeout(order_notice, 5000);
-		});
+}
+if(i == count)
+	alert('没有匹配打印机，请安装小票打印机，并在打印机管理中设置打印机！');
+else{
+	print_order();
+}
+function getPrinterCount() {	//获取打印机个数	
+	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  
+	return LODOP.GET_PRINTER_COUNT();	
+};
+function getPrinterName(iPrinterNO) {	//获取打印机名称	
+	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  
+	return LODOP.GET_PRINTER_NAME(iPrinterNO);	
+};
+function PreviewByPrinterIndex(intPrinterIndex) { //通过ID预览打印内容		
+	CreatePrintPage();
+	if (LODOP.SET_PRINTER_INDEX(intPrinterIndex))
+	LODOP.PREVIEW();		
+};
+function PrintByPrinterIndex(intPrinterIndex) {	//通过ID命令某台打印机打印内容
+	//CreatePrintPage();
+	if (LODOP.SET_PRINTER_INDEX(intPrinterIndex)) 
+	LODOP.PRINT();		
+};
+function PreviewByPrinterName(strPrinterName) {	//通过打印机名字预览打印内容			
+	CreateHTMPrintPage();
+	if (LODOP.SET_PRINTER_INDEXA(strPrinterName)) 
+	LODOP.PREVIEW();		
+};
+function PrintByPrinterName(strPrinterName) {	//通过名称命令打印机打印内容	
+	CreateHTMPrintPage();
+	if (LODOP.SET_PRINTER_INDEXA(strPrinterName)) 
+	LODOP.PRINT();		
+};	
+function SelectAsDefaultPrinter() {
+	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  
+    	if (LODOP.SELECT_PRINTER()>=0) 
+    	alert("选择成功!"); else alert("选择失败！");
+};
+function PrintByDefaultPrinter() {
+	CreatePrintPage();
+	LODOP.PRINT();	
+};	
+function PrintMoreCopies(intCopies) {
+	CreatePrintPage();		
+	        if (LODOP.SET_PRINT_COPIES(intCopies)) LODOP.PRINT();
+	else  alert("设置打印份数失败！");
+};		
+function CreatePrintPage() {	//打印内容设置
+	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  	
+	LODOP.PRINT_INIT("打印控件功能演示_Lodop功能_测试页一");
+	LODOP.SET_PRINT_PAGESIZE(1,500,500,"A4");
+	LODOP.ADD_PRINT_TEXT(10,10,90,11,"测试页标题");
+	LODOP.ADD_PRINT_TEXT(30,10,90,11,"测试页内容");
+	//LODOP.ADD_PRINT_TEXT(129,131,345,31,"测试内容一:9号宋体字是默认字体");
+	//LODOP.ADD_PRINT_TEXT(161,131,345,31,"测试内容二:11号普通宋体字正体");
+	//LODOP.SET_PRINT_STYLEA(0,"FontSize",11);
+	//LODOP.ADD_PRINT_TEXT(193,131,345,31,"测试内容三:13.5 号宋体字的粗体");
+	//LODOP.SET_PRINT_STYLEA(0,"FontSize",13.5);
+	//LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+	//LODOP.ADD_PRINT_TEXT(225,131,345,31,"测试内容四:15号宋体字的斜体");
+	//LODOP.SET_PRINT_STYLEA(0,"FontSize",15);
+	//LODOP.SET_PRINT_STYLEA(0,"Italic",1);
+	//LODOP.ADD_PRINT_TEXT(260,131,345,31,"测试内容五:16号斜体字带下划线");
+	//LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+	//LODOP.SET_PRINT_STYLEA(0,"Italic",1);
+	//LODOP.SET_PRINT_STYLEA(0,"Underline",1);
+	//LODOP.ADD_PRINT_TEXT(308,144,318,29,"测试内容六:黑体字居中");
+	//LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+	//LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
+	//LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
+	//LODOP.ADD_PRINT_TEXT(350,300,170,66,"测试内容七:单行文字右靠齐超出区域宽度时则折行显示");
+	//LODOP.SET_PRINT_STYLEA(0,"FontSize",11);
+	//LODOP.SET_PRINT_STYLEA(0,"Alignment",3);
+	//LODOP.ADD_PRINT_TEXT(428,79,400,23,"以上演示了位置、区域、字体、图形、线型等打印布局和风格。");
+		
+};	
+function setContent(data) {	//打印内容设置
+	if(data.type == 'error'){
+		return false;
 	}
-	$(function(){
-		log_update();
-		order_notice();
+	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  	
+	LODOP.PRINT_INIT("企鹅造饭-订单打印");
+	//根据订单长度计算订单
+	var dishes = data.dish;
+	var dishLength = dishes.length;
+	var realHeight = dishLength * 20 + 500;
+	var height = realHeight>500?realHeight:500;
+	LODOP.SET_PRINT_PAGESIZE(1,500,height,"A4");
+	LODOP.ADD_PRINT_TEXT(10, 50, 450, 20, '企鹅造饭');
+	var beginX = 30;
+	var beginY = 20;
+	var contentWidth = 480;
+	var contentHeight = 20;
+	for(var i = 0 ; i < dishLength; i++){
+		beginX += 25;
+		LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, dishes[i]['dish_title'] + " x " + dishes[i]['dish_num'] + '份    ' + dishes[i]['dish_price'] + '元');
+	}
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '顾客：' + data.username);
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '电话：' + data.mobile);
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '地址：' + data.address);
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '总价：' + data.price + '元');			
+};	
+function CreateHTMPrintPage() {	
+	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  	
+	LODOP.PRINT_INIT("打印控件功能演示_Lodop功能_测试页二");
+	var strHTML="<!doctype><body><font style='font-size:16px;'>字体大小:16px</font><br>";
+	strHTML=strHTML+"<font style='font-size:16pt;'>字体大小:16pt</font><br>";
+	strHTML=strHTML+"<font style='font-size:x-small'>字体大小:x-small</font><br>";
+	strHTML=strHTML+"<font style='font-size:small'>字体大小:small</font><br>";
+	strHTML=strHTML+"<font style='font-size:medium'>字体大小:medium</font><br>";
+	strHTML=strHTML+"<font style='font-size:large'>字体大小:large</font><br>";
+	strHTML=strHTML+"<font style='font-size:x-large'>字体大小:x-large</font><br>";
+	strHTML=strHTML+"<font style='font-size:XX-large'>字体大小:XX-large</font><br>";
+	strHTML=strHTML+"<font size='1'>字体大小:1</font><br>";
+	strHTML=strHTML+"<font size='2'>字体大小:2</font><br>";
+	strHTML=strHTML+"<font size='3'>字体大小:3</font><br>";
+	strHTML=strHTML+"<font size='4'>字体大小:4</font><br>";
+	strHTML=strHTML+"<font size='5'>字体大小:5</font><br>";
+	strHTML=strHTML+"<font size='6'>字体大小:6</font><br>";
+	strHTML=strHTML+"<font size='7'>字体大小:7</font><br>";
+	strHTML=strHTML+"<font size='-1'>字体大小:-1</font><br>";
+	strHTML=strHTML+"<font size='-2'>字体大小:-2</font><br></body>";
+	LODOP.ADD_PRINT_HTM(5,5,"100%","100%",strHTML);
+	LODOP.SET_PRINT_STYLEA(0,"Horient",3);
+	LODOP.SET_PRINT_STYLEA(0,"Vorient",3);			
+};
+
+
+
+
+function log_update() {
+	$.post("{php echo $this->createWebUrl('cron', array('op' => 'print'));}", function(){
+		setTimeout(log_update, 10000);
 	});
+}
+function print_order(){
+	$.post("{php echo $this->createWebUrl('manage', array('op' => 'print_order'));}", function(data){
+		var data = JSON.parse(data);
+		if(data != '' && data.type != 'error'){			
+			setContent(data);
+			PrintByPrinterIndex(index);	
+			//打印成功后需要更新订单已打印
+			$.post("{php echo $this->createWebUrl('manage', array('op' => 'update_print'));}", {'id':data.id}, function(result){
+				if(result != 'success')
+					alert('订单更新失败，将会重新打印');
+			});
+		}		
+	});
+	setTimeout(print_order, 5000);
+	
+}
+function order_notice() {
+	$.post("{php echo $this->createWebUrl('cron', array('op' => 'order'));}", function(data){
+		if(data == 'success') {
+			$("#musicClick")[0].play();
+		}
+		setTimeout(order_notice, 5000);
+	});
+}
+$(function(){
+	//log_update();
+	//print_order();
+	order_notice();
+});
 </script>
