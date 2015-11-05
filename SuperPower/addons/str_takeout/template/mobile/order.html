@@ -112,19 +112,6 @@
 			_add.amount(count, amountCb);
 		});
 	});
-	$('#emptyBtn').click(function() {
-		$('#emptyBox').dialog({
-			title: '确定重选菜品'
-		});
-	});
-	$("#cancel_empty").click(function() {
-		$('#emptyBox').dialog('close');
-	});
-	$("#confirm_empty").click(function() {
-		location.href = "{php echo $this->createMobileUrl('dish', array('sid' => $_GPC['sid'], 'f' => 1))}";
-		return false;
-	});
-	var is_add = "{$is_add}";
 	$(".submit_order").click(function(){
 		if(!$(this).hasClass('disabled')){
 			$(this).addClass('disabled');				
@@ -153,9 +140,14 @@
 					return false;
 				}
 			}
-			var orderer = $("#showName").val();
-			if(!address_id) {
+			var realname = $("#showName").val();
+			if(!realname) {
 				alert('请输入姓名');
+				$(this).removeClass('disabled');
+				return false;
+			}
+			if($("#totalPrice").text()<=0){
+				alert('请点单');
 				$(this).removeClass('disabled');
 				return false;
 			}
@@ -164,7 +156,7 @@
 				'address_id':address_id,
 				'note':'',
 				'delivery_time':'',
-				'realname':orderer,
+				'realname':realname,
 				'mobile':mobile,
 				'room':room
 			}

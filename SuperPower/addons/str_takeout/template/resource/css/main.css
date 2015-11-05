@@ -1,5 +1,4 @@
 /*reset*/
-
 body,
 button,
 input,
@@ -2567,6 +2566,16 @@ a.deladdress.adress_delete {
 }
 a.deladdress.adress_delete:before {
 	content: "X";
+}
+.addressChecking0{
+	border-left: #EA6E4C 3px;
+	border-left-style: solid;
+	padding-left: 10px;
+}
+.addressChecking1{
+	border-left: #1DA35A 3px;
+	border-left-style: solid;
+	padding-left: 10px;
 }
 .adress_add_wrapper {
 	text-align: center;

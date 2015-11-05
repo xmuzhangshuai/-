@@ -56,7 +56,7 @@
 				{php $addinstore=pdo_fetchall('SELECT * FROM ' . tablename('str_address').' WHERE sid='.$store['sid'].' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));}
 				{loop $addinstore $address}
 			<li style="padding: 0;width: 100%;margin: 0;" class="cont_box">
-				<span class="adress_detailed addressChecked" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}</span>
+				<span class="adress_detailed addressChecked {if $_GPC['r']!=3}addressChecking{$address['is_default']}{/if}" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}</span>
 				<a class="adress_delete deladdress" data-id="{$address['id']}" data-sid="{$address['sid']}"></a>
 			</li>
 				{/loop}
@@ -304,6 +304,7 @@
 		    }
 	 	}
 		{/if}
+		{if $_GPC['r']!=3}
 		$('.addressChecked').click(function(){
 			var address_id = $(this).attr('data-id');
 			var address_sid = $(this).attr('data-sid');
@@ -313,8 +314,6 @@
 						location.href=return_url1 + '&address_id='+address_id;
 					} else if(r==2) {
 						location.href=return_url2 + '&address_id='+address_id+'&sid='+address_sid;
-					} else if(r==3) {
-						return false;
 					} else {
 						location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid));}";
 					}
@@ -322,6 +321,7 @@
 			}
 			return false;
 		});
+		{/if}
 		$(".compiler").click(function(){
 			if($("#mobileipt").hasClass("hidden")){
 				$("#mobileipt").removeClass("hidden");
