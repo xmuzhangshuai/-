@@ -1,3 +1,4 @@
+{php session_start();}
 {template 'common/header'}
 <style type="text/css">
 	.require{color:red;}
@@ -176,5 +177,7 @@
 	
 	</script>
 {/if}
+{if $_SESSION['role'] != 'manager'}
 {template 'common'}
+{/if}
 {template 'common/footer'}
