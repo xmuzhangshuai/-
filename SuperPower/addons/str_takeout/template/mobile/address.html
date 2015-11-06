@@ -192,6 +192,7 @@
 			user_point = _value.point;
 			$("#location_input").value = user_loc;
 			$("#location_input").change();
+			return false;
 		});
 		if(0){
 			$("#location_input").focus(function (){
@@ -208,7 +209,7 @@
 			user_loc = this.value;
 			function findPoint(){
 				var point = local.getResults().getPoi(0).point;
-				user_point=point;
+				user_detail.point=user_point=point;
 				checkPointAvail();
 			}
 			var local = new BMap.LocalSearch(map, { //智能搜索
