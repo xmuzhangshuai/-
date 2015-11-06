@@ -411,7 +411,7 @@
 			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(data){
 				var data = $.parseJSON(data);
 				if(!data.errorno) {
-					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid, 'success' => 1, 'r' => $_GPC['r'],'del' => $sid));}";
+					location.reload();
 				} else {
 					alert(data.message);
 					return false;
