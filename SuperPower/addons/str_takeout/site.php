@@ -1608,7 +1608,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			);
 			pdo_update('str_address', $addrdata, array('uniacid' => $_W['uniacid'], 'id' => $_GPC['address_id']));
 			$address = get_address($_GPC['address_id']);
-			$data['address'] = trim($address['address']);
+			$data['address'] = trim($address['address']).' - '.trim($address['room']);
 			$data['mobile'] = trim($address['mobile']);
 			$data['username'] = trim($address['realname']);
 			
