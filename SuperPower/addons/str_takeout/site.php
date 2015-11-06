@@ -1419,7 +1419,15 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		global $_W, $_GPC;
 		$sid = intval($_GPC['sid']);
 		checkauth();
-		
+		$address_id = intval($_GPC['address_id']);
+		$address = get_address($address_id);
+		if(empty($address)) {
+			$address = get_default_address();
+		}
+		if((!empty($address))&&intval($address['sid'])!=$sid){
+			header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
+			exit;
+		}
 		$str_store_dish = tablename('str_store_dish');
 		$str_dish = tablename('str_dish');
 		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id AND '. $str_dish . '.share = 1';
@@ -2028,7 +2036,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		if($op == 'del') {
 			$id = intval($_GPC['id']);
 			pdo_delete('str_address', array('uniacid' => $_W['uniacid'], 'uid' => $_W['member']['uid'], 'id' => $id));
-			exit(json_encode(array('errorno' => 0, 'message' => '')));
+			exit(json_encode(array('errorno' => 0, 'message' => '','del' => $id)));
 		}
 
 		if($op == 'default') {

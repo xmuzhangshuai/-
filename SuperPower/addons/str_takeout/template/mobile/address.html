@@ -35,9 +35,7 @@
 		{if $stores}
 		<div class="cont_box person_info">
 			<img class="phone" src="../addons/str_takeout/template/resource/images/phone.png" />
-
 			<br />
-			
 			<p class="phone_number" name="mobile" id="mobile" data-id="{$currentadd['id']}"><span>{$currentadd['mobile']}</span>
 				<input class="hidden" type="text" name="mobile" id="mobileipt" value="{$currentadd['mobile']}" data-id="{$currentadd['id']}"  placeholder="手机" />
 			</p>
@@ -238,7 +236,7 @@
 			if(user_point){
 				if(ha_detail&&ha_detail.accuracy){
 					var dis=map.getDistance(user_point,ha_detail.point);
-					if(dis<2*ha_detail.accuracy){
+					if(dis<3*ha_detail.accuracy||!user_detail.accuracy){
 						user_point=ha_detail.point;
 					}else{
 						ha_detail=null;
@@ -274,7 +272,7 @@
 			storePoints[{$one['id']}]  = eval(storePoint.replace(/&quot;/g,"\""));
 			storeNames[{$one['id']}] = '{$one['title']}';
 			{/loop}
-			for(var i=0;i<storeCount;++i) {
+			for(var i=0;i<=storeCount;++i) {
 				console.log("checking"+i);
 				if((storePoints[i])&&(isIn(storePoints[i],{x:user_point.lng,y:user_point.lat}))){
 					sid=i;
@@ -381,10 +379,16 @@
 					var data = $.parseJSON(data);
 					if(!data.errorno) {
 						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default'))}", {'id':data.message,'sid':sid},function(){
+							address_id=data.message;
 							if(r==1) {
-								location.href=return_url1 + '&address_id='+data.message;
+								var oldsid={$sid};
+								if(oldsid!=sid){
+									location.href=return_url2 + '&address_id='+address_id+'&sid='+sid;
+								}else{
+									location.href=return_url1 + '&address_id='+address_id;
+								}
 							} else if(r==2) {
-								location.href=return_url2 + '&address_id='+data.message+'&sid='+sid;
+								location.href=return_url2 + '&address_id='+address_id+'&sid='+sid;
 							} else {
 								location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid));}"
 							}
@@ -407,7 +411,7 @@
 			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(data){
 				var data = $.parseJSON(data);
 				if(!data.errorno) {
-					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid, 'success' => 1, 'r' => $_GPC['r']));}";
+					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid, 'success' => 1, 'r' => $_GPC['r'],'del' => $sid));}";
 				} else {
 					alert(data.message);
 					return false;
