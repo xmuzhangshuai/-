@@ -328,7 +328,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					'displayorder' => intval($_GPC['displayorder']),
 					'description' => trim($_GPC['description']),
 					'dish_type' => $type,
-					'share' => intval($_GPC['share']),
 					'zuhe' => trim($_GPC['danpinzuhe']),
 					'comprise' => trim($_GPC['comprise'])
 				);
@@ -344,6 +343,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		  }
 		  if($op == 'dish_del'){
 		  	$id = intval($_GPC['id']);
+		  	/**
+		  	 * 二次开发 总店管理员删除菜品：删除套餐其余全部删除
+		  	 */
 			pdo_delete('str_dish', array('uniacid' => $_W['uniacid'], 'id' => $id));
 			message('删除菜品成功', $this->createWebUrl('store', array('op' => 'dish_manage')), 'success');
 		  }
@@ -657,7 +659,22 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			message('删除菜品分类成功', $this->createWebUrl('manage', array('op' => 'cate_list')), 'success');
 		} elseif($op == 'dish_del') {
 			$id = intval($_GPC['id']);
-			pdo_delete('str_dish', array('uniacid' => $_W['uniacid'], 'sid' => $sid, 'id' => $id));
+			/**
+			 * 二次开发：总店管理员删除单品，则str_store_dish，以及store_taocan中含有此单品的套餐都需要删除
+			 */
+			 //获取该dish的名称及种类。
+			 $dish = pdo_fetch('SELECT title,dish_type FROM ' . tablename('str_dish') . ' WHERE id='.$id);
+			 
+			pdo_delete('str_dish', array('uniacid' => $_W['uniacid'], 'id' => $id));
+			
+			if(!empty($dish)&&$dish['dish_type'] == 'DANPIN'){
+				pdo_run('DELETE FROM ' . tablename('str_dish') . " WHERE  zuhe LIKE '%". $dish['title'] ."%' AND dish_type = 'TAOCAN'");
+			 	//在总店菜品中获得包含该 单品的套餐，然后在门店中删除这些套餐
+				pdo_run('DELETE FROM ' . tablename('str_store_dish') . ' WHERE dish_id IN' . '(SELECT id FROM '.
+						tablename('str_dish') . " WHERE zuhe LIKE '%". $dish['title'] ."%' AND dish_type = 'TAOCAN')");
+				pdo_run('DELETE FROM ' . tablename('str_store_taocan') . ' WHERE dish_id IN' . '(SELECT id FROM '.
+						tablename('str_dish') . " WHERE zuhe LIKE '%". $dish['title'] ."%' AND dish_type = 'TAOCAN')");
+			 }
 			message('删除菜品成功', $this->createWebUrl('manage', array('op' => 'dish_list')), 'success');
 		} elseif($op == 'dish_list') {
 			$condition = ' uniacid = :aid AND sid = :sid';
@@ -1149,16 +1166,59 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			if($do == 1){//移除菜单
 				$id = intval($_GPC['id']);
 				$state = pdo_delete('str_store_dish', array('uniacid' => $_W['uniacid'], 'store_id' => $sid, 'dish_id' => $id));
-				if($_GPC['type'] == 'TAOCAN')
+				if($_GPC['type'] == 'TAOCAN'){
+					//删除套餐，里面的单品不删除
 					$tstate = pdo_delete('str_store_taocan', array('uniacid' => $_W['uniacid'], 'store_id' => $sid, 'dish_id' => $id));
-			}else if($do == 2){//加入菜单
+				}else{//移除单品，则包含该单品的套餐也一并删除
+					//获得单品名称
+					$dish = pdo_fetch('SELECT title FROM ' . tablename('str_dish') . ' WHERE id = :dish_id AND uniacid = :acid', array(':dish_id' => $id, ':acid' => $_W['uniacid']));
+					if(!empty($dish)){
+						//在总店菜品中获得包含该 单品的套餐，然后在门店中删除这些套餐
+						$tstate = pdo_run('DELETE FROM ' . tablename('str_store_dish') . ' WHERE dish_id IN' . '(SELECT id FROM '.
+							  tablename('str_dish') . " WHERE zuhe LIKE '%". $dish['title'] ."%' AND dish_type = 'TAOCAN'" . ' ) AND store_id='
+							  . $sid);
+						pdo_run('DELETE FROM ' . tablename('str_store_taocan') . ' WHERE dish_id IN' . '(SELECT id FROM '.
+							  tablename('str_dish') . " WHERE zuhe LIKE '%". $dish['title'] ."%' AND dish_type = 'TAOCAN'" . ' ) AND store_id='
+							  . $sid);
+					}
+					
+				}
+					
+			}else if($do == 2){//套餐加入菜单，特别处理
 				$insert['dish_id'] = intval($_GPC['id']);
 				$insert['store_id'] = $sid;
 				$insert['uniacid'] = $_W['uniacid'];
 				$insert['dish_name'] = $_GPC['name'];
+				$insert['dtype'] = trim($_GPC['type']);
+				
 				$state = pdo_insert('str_store_dish',$insert);
-				if($_GPC['type'] == 'TAOCAN')
+				if($_GPC['type'] == 'TAOCAN'){
+					//套餐的话需要将套餐中的单品加进去。
+					//获得套餐dish 获得里面的组合
+					$taocan = pdo_fetch('SELECT zuhe FROM ' . tablename('str_dish') . ' WHERE id = :dish_id AND uniacid = :acid', array(':dish_id' => $insert['dish_id'], ':acid' => $_W['uniacid']));
+					$danpinNames = explode('+',$taocan['zuhe']);
+					for($i = 0; $i < count($danpinNames); $i++){
+						//没有的插入
+						$dish = pdo_fetch('SELECT id FROM ' . tablename('str_store_dish') . ' WHERE dish_name = :dish_name AND store_id = :sid', array(':dish_name' => $danpinNames[$i], ':sid' => $sid));
+						//门店中无该单品=
+						if(empty($dish)){
+							//获得单个单品的id
+							$danpin = pdo_fetch('SELECT id FROM ' . tablename('str_dish') . ' WHERE title = :title AND uniacid = :acid', array(':title' => $danpinNames[$i], ':acid' => $_W['uniacid']));
+						
+							$dish['dish_id'] = $danpin['id'];
+							$dish['store_id'] = $sid;
+							$dish['uniacid'] = $_W['uniacid'];
+							$dish['dish_name'] = $danpinNames[$i];
+							$dish['dtype']	= 'DANPIN';									
+							pdo_insert('str_store_dish', $dish);
+						}						
+					}
+					
 					$tstate = pdo_insert('str_store_taocan', $insert);
+				}//else{
+					//$tstate = pdo_insert('str_store_danpin',$insert);
+				//}
+					
 				
 			}
 			if($state !== false && $tstate !== false) {

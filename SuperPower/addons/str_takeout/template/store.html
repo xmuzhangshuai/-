@@ -1135,7 +1135,7 @@ $('.form_datetime').datetimepicker({
 								<th>赠送积分</th>
 								<th>是否上架</th>
 								<th>是否推送</th> -->
-								<th>是否分享给门店</th>
+								<!-- <th>是否分享给门店</th> -->
 								<th style="width:150px; text-align:right;">操作</th>
 							</tr>
 						</thead>
@@ -1169,6 +1169,7 @@ $('.form_datetime').datetimepicker({
 								<td>
 								{$item['zuhe']}
 								</td>
+								<!-- 
 								<td>
 									{if $item['share'] == 1}
 										<span class="btn btn-sm btn-success share-toggle" id="{$item['id']}" data-toggle="2" title="点击修改">不分享</span>
@@ -1176,6 +1177,7 @@ $('.form_datetime').datetimepicker({
 										<span class="btn btn-sm btn-warning share-toggle" id="{$item['id']}" data-toggle="1" title="点击修改">分享</span>
 									{/if}
 								</td>
+								 -->
 								<td style="text-align:right;">
 									<a href="{php echo $this->createWebUrl('store', array('op' => 'dish_post', 'id' => $item['id']))}" class="btn btn-default btn-sm" title="编辑" data-toggle="tooltip" data-placement="top"><i class="fa fa-edit"> </i></a>
 									<a href="{php echo $this->createWebUrl('store', array('op' => 'dish_del', 'id' => $item['id']))}" class="btn btn-default btn-sm" title="删除" data-toggle="tooltip" data-placement="top" onclick="if(!confirm('删除后将不可恢复，确定删除吗?')) return false;"><i class="fa fa-times"> </i></a>
@@ -1351,7 +1353,7 @@ $('.form_datetime').datetimepicker({
 							<label class="radio-inline"><input type="radio" name="recommend" value="2" {if $item['recommend'] == 2 || !$item['recommend']}checked{/if}> 不推送</label>
 							<div class="help-block">设置为推送后,当客人没有点该菜品时,提交订单之前,系统会提示客人</div>
 						</div>
-					</div> -->
+					</div> 
 					<div class="form-group">
 						<label class="col-xs-12 col-sm-3 col-md-2 control-label"><span class="require">* </span>分享给门店</label>
 						<div class="col-sm-9 col-xs-9 col-md-9">
@@ -1359,7 +1361,7 @@ $('.form_datetime').datetimepicker({
 							<label class="radio-inline"><input type="radio" name="share" value="2" {if $item['share'] == 2 || !$item['share']}checked{/if}> 不分享</label>
 							<div class="help-block">设置为分享后，其他门店的菜单中包含该菜品</div>
 						</div>
-					</div>
+					</div>-->
 					<!-- 二次开发，隐藏内容 -->
 					<!-- 
 					<div class="form-group">
