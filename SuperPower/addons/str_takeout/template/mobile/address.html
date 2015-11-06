@@ -206,10 +206,15 @@
 		}
 		$("#location_input").change(function() {
 			user_loc = this.value;
-			myGeo.getPoint(user_loc, function(point){
+			function findPoint(){
+				var point = local.getResults().getPoi(0).point;
 				user_point=point;
 				checkPointAvail();
-			}, user_iploc.content.address);
+			}
+			var local = new BMap.LocalSearch(map, { //智能搜索
+			  onSearchComplete: findPoint
+			});
+			local.search(user_loc);
 		});
 		$(".home-position").click(function(){
 			if($(this).hasClass("hdisabled")){return false;}
@@ -229,7 +234,6 @@
 				user_point=r.point;
 				checkPointAvail();
 			},{enableHighAccuracy: true});
-
 		});
 		
 		function checkPointAvail(){
