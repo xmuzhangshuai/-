@@ -991,6 +991,12 @@ input.half[type=text]:last-child {
 	float: left;
 	padding-top: 10px;
 }
+.menu_list li.auto_height {
+	padding-bottom: 10px;
+	border-bottom: 1px #CCC;
+	border-bottom-style: solid;
+	margin-bottom: 15px;
+}
 ul.menu_list > li.order_item {
 	padding-top: 10px;
 }
@@ -1014,7 +1020,7 @@ ul.menu_list > li.order_item {
 	.menu_list li h3 {
 		font-weight: bold;
 		line-height: 1.7;
-		font-size: 12px;
+		font-size: 14px;
 		color: #000000;
 		display: inline;
 	}
@@ -1028,7 +1034,7 @@ ul.menu_list > li.order_item {
 	}
 	.menu_list li div.info,
 	.menu_list li span.info {
-		font-size: 9px;
+		font-size: 12px;
 	}
 	.menu_list li strong {
 		font-size: 12px;
@@ -1046,7 +1052,7 @@ ul.menu_list > li.order_item {
 	}
 	.menu_list li .order_item strong span,
 	.menu_list li.order_item strong span {
-		font-size: 12px;
+		font-size: 14px;
 	}
 	.menu_list li.order_item strong {
 		font-size: 10px;
@@ -1102,9 +1108,9 @@ ul.menu_list > li.order_item {
 .order_item_count .btn_n.add,
 .order_item_count .btn_n.del {
 	position: absolute;
-	background-size: 20px;
-	width: 20px;
-	height: 20px;
+	background-size: 16px;
+	width: 16px;
+	height: 16px;
 }
 .order_item_count .btn_n.add:before,
 .order_item_count .btn_n.del:before {

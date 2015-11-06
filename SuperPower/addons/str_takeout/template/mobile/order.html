@@ -1,5 +1,5 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1" />
 <script src="../addons/str_takeout/template/resource/js/order.js"></script>
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="https://one.pingxx.com/lib/pingpp_one.js"></script>
@@ -40,7 +40,7 @@
 						<div class="order_item">
 							<h3>{$li['title']}</h3>
 							<strong>￥<span class="unit_price">{$li['price']}</span></strong>
-							<div class="info">{$li['description']}</div>
+							<div class="info">{$li['zuhe']}</div>
 						</div>
 						<div class="order_item_count">
 							<div class="fr" max="{$li['kucun']}">

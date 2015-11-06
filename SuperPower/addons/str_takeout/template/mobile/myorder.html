@@ -1,5 +1,5 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <style type="text/css">
 	.nav div {
@@ -65,10 +65,12 @@
 			<div>
 				<h3>{$dis['dish_title']}  <span class="order_item_count">x{$dis['dish_num']}</span><strong>￥<span class="unit_price">{$dis['dish_price']}</span></strong></h3>
 			</div>
-		{php $dishinfo=get_dishinfo($dis['dish_id']);} {loop $dishinfo $dinfo}
+			{php $dishinfo=get_dishinfo($dis['dish_id']);} 
+			{loop $dishinfo $dinfo}
 			<span class="food_detailed info">{$dinfo['zuhe']}</span>
+			{/loop} 
 		</li>
-		{/loop} {/loop}
+		{/loop}
 		<li class="cont_box order_item" style="margin-top: 2px;padding-bottom: 10px;">
 			<div>
 				<span class="state state{$row['status']}">
