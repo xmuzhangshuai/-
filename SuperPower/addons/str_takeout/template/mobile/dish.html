@@ -1,83 +1,77 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css">
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="../addons/str_takeout/template/resource/js/main.js"></script>
 <script src="../addons/str_takeout/template/resource/js/menu.js"></script>
 <script src="../addons/str_takeout/template/resource/js/common.js"></script>
 <script src="../addons/str_takeout/template/resource/js/resp_slide.js"></script>
-<style type="text/css">
-	{if $store['comment_status'] == 1}
-	.nav a{width:33.333%;}
-	{/if}
-</style>
 <div class="container" onselectstart="return true;" ondragstart="return false;">
 	{template 'header'}
-    <!--
+	<!--
     	作者：librazy@foxmail.com
     	时间：2015-10-14
     	描述：TODO:定位、选择
     -->
-    {if $address['address']}
-    <div class="nav_address"><span>送货到：</span><span>{$address['address']}</span>-<span>{$address['room']}</span><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a></div>
-    {else}
-    <div class="nav_address"><span>添加送餐地址才能点餐哟</span><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'op' =>'post', 'r' => 2));}" class="nav_sp_location"></a></div>
-    {/if}
+	{if $address['address']}
+	<div class="nav_address"><span>送货到：</span><span>{$address['address']}</span>-<span>{$address['room']}</span>
+		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a>
+	</div>
+	{else}
+	<div class="nav_address"><span>添加送餐地址才能点餐哟</span>
+		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'op' =>'post', 'r' => 2));}" class="nav_sp_location"></a>
+	</div>
+	{/if}
 	<form name="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
 		<input type="hidden" name="more" value="{$_GPC['more']}">
 		<input type="hidden" name="dish_str" value="{$dish_str}">
 		<section class="menu_wrap" id="menuWrap">
 			{if $store['open']==0}
-				<div class="tips">企鹅休息中，接受预定~下次配送时间：<br /><span>{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></span></div>
+			<div class="tips">企鹅休息中，接受预定~下次配送时间：
+				<br /><span>{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></span></div>
 			{/if}
 			<div class="menu_container">
-					<ul class="menu_list">
-						{loop $dish $ds}
-							<li id="{$ds['id']}" class="auto_height {if !($ds['total'] == -1 || $ds['total'] > 0)}out{/if}">
-								<div>
-									<div class="menu_type">{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></div>
-									{if $ds['thumb']}
-									{php $ds['thumb'] = explode(';',$ds['thumb']); }
-									<div class="slider_wrap">
-										<ul class="rslides" id="slider{$ds['id']}">
-											{loop $ds['thumb'] $thu}
-											<li>
-												<img src="{php echo tomedia($thu);}" alt="" />
-											</li>
-											{/loop}
-										</ul>
-										<div class="mask"><div><p>售完</p></div></div>
+				<ul class="menu_list">
+					{loop $dish $ds}
+					<li id="{$ds['id']}" class="auto_height {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}out{/if}">
+						<div>
+							<div class="menu_type">{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></div>
+							{if $ds['thumb']} {php $ds['thumb'] = explode(';',$ds['thumb']); }
+							<div class="slider_wrap">
+								<ul class="rslides" id="slider{$ds['id']}">
+									{loop $ds['thumb'] $thu}
+									<li>
+										<img src="{php echo tomedia($thu);}" alt="" />
+									</li>
+									{/loop}
+								</ul>
+								<div class="mask">
+									<div>
+										<p>售完</p>
 									</div>
-									{else}
-										<div class="nopic"></div>
-									{/if}								
 								</div>
-								<div class="menu_desc">
-									<h3>{$ds['title']}</h3>
-									<div class="info">{$ds['zuhe']}</div>
-								</div>
-								<div class="price_wrap menu_desc">
-									<strong>￥<span class="unit_price">{$ds['price']}</span></strong>
-										<div class="fr buy_btn {if !($ds['total'] == -1 || $ds['total'] > 0)}buy_btn_out{/if}" max="{$ds['total']}">
-											<a href="javascript:void(0);" class="btn_n add" data-num="{$cart['data'][$ds['id']]}"></a>
-											{if $store['business_hours_flag']}<a href="javascript:void(0);" class="btn_fork"></a>{else}预订{/if}
-											<input autocomplete="off" class="h_num" type="hidden" name="dish[{$ds['id']}]" value="{$cart['data'][$ds['id']]}">
-										</div>
-								</div>
-							</li>
-						{/loop}
-					</ul>
+							</div>
+							{else}
+							<div class="nopic"></div>
+							{/if}
+						</div>
+						<div class="menu_desc">
+							<h3>{$ds['title']}</h3>
+							<div class="info">{$ds['zuhe']}</div>
+						</div>
+						<div class="price_wrap menu_desc">
+							<strong>￥<span class="unit_price">{$ds['price']}</span></strong>
+							<div class="fr buy_btn {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}buy_btn_out{/if}" max="{$ds['kucun']}">
+								<a href="javascript:void(0);" class="btn_n add" data-num="{$cart['data'][$ds['id']]}"></a>
+								{if $store['business_hours_flag']}
+								<a href="javascript:void(0);" class="btn_fork"></a>{else}预订{/if}
+								<input autocomplete="off" class="h_num" type="hidden" name="dish[{$ds['id']}]" value="{$cart['data'][$ds['id']]}">
+							</div>
+						</div>
+					</li>
+					{/loop}
+				</ul>
 			</div>
 		</section>
-		{if $store['is_takeout'] == 1 && $store['is_meal'] == 2}
-		<footer class="shopping_cart">
-			<div class="fixed hidden" id="fix_bar">
-				<div>
-					<span class="comm_btn disabled">还差<span id="sendCondition">{$store['send_price']}元</span>起送</span>
-					<a id="settlement" href="javascript:document.cart_form.submit();" class="comm_btn" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 立即下单</a>
-				</div>
-			</div>
-		</footer>
-		{else}
 		<footer class="shopping_cart">
 			<div class="fixed hidden" id="fix_bar">
 				<div>
@@ -86,118 +80,101 @@
 				</div>
 			</div>
 		</footer>
-		{/if}
 	</form>
 </div>
 
 <script type="text/javascript">
-			$(function() {
-				$(".rslides").responsiveSlides({
-					auto: true,
-					nav: true,
-					speed: 500,
-					namespace: "callbacks",
-					pager: true,
-				});
-				$("#settlement").click(function(){
-					if(!$("#settlement").hasClass("disabled")){
-						document.cart_form.submit();
-					}					
+	$(function() {
+		$(".rslides").responsiveSlides({
+			auto: true,
+			nav: true,
+			speed: 500,
+			namespace: "callbacks",
+			pager: true,
+		});
+		$("#settlement").click(function() {
+			if (!$("#settlement").hasClass("disabled")) {
+				document.cart_form.submit();
+			}
+		});
+	});
+	var menu = {
+		offsetAry: [0],
+		_is_left_menu_addclass: true,
+		init: function(id) {
+			var winH = $(window).height(),
+				_this = this,
+				_icoMenu = $('#icoMenu'),
+				_sideNav = $('#sideNav'),
+				maxH = winH - (_icoMenu.parent().is(':visible') ? _icoMenu.outerHeight(true) : 0) - 45;
+			this.el = $(id);
+			_sideNav.height(maxH);
+			if (_sideNav.find('ul').height() > maxH) new IScroll('#sideNav', {
+				probeType: 3,
+				mouseWheel: true,
+				click: true
+			});
+			$(window).bind('scroll', function() {
+				_this.scroll.call(_this);
+			});
+			$('#icoMenu').click(function() {
+				if (_sideNav.css('display') != 'none') {
+					_sideNav.show();
+				} else {
+					_sideNav.hide();
+				}
+				if (_sideNav.find('ul').height() > maxH) new IScroll('#sideNav', {
+					probeType: 3,
+					mouseWheel: true,
+					click: true
 				});
 			});
-var menu = {
-	offsetAry: [0],
-	_is_left_menu_addclass:true,
-	init: function(id){
-		var winH = $(window).height(),
-			_this = this,			
-			_icoMenu = $('#icoMenu'),
-			_sideNav = $('#sideNav'),
-			maxH = winH - (_icoMenu.parent().is(':visible') ? _icoMenu.outerHeight(true) : 0) - 45;
-
-		this.el =  $(id);
-		
-		_sideNav.height(maxH);
-
-		if(_sideNav.find('ul').height() > maxH)  new IScroll('#sideNav', { probeType: 3, mouseWheel: true ,click:true});
-
-		$(window).bind('scroll', function(){
-			_this.scroll.call(_this);
-		});
-
-		$('#icoMenu').click(function(){
-			if(_sideNav.css('display') != 'none') {
-				_sideNav.show();
-			} else {
-				_sideNav.hide();
+			$('.menu_tt h2').each(function() {
+				_this.offsetAry.push($(this).offset().top);
+			});
+			this.el.find('a').click(function() {
+				$(this).addClass('on').parent().siblings().find('a').removeClass('on');
+				_this._is_left_menu_addclass = false;
+				var t = $(window).scrollTop();
+				var t1 = _this.offsetAry[_this.el.find('a').index(this) + 1];
+				var _t = Math.abs(t1 - t);
+				var _time = parseInt(Math.round(_t / 3));
+				$('html,body').animate({
+					scrollTop: t1
+				}, _time, "linear", function() {
+					_this._is_left_menu_addclass = true;
+				});
+			});
+			_this.offsetT = this.el.offset().top;
+		},
+		getIndex: function(ary, value) {
+			var i = 0;
+			for (; i < ary.length; i++) {
+				if (value >= ary[i] && value < ary[i + 1]) {
+					return i;
+				}
 			}
-			if(_sideNav.find('ul').height() > maxH)  new IScroll('#sideNav', { probeType: 3, mouseWheel: true ,click:true});
-		});
-
-		$('.menu_tt h2').each(function(){
-			_this.offsetAry.push($(this).offset().top);
-		});
-
-		this.el.find('a').click(function(){
-			$(this).addClass('on').parent().siblings().find('a').removeClass('on');
-			_this._is_left_menu_addclass=false;
-			var t = $(window).scrollTop();
-			var t1= _this.offsetAry[_this.el.find('a').index(this) + 1];
-			var _t =Math.abs(t1-t);
-			var _time =parseInt( Math.round(_t/3));
-			$('html,body').animate({scrollTop: t1}, _time,"linear",function(){_this._is_left_menu_addclass=true;});
-		});
-
-		_this.offsetT = this.el.offset().top;	
-	},
-	getIndex: function(ary, value){
-		var i = 0;
-		for(; i < ary.length; i++){
-			if(value >= ary[i] && value < ary[i + 1]){
-				return i;
+			return ary.length - 1;
+		},
+		scroll: function() {
+			var st = $(document).scrollTop(),
+				index = this.getIndex(this.offsetAry, st),
+				i = index - 1;
+			if (this.curIndex !== index) { // 判断分类是否切换
+				$('.menu_tt h2').removeClass('menu_fixed');
+				if (this._is_left_menu_addclass == true)
+					this.el.find('a').removeClass('on');
+				if (i >= 0) {
+					this.el.addClass('menu_fixed');
+					$('.menu_tt').eq(i).find('h2').addClass('menu_fixed');
+					if (this._is_left_menu_addclass == true)
+						this.el.find('a').eq(i).addClass('on');
+				} else {
+					this.el.removeClass('menu_fixed');
+				}
+				this.curIndex = index;
 			}
-		}
-		return ary.length -1;
-	},
-	scroll: function(){
-		var st = $(document).scrollTop(),
-			index = this.getIndex(this.offsetAry, st),
-			i = index - 1;
-
-		if(this.curIndex !== index){ // 判断分类是否切换
-			
-			$('.menu_tt h2').removeClass('menu_fixed');
-			if(this._is_left_menu_addclass==true)
-				this.el.find('a').removeClass('on');
-			if(i >= 0){
-				this.el.addClass('menu_fixed');
-				$('.menu_tt').eq(i).find('h2').addClass('menu_fixed');
-				if(this._is_left_menu_addclass==true)
-					this.el.find('a').eq(i).addClass('on');	
-			}else{
-				this.el.removeClass('menu_fixed');
-			}
-			this.curIndex = index;
 		}
 	}
-}
-//	$(function(){
-//		menu.init('#menuNav');
-//	});
-//	function setHeight(sel){
-//		var maxh = 0;
-//		$(sel).css("height","auto");
-//		$(sel).each(function(){
-//			maxh=$(this).prop("scrollHeight")>maxh?$(this).prop("scrollHeight"):maxh;
-//		});
-//		maxh+=10;
-//		$(sel).css("height",maxh+"px");
-//		if($(".container-fill").width()<=720){$(sel).css("height","auto");}
-//	}
-//	function setH(){setHeight(".auto_height")}
-//	$(window).resize(setH);
-//	$(document).ready(setH);
-//	setInterval(setH,1000);
 </script>
-{template 'common'}
-{template 'common/footer'}
+{template 'common'} {template 'common/footer'}

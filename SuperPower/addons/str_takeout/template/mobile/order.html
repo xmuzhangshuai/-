@@ -1,16 +1,13 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css">
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css" />
 <script src="../addons/str_takeout/template/resource/js/order.js"></script>
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="https://one.pingxx.com/lib/pingpp_one.js"></script>
 <script src="https://one.pingxx.com/lib/sea.js"></script>
 <style type="text/css">
-	{if $store['comment_status']==1}
-	.nav a {
-		width: 33.333%;
+	body {
+		background-color: #E5E5E5;
 	}
-	{/if}
-	body{background-color: #E5E5E5;}
 </style>
 {template 'header'}
 <div class="container">
@@ -66,29 +63,6 @@
 				<p>&nbsp;</p>
 			</div>
 			<div class="tips" id="addtip" style="background-color:#e1943c;display:none" data-flag="0">亲，您可能还需要以下菜品</div>
-			<!-- 提醒客户需要点的菜品（比如：米饭）-->
-			{if !empty($dish_add)}
-			<ul class="menu_list order_list" id="addList" style="display:none">
-				{loop $dish_add $add_li}
-				<li>
-					<div>
-						<img src="{php echo tomedia($add_li['thumb']);}" alt="">
-					</div>
-					<div>
-						<h3>{$add_li['title']}</h3>
-						<div>
-							<div class="fr" max="{$add_li['total']}">
-								<a href="javascript:void(0);" class="btn_n add active"></a>
-							</div>
-							<input autocomplete="off" class="number" type="hidden" name="dish[{$add_li['id']}]" value="0">
-							<span class="count">0</span>
-							<strong>￥<span class="unit_price">{$add_li['price']}</span></strong>
-						</div>
-					</div>
-				</li>
-				{/loop}
-			</ul>
-			{/if}
 		</section>
 		<footer class="order_fixed">
 			<div class="fixed" id="fix_bar">
