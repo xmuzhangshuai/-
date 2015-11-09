@@ -346,7 +346,13 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		  	/**
 		  	 * 二次开发 总店管理员删除菜品：删除套餐其余全部删除
 		  	 */
+		  	 $dish = pdo_fetch('str_dish',array('uniacid' => $_W['uniacid'], 'id' => $id));
 			pdo_delete('str_dish', array('uniacid' => $_W['uniacid'], 'id' => $id));
+			if($dish['dish_type'] == 'DANPIN'){
+				pdo_run('DELETE FROM '.tablename('str_dish'). " WHERE zuhe LIKE '%" . $dish['title'] . "%' AND dish_type = 'TAOCAN'");
+				pdo_run('DELETE FROM '.tablename('str_store_dish'). " WHERE dish_id IN"."(SELECT id FROM ".tablename('str_dish')." WHERE zuhe LIKE '%" . $dish['title'] . "%' AND dish_type='TAOCAN') AND dtype = 'TAOCAN'");
+				pdo_run('DELETE FROM '.tablename('str_store_taocan'). " WHERE dish_id IN"."(SELECT id FROM ".tablename('str_dish')." WHERE zuhe LIKE '%" . $dish['title'] . "%' AND dish_type='TAOCAN')");
+			}
 			message('删除菜品成功', $this->createWebUrl('store', array('op' => 'dish_manage')), 'success');
 		  }
 
@@ -668,7 +674,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			pdo_delete('str_dish', array('uniacid' => $_W['uniacid'], 'id' => $id));
 			
 			if(!empty($dish)&&$dish['dish_type'] == 'DANPIN'){
-				pdo_run('DELETE FROM ' . tablename('str_dish') . " WHERE  zuhe LIKE '%". $dish['title'] ."%' AND dish_type = 'TAOCAN'");
+				pdo_run('DELETE FROM ' . tablename('str_dish') . " WHERE  zuhe LIKE %单品2% AND dish_type = 'TAOCAN'");
 			 	//在总店菜品中获得包含该 单品的套餐，然后在门店中删除这些套餐
 				pdo_run('DELETE FROM ' . tablename('str_store_dish') . ' WHERE dish_id IN' . '(SELECT id FROM '.
 						tablename('str_dish') . " WHERE zuhe LIKE '%". $dish['title'] ."%' AND dish_type = 'TAOCAN')");
