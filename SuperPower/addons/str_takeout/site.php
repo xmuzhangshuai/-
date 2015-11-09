@@ -1467,6 +1467,11 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 		}			
 		$pager = pagination($total, $pindex, $psize, '', array('before' => 0, 'after' => 0));
+		$address_id = intval($_GPC['address_id']);
+		$address = get_address($address_id);
+		if(empty($address)) {
+			$address = get_default_address();
+		}
 		include $this->template('index');
 	}
 
@@ -1474,7 +1479,15 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		global $_W, $_GPC;
 		$sid = intval($_GPC['sid']);
 		checkauth();
-		
+		$address_id = intval($_GPC['address_id']);
+		$address = get_address($address_id);
+		if(empty($address)) {
+			$address = get_default_address();
+		}
+		if((!empty($address))&&intval($address['sid'])!=$sid){
+			header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
+			exit;
+		}
 		$str_store_dish = tablename('str_store_dish');
 		$str_dish = tablename('str_dish');
 		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id AND '. $str_dish . '.share = 1';
@@ -1483,7 +1496,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		
 		checkclerk($sid);
 		check_trash($sid);
-		$store = pdo_fetch('SELECT title,logo,id,content,delivery_price,business_hours,send_price,dish_style,is_meal,is_takeout,comment_status,notice,open FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
+		$store = pdo_fetch('SELECT * FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
 		$title = $store['title'];
 		$_share = get_share($store);
 		if($store['comment_status'] == 1) {
@@ -1640,10 +1653,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$store = pdo_fetch('SELECT notice_acid,title,store_tpl,member_tpl,delivery_tpl,delivery_price FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
 			$out['errno'] = 1;
 			$out['error'] = '';
-			if(!$sid || empty($dish)) {
-				$out['errno'] = 1;
-				$out['error'] = '订单信息不存在或已失效';
-			}
 			$data['uniacid'] = $_W['uniacid'];
 			$data['sid'] = $sid;
 			$data['uid'] = $_W['member']['uid'];
@@ -1659,7 +1668,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			);
 			pdo_update('str_address', $addrdata, array('uniacid' => $_W['uniacid'], 'id' => $_GPC['address_id']));
 			$address = get_address($_GPC['address_id']);
-			$data['address'] = trim($address['address']);
+			$data['address'] = trim($address['address']).' - '.trim($address['room']);
 			$data['mobile'] = trim($address['mobile']);
 			$data['username'] = trim($address['realname']);
 			
@@ -1673,8 +1682,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$out['error'] = '菜品为空';
 				exit(json_encode($out));
 			}
-			$data['num'] = $cart['num'];
-			$data['price'] = $cart['price'];
+
 			$data['addtime'] = TIMESTAMP;
 			$data['status'] = 1;
 			$data['is_notice'] = 0;
@@ -1693,9 +1701,16 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$ids_str = implode(',', array_keys($cart['data']));
 				$dish_info = pdo_fetchall('SELECT ' . $str_dish . '.*,'. $str_store_dish . '.selling,'. $str_store_dish .'.kucun FROM ' . $str_dish . ',' .$str_store_dish .' WHERE ' . $condition . ' AND '.$str_dish.'.id IN ('.$ids_str.') ORDER BY displayorder DESC,'. $str_dish .'.id ASC', $params);
 			}
+			$data['num'] = 0;
+			$data['price'] = 0;
 			foreach($cart['data'] as $k => $v) {
 				$k = intval($k);
 				$v = intval($v);
+				if($_GPC['dish'.$k]){
+					$v=intval($_GPC['dish'.$k]);
+				}else{
+					$v=0;
+				}
 				pdo_query('UPDATE ' . tablename('str_dish') . " set sailed = sailed + {$v} WHERE uniacid = :aid AND id = :id", array(':aid' => $_W['uniacid'], ':id' => $k));
 				$stat = array();
 				if($k && $v) {
@@ -1704,13 +1719,16 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					$stat['sid'] = $sid;
 					$stat['dish_id'] = $k;
 					$stat['dish_num'] = $v;
+					$data['num'] = $v + intval($data['num']);
 					$d_info = pdo_fetchall('SELECT ' . $str_dish . '.* FROM ' . $str_dish . ',' .$str_store_dish .' WHERE '.$str_dish.'.id='.$k.' ORDER BY displayorder DESC,'. $str_dish .'.id ASC', $params);
 					$stat['dish_title'] = $d_info[0]['title'];
 					$stat['dish_price'] = ($v * $d_info[0]['price']);
+					$data['price'] = $data['price'] + intval($stat['dish_price']);
 					$stat['addtime'] = TIMESTAMP;
 					pdo_insert('str_stat', $stat);
 				}
 			}
+			pdo_update('str_order', $data, array('uniacid' => $_W['uniacid'], 'id' => $id));
 			//是否打印订单
 			init_print_order($sid, $id, 'order');
 			//微信邮件通知
@@ -1742,11 +1760,10 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			message('门店不存在', referer(), 'error');
 		}
 		$title = $store['title'];
-		$where = ' WHERE uniacid = :aid AND sid = :sid AND uid = :uid';
+		$where = ' WHERE uniacid = :aid AND uid = :uid';
 		$params = array(
 			':aid' => $_W['uniacid'],
-			':uid' => $_W['member']['uid'],
-			':sid' => $sid,
+			':uid' => $_W['member']['uid']
 		);
 		$status = intval($_GPC['status']);
 
@@ -2017,12 +2034,19 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		$sid = intval($_GPC['sid']);
 		$uid = $_W['member']['uid'];
 		$store = get_store($sid);
+		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'list';
+		$r = trim($_GPC['r']) ? trim($_GPC['r']) : '';
 		$_share = get_share($store);
-		if(empty($store)) {
+		if(empty($store)&&($op!='init')) {
 			message('商家不存在', '', 'error');
 		}
+		$where = ' WHERE uniacid = :aid AND uid = :uid';
+		$params = array(
+			':aid' => $_W['uniacid'],
+			':uid' => $_W['member']['uid']
+		);
+		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') . $where, $params);
 		$title = $store['title'];
-		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'list';
 		$return_url = '';
 		if(!empty($_GPC['return_url'])) {
 			$return_url = urldecode($_GPC['return_url']);
@@ -2034,10 +2058,13 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$currentadd = get_default_address();
 			}
 			$addressesgroup = get_addressesgroup();
-			$stores=pdo_fetchall('SELECT distinct(sid),title FROM ' . tablename('str_address').',' .tablename('str_store').' WHERE '.tablename('str_address').'.sid='.tablename('str_store').'.id'.' AND '.tablename('str_address').'.uniacid = :aid AND uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));
+			if($r=='1'){
+				$stores=pdo_fetchall('SELECT distinct(sid),title FROM ' . tablename('str_address').',' .tablename('str_store').' WHERE '.tablename('str_address').'.sid='.$sid.' AND '.tablename('str_store').'.id='.$sid.' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));
+			}else{
+				$stores=pdo_fetchall('SELECT distinct(sid),title FROM ' . tablename('str_address').',' .tablename('str_store').' WHERE '.tablename('str_address').'.sid='.tablename('str_store').'.id'.' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));
+			}
 		}
-		
-		if($op == 'post') {
+		if($op == 'post'||$op == 'init') {
 			$currentadd = get_default_address();
 			$id = intval($_GPC['id']);
 			$address = get_address($id);
@@ -2069,7 +2096,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		if($op == 'del') {
 			$id = intval($_GPC['id']);
 			pdo_delete('str_address', array('uniacid' => $_W['uniacid'], 'uid' => $_W['member']['uid'], 'id' => $id));
-			exit(json_encode(array('errorno' => 0, 'message' => '')));
+			exit(json_encode(array('errorno' => 0, 'message' => '','del' => $id)));
 		}
 
 		if($op == 'default') {

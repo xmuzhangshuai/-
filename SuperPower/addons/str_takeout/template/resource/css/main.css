@@ -1,5 +1,4 @@
 /*reset*/
-
 body,
 button,
 input,
@@ -390,11 +389,12 @@ body>div:first-child {
 	height: 38px;
 	width: 100%;
 	background-color: #d9d9d9;
-	font-size: 16px;
+	font-size: 14px;
 	line-height: 38px;
 	padding-left: 20px;
 	text-overflow: ellipsis;
 	overflow: hidden;
+	position: relative;
 }
 .nav_address span {
 	text-overflow: ellipsis;
@@ -410,7 +410,30 @@ body>div:first-child {
 	margin-top: 5px;
 	margin-right: 12px;
 	float: right;
-	position: static;
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 100;
+}
+i.cantype1,
+i.cantype2,
+i.cantype3,
+.menu_wrap .tips i.cantype1,
+.menu_wrap .tips i.cantype2,
+.menu_wrap .tips i.cantype3{
+	display: inline;
+}
+.cantype1:before{
+	display: inline;
+	content: "早餐";
+}
+.cantype2:before{
+	display: inline;
+	content: "午餐";
+}
+.cantype3:before{
+	display: inline;
+	content: "晚餐";
 }
 .img_swipe {
 	position: relative;
@@ -699,6 +722,13 @@ body>div:first-child {
 .menu_list li h3 span {
 	color: #ff510c;
 }
+.menu_list li h3 span.order_item_count {
+	color: #333;
+	font-size: 70%;
+	font-style: normal;
+	font-weight: normal;
+}
+
 .menu_list li p {
 	font-size: 12px;
 	line-height: 1.8;
@@ -961,6 +991,12 @@ input.half[type=text]:last-child {
 	float: left;
 	padding-top: 10px;
 }
+.menu_list li.auto_height {
+	padding-bottom: 10px;
+	border-bottom: 1px #CCC;
+	border-bottom-style: solid;
+	margin-bottom: 15px;
+}
 ul.menu_list > li.order_item {
 	padding-top: 10px;
 }
@@ -984,7 +1020,7 @@ ul.menu_list > li.order_item {
 	.menu_list li h3 {
 		font-weight: bold;
 		line-height: 1.7;
-		font-size: 12px;
+		font-size: 14px;
 		color: #000000;
 		display: inline;
 	}
@@ -998,7 +1034,7 @@ ul.menu_list > li.order_item {
 	}
 	.menu_list li div.info,
 	.menu_list li span.info {
-		font-size: 9px;
+		font-size: 12px;
 	}
 	.menu_list li strong {
 		font-size: 12px;
@@ -1016,7 +1052,7 @@ ul.menu_list > li.order_item {
 	}
 	.menu_list li .order_item strong span,
 	.menu_list li.order_item strong span {
-		font-size: 12px;
+		font-size: 14px;
 	}
 	.menu_list li.order_item strong {
 		font-size: 10px;
@@ -1072,9 +1108,9 @@ ul.menu_list > li.order_item {
 .order_item_count .btn_n.add,
 .order_item_count .btn_n.del {
 	position: absolute;
-	background-size: 20px;
-	width: 20px;
-	height: 20px;
+	background-size: 16px;
+	width: 16px;
+	height: 16px;
 }
 .order_item_count .btn_n.add:before,
 .order_item_count .btn_n.del:before {
@@ -2537,6 +2573,16 @@ a.deladdress.adress_delete {
 a.deladdress.adress_delete:before {
 	content: "X";
 }
+.addressChecking0{
+	border-left: #EA6E4C 3px;
+	border-left-style: solid;
+	padding-left: 10px;
+}
+.addressChecking1{
+	border-left: #1DA35A 3px;
+	border-left-style: solid;
+	padding-left: 10px;
+}
 .adress_add_wrapper {
 	text-align: center;
 	clear: both;
@@ -2621,4 +2667,16 @@ a.deladdress.adress_delete:before {
 }
 .state3:before {
 	content: "订单完成";
+}
+.state4 {
+	color: rgb(100, 100, 100);
+}
+.state4:before {
+	content: "已取消";
+}
+.state6 {
+	color: rgb(243, 0, 0);
+}
+.state6:before {
+	content: "问题订单";
 }

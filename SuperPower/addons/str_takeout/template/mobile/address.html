@@ -1,6 +1,6 @@
 {template 'common/header'}
 <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6E7C75E41980283b39d3c61e81f16a39"></script>
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css">
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="../addons/str_takeout/template/resource/js/intersectPolygon.js"></script>
 <div id="allmap"></div>
@@ -19,7 +19,7 @@
 		<span class="cont_userdec">微信昵称</span>
 		<br>
 		<br>
-		<span class="cont_userdec1">共3个订单</span>
+		<span class="cont_userdec1">共{$total}个订单</span>
 	</div>
 </div>
 {template 'header'}
@@ -32,36 +32,40 @@
 	</div>
 	<hr width="102%" class="division" />
 	<div class="cont_box">
+		{if $stores}
 		<div class="cont_box person_info">
 			<img class="phone" src="../addons/str_takeout/template/resource/images/phone.png" />
-
 			<br />
 			<p class="phone_number" name="mobile" id="mobile" data-id="{$currentadd['id']}"><span>{$currentadd['mobile']}</span>
-				<input class="hidden" type="text" name="mobile" id="mobileipt" value="{$currentadd['mobile']}" data-id="{$currentadd['id']}">
+				<input class="hidden" type="text" name="mobile" id="mobileipt" value="{$currentadd['mobile']}" data-id="{$currentadd['id']}"  placeholder="手机" />
 			</p>
 			<img class="compiler" src="../addons/str_takeout/template/resource/images/edit.png" />
 		</div>
+		{/if}
 	</div>
 	<ul class="menu_list order_list cont_box">
-		{loop $stores $store}
-		<li style="margin-top: 15px;margin-bottom: 4px;width: 100%;margin: 0;" class="cont_box">
+		{if $stores}
+			{loop $stores $store}
+		<li style="margin: 0;margin-top: 15px;width: 100%;" class="cont_box">
 			<span class="adress_name">
 				{$store['title']}
 			</span>
 		</li>
-			{php $addinstore=pdo_fetchall('SELECT * FROM ' . tablename('str_address').' WHERE sid='.$store['sid']);}
-			{loop $addinstore $address}
+				{php $addinstore=pdo_fetchall('SELECT * FROM ' . tablename('str_address').' WHERE sid='.$store['sid'].' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));}
+				{loop $addinstore $address}
 			<li style="padding: 0;width: 100%;margin: 0;" class="cont_box">
-				<span class="adress_detailed addressChecked" data-id="{$address['id']}">{$address['address']}</span>
-				<a class="adress_delete deladdress" data-id="{$address['id']}"></a>
+				<span class="adress_detailed addressChecked {if $_GPC['r']!=3}addressChecking{$address['is_default']}{/if}" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}{if $address['room']} - {/if}{$address['room']}</span>
+				<a class="adress_delete deladdress" data-id="{$address['id']}" data-sid="{$address['sid']}"></a>
 			</li>
+				{/loop}
 			{/loop}
-		{/loop}
-
+		{else}
+		<li class="on-info"><i class="fa fa-info-circle"></i> 请添加地址</li>
+		{/if}
 		<div class="cont_box adress_add_wrapper"><a class="adress_add" href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid ,'r'=> $_GPC['r']))}" class="add">新增地址</a></div>
 	</ul>
 </div>
-{elseif $op == 'post'}
+{elseif $op == 'post'||$op == 'init'}
 <style>
 	.home-position {
 		margin-top: 30px;
@@ -170,11 +174,13 @@
 	$(function(){
 		var r = "{$_GPC['r']}";
 		var return_url1 = "{php echo $this->createMobileUrl('order', array('op' => 'get','sid' => $sid, 'r' => 1));}";
-		var return_url2 = "{php echo $this->createMobileUrl('dish', array('sid' => $sid));}";
+		var return_url2 = "{php echo $this->createMobileUrl('dish');}";
+		return_url1 = (return_url1.split('#'))[0];
+		return_url2 = (return_url2.split('#'))[0];
 		var map = new BMap.Map("allmap");
 		var myGeo = new BMap.Geocoder();
 		map.centerAndZoom(user_iploc.content.address,12);
-		{if $op == 'post'}
+		{if $op == 'post'|| $op == 'init'}
 		var ac = new BMap.Autocomplete(    //建立一个自动完成的对象
 			{"input" : "location_input"
 			,"location" : map
@@ -186,6 +192,7 @@
 			user_point = _value.point;
 			$("#location_input").value = user_loc;
 			$("#location_input").change();
+			return false;
 		});
 		if(0){
 			$("#location_input").focus(function (){
@@ -200,10 +207,15 @@
 		}
 		$("#location_input").change(function() {
 			user_loc = this.value;
-			myGeo.getPoint(user_loc, function(point){
-				user_point=point;
+			function findPoint(){
+				var point = local.getResults().getPoi(0).point;
+				user_detail.point=user_point=point;
 				checkPointAvail();
-			}, user_iploc.content.address);
+			}
+			var local = new BMap.LocalSearch(map, { //智能搜索
+			  onSearchComplete: findPoint
+			});
+			local.search(user_loc);
 		});
 		$(".home-position").click(function(){
 			if($(this).hasClass("hdisabled")){return false;}
@@ -223,14 +235,13 @@
 				user_point=r.point;
 				checkPointAvail();
 			},{enableHighAccuracy: true});
-
 		});
 		
 		function checkPointAvail(){
 			if(user_point){
 				if(ha_detail&&ha_detail.accuracy){
 					var dis=map.getDistance(user_point,ha_detail.point);
-					if(dis<2*ha_detail.accuracy){
+					if(dis<3*ha_detail.accuracy||!user_detail.accuracy){
 						user_point=ha_detail.point;
 					}else{
 						ha_detail=null;
@@ -241,6 +252,7 @@
 				sid=-1;
 				checkStore();
 			}else{
+				sid=-1;
 				hideInput();
 				//隐藏输入框
 				if(ha_detail&&ha_detail.accuracy){
@@ -265,15 +277,19 @@
 			storePoints[{$one['id']}]  = eval(storePoint.replace(/&quot;/g,"\""));
 			storeNames[{$one['id']}] = '{$one['title']}';
 			{/loop}
-			for(var i=0;i<storeCount;++i) {
+			for(var i=0;i<=storeCount;++i) {
 				console.log("checking"+i);
 				if((storePoints[i])&&(isIn(storePoints[i],{x:user_point.lng,y:user_point.lat}))){
 					sid=i;
 					break;
 				}
 			}
-			if(sid>=0){$(".home-position").text("定位成功，门店"+storeNames[sid]+"将为您服务");}
-			else{$(".home-position").text("很抱歉，您暂时不在我们的配送范围");}
+			if(sid>=0){
+				$(".home-position").text("定位成功，门店"+storeNames[sid]+"将为您服务");
+			}else{
+				$(".home-position").text("很抱歉，您暂时不在我们的配送范围");
+				hideInput();
+			}
 			if(!$(this).hasClass("hdisabled")){
 				$(".home-position").addClass("hdisabled");
 				setTimeout(function (){$(".home-position").text("定位到我所在的楼宇").removeClass("hdisabled");},10000);
@@ -291,23 +307,24 @@
 		    }
 	 	}
 		{/if}
+		{if $_GPC['r']!=3}
 		$('.addressChecked').click(function(){
 			var address_id = $(this).attr('data-id');
+			var address_sid = $(this).attr('data-sid');
 			if(address_id) {
 				$.post("{php echo $this->createMobileUrl('address', array('op' => 'default', 'sid' => $sid))}", {'id':address_id},function(){
 					if(r==1) {
 						location.href=return_url1 + '&address_id='+address_id;
 					} else if(r==2) {
-						location.href=return_url2 + '&address_id='+address_id;
-					} else if(r==3) {
-						return false;
+						location.href=return_url2 + '&address_id='+address_id+'&sid='+address_sid;
 					} else {
-						location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid));}"
+						location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid));}";
 					}
 				});
 			}
 			return false;
 		});
+		{/if}
 		$(".compiler").click(function(){
 			if($("#mobileipt").hasClass("hidden")){
 				$("#mobileipt").removeClass("hidden");
@@ -320,12 +337,17 @@
 				$("#mobileipt").addClass("hidden");
 				$("#mobile span").removeClass("hidden");
 			}
-			var newmoblie=$("#mobileipt").val();
-			$("#mobile span").html(newmoblie);
-			$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmoblie, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
+			var newmobile=$("#mobileipt").val();
+			var valid = !!newmobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
+			if(!valid){
+				$("#mobileipt").val($("#mobile span").text());
+				alert('手机号格式不正确');
+			}else{
+				$("#mobile span").html(newmobile);
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
+			}
 		});
 		$('#submit').click(function(){
-			
 			var id = '{$id}';
 			var room = $.trim($(':text[name="room"]').val());
 			var realname = $.trim($(':text[name="realname"]').val());
@@ -358,14 +380,20 @@
 			}*/
 			if(!$(this).hasClass('disabled')){
 				$(this).addClass('disabled');	
-				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid}, function(data){
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post'))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid}, function(data){
 					var data = $.parseJSON(data);
 					if(!data.errorno) {
-						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default', 'sid' => $sid))}", {'id':data.message},function(){
+						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default'))}", {'id':data.message,'sid':sid},function(){
+							address_id=data.message;
 							if(r==1) {
-								location.href=return_url1 + '&address_id='+data.message;
+								var oldsid={$sid};
+								if(oldsid!=sid){
+									location.href=return_url2 + '&address_id='+address_id+'&sid='+sid;
+								}else{
+									location.href=return_url1 + '&address_id='+address_id;
+								}
 							} else if(r==2) {
-								location.href=return_url2 + '&address_id='+data.message;
+								location.href=return_url2 + '&address_id='+address_id+'&sid='+sid;
 							} else {
 								location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid));}"
 							}
@@ -388,7 +416,7 @@
 			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(data){
 				var data = $.parseJSON(data);
 				if(!data.errorno) {
-					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid, 'r' => $_GPC['r']));}";
+					location.reload();
 				} else {
 					alert(data.message);
 					return false;

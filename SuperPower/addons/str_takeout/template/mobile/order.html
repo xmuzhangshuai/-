@@ -1,16 +1,13 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css">
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1" />
 <script src="../addons/str_takeout/template/resource/js/order.js"></script>
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="https://one.pingxx.com/lib/pingpp_one.js"></script>
 <script src="https://one.pingxx.com/lib/sea.js"></script>
 <style type="text/css">
-	{if $store['comment_status']==1}
-	.nav a {
-		width: 33.333%;
+	body {
+		background-color: #E5E5E5;
 	}
-	{/if}
-	body{background-color: #E5E5E5;}
 </style>
 {template 'header'}
 <div class="container">
@@ -21,12 +18,12 @@
 				<label class="left">送餐地址</label>
 				<div class="mid"><span id="showAddres">{$address['address']}</span><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 1));}"><i class="ico_forward"></i></a></div>
 				<br />
-				<label class="left" id="showRoom">楼层房号</label>
+				<label class="left" id="showRoom">楼名房号</label>
 				<div class="mid">
 					<input type="text" id="showNumber" name="room" value="{$address['room']}"></input>
 				</div>
 				<br />
-				<input type="text" id="showName" name="username" value="{$address['realname']}" class="half"  placeholder="姓名"></input>
+				<input type="text" id="showName" name="realname" value="{$address['realname']}" class="half"  placeholder="姓名"></input>
 				<input type="tel" id="showTel" name="mobile" value="{$address['mobile']}" class="half" placeholder="手机号"></input>
 			</div>
 			<div class="cont_box">
@@ -43,13 +40,13 @@
 						<div class="order_item">
 							<h3>{$li['title']}</h3>
 							<strong>￥<span class="unit_price">{$li['price']}</span></strong>
-							<div class="info">{$li['description']}</div>
+							<div class="info">{$li['zuhe']}</div>
 						</div>
 						<div class="order_item_count">
-							<div class="fr" max="{$li['total']}">
+							<div class="fr" max="{$li['kucun']}">
 								<a href="javascript:void(0);" class="btn_n add active"></a>
 							</div>
-							<input autocomplete="off" class="number" type="hidden" name="dish[{$li['id']}]" value="{$dishes[$li['id']]}">
+							<input autocomplete="off" class="number" type="hidden" name="dish{$li['id']}" value="{$dishes[$li['id']]}">
 							<span class="count">{$dishes[$li['id']]}</span>
 						</div>
 
@@ -66,29 +63,6 @@
 				<p>&nbsp;</p>
 			</div>
 			<div class="tips" id="addtip" style="background-color:#e1943c;display:none" data-flag="0">亲，您可能还需要以下菜品</div>
-			<!-- 提醒客户需要点的菜品（比如：米饭）-->
-			{if !empty($dish_add)}
-			<ul class="menu_list order_list" id="addList" style="display:none">
-				{loop $dish_add $add_li}
-				<li>
-					<div>
-						<img src="{php echo tomedia($add_li['thumb']);}" alt="">
-					</div>
-					<div>
-						<h3>{$add_li['title']}</h3>
-						<div>
-							<div class="fr" max="{$add_li['total']}">
-								<a href="javascript:void(0);" class="btn_n add active"></a>
-							</div>
-							<input autocomplete="off" class="number" type="hidden" name="dish[{$add_li['id']}]" value="0">
-							<span class="count">0</span>
-							<strong>￥<span class="unit_price">{$add_li['price']}</span></strong>
-						</div>
-					</div>
-				</li>
-				{/loop}
-			</ul>
-			{/if}
 		</section>
 		<footer class="order_fixed">
 			<div class="fixed" id="fix_bar">
@@ -112,19 +86,6 @@
 			_add.amount(count, amountCb);
 		});
 	});
-	$('#emptyBtn').click(function() {
-		$('#emptyBox').dialog({
-			title: '确定重选菜品'
-		});
-	});
-	$("#cancel_empty").click(function() {
-		$('#emptyBox').dialog('close');
-	});
-	$("#confirm_empty").click(function() {
-		location.href = "{php echo $this->createMobileUrl('dish', array('sid' => $_GPC['sid'], 'f' => 1))}";
-		return false;
-	});
-	var is_add = "{$is_add}";
 	$(".submit_order").click(function(){
 		if(!$(this).hasClass('disabled')){
 			$(this).addClass('disabled');				
@@ -153,9 +114,14 @@
 					return false;
 				}
 			}
-			var orderer = $("#showName").val();
-			if(!address_id) {
-				alert('请选择姓名');
+			var realname = $("#showName").val();
+			if(!realname) {
+				alert('请输入姓名');
+				$(this).removeClass('disabled');
+				return false;
+			}
+			if($("#totalPrice").text()<=0){
+				alert('请点单');
 				$(this).removeClass('disabled');
 				return false;
 			}
@@ -164,11 +130,11 @@
 				'address_id':address_id,
 				'note':'',
 				'delivery_time':'',
-				'realname':orderer,
+				'realname':realname,
 				'mobile':mobile,
 				'room':room
 			}
-			$.post("{php echo $this->createMobileUrl('order', array('sid' => $sid));}", param, function(e){
+			$.post("{php echo $this->createMobileUrl('order', array('sid' => $sid));}", $('#cart_confirm_form').serialize(), function(e){
 				if(e.errno == 0) {
 					$(".submit_order").html('已提交');
 					$(".submit_order").addClass('disabled');

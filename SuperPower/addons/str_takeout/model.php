@@ -226,7 +226,7 @@ function get_dish($oid, $cancel = false) {
 function get_dishinfo($did) {
 	global $_W;
 	$did = intval($did);
-	$data = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') . ' WHERE id = :id AND is_display = 1 ORDER BY displayorder DESC, id ASC', array(':id' => $did));
+	$data = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') . ' WHERE id = :id ORDER BY displayorder DESC, id ASC', array(':id' => $did));
 	return $data;
 }
 function get_clerks($sid) {
@@ -242,11 +242,11 @@ function get_clerk($id) {
 }
 
 function notice(){
-					//给管理员和订餐人发送消息
-				if(!empty($store['notice_acid'])) {
-					$acc = WeAccount::create($store['notice_acid']);
-					$clerks = pdo_fetchall('SELECT * FROM ' . tablename('str_clerk') . ' WHERE uniacid = :aid AND sid = :sid', array(':aid' => $_W['uniacid'], ':sid' => $sid));
-				}
+		//给管理员和订餐人发送消息
+	if(!empty($store['notice_acid'])) {
+		$acc = WeAccount::create($store['notice_acid']);
+		$clerks = pdo_fetchall('SELECT * FROM ' . tablename('str_clerk') . ' WHERE uniacid = :aid AND sid = :sid', array(':aid' => $_W['uniacid'], ':sid' => $sid));
+	}
 
 }
 /*
