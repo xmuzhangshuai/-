@@ -346,7 +346,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		  	/**
 		  	 * 二次开发 总店管理员删除菜品：删除套餐其余全部删除
 		  	 */
-		  	 $dish = pdo_fetch('str_dish',array('uniacid' => $_W['uniacid'], 'id' => $id));
+		  	 $dish = pdo_fetch('SELECT title,dish_type FROM ' . tablename('str_dish') . ' WHERE id='.$id);
 			pdo_delete('str_dish', array('uniacid' => $_W['uniacid'], 'id' => $id));
 			if($dish['dish_type'] == 'DANPIN'){
 				pdo_run('DELETE FROM '.tablename('str_dish'). " WHERE zuhe LIKE '%" . $dish['title'] . "%' AND dish_type = 'TAOCAN'");
