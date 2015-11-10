@@ -78,6 +78,7 @@
 		color: #F7B74D;
 		border: 1px solid #F7B74D;
 		border-radius: 3px;
+		padding: 0px 20px;
 	}
 	.home-position:active,.home-position:hover,.home-position:visited{
 		background-color: #FFF;
@@ -87,15 +88,13 @@
 	.nav_sp_logo,.nav_sp_home{display:none;}
 	.nav_sp{border: none;}
 	input#location_input{
-		text-align:center;
 		width: 100%;
 		height:52px!important;
 		line-height:24px;
 		padding-top: 14px;
 		font-size:23px;
-		border: none;
-		color: #FFF;
-		background-color: #F7B74D;
+		border: 1px solid #F7B74D;
+		color: #F7B74D;
 		border-radius: 3px;
 		padding: 0px 20px;
 	}
@@ -118,18 +117,18 @@
 		}
 	}
 	input#location_input::-webkit-input-placeholder { /* WebKit browsers */
-	    color:    #FFF;
+	    color:    #F7B74D;
 	}
 	input#location_input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-	   color:    #FFF;
+	   color:    #F7B74D;
 	   opacity:  1;
 	}
 	input#location_input::-moz-placeholder { /* Mozilla Firefox 19+ */
-	   color:    #FFF;
+	   color:    #F7B74D;
 	   opacity:  1;
 	}
 	input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
-	   color:    #FFF;
+	   color:    #F7B74D;
 	}
 </style>
 
@@ -137,8 +136,8 @@
 	<div class="cont_box" style="text-align: center;"><img src="../addons/str_takeout/template/resource/images/logo.png" style="width: 60%;max-width: 367px;margin-top: 30px;"></div>
 	<div style="position: relative;">
 		<a name="#ddress"></a>
-		<input type="text" name="address" id="location_input" style="padding:0;" autocomplete="off" placeholder="请输入您所在的楼宇" /><img id="search" style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/search.png" /></div>
-	<div style="position: relative;text-align: center;"><a class="home-position">定位到我所在的楼宇</a><img style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/position.png" /></div>
+		<input type="text" name="address" id="location_input" autocomplete="off" placeholder="请输入您所在的楼宇" /><img id="search" style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/search.png" /></div>
+	<div style="position: relative;"><a class="home-position">定位到我所在的楼宇</a><img style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/position.png" /></div>
 	<div class="hidden">
 		<input type="text" name="realname" value="{$address['realname']}" placeholder="姓名">
 	</div>
@@ -196,6 +195,11 @@
 			$("#location_input").value = user_loc;
 			$("#location_input").change();
 			return false;
+		});
+		$("#location_input").focus(function (){
+			$(this).attr("placeholder","");
+		}).blur(function (){
+			$(this).attr("placeholder","请输入您所在的楼宇");
 		});
 		if(0){
 			$("#location_input").focus(function (){
