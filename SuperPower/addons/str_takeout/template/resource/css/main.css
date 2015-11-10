@@ -386,11 +386,12 @@ body>div:first-child {
 	position: static;
 }
 .nav_address {
-	height: 38px;
+	height: 45px;
 	width: 100%;
 	background-color: #d9d9d9;
 	font-size: 14px;
-	line-height: 38px;
+	line-height: 45px;
+	padding-top: 2px;
 	padding-left: 20px;
 	text-overflow: ellipsis;
 	overflow: hidden;
@@ -407,7 +408,7 @@ body>div:first-child {
 	display: table-cell;
 	width: 20px;
 	background-size: 20px 28px;
-	margin-top: 5px;
+	margin-top: 9px;
 	margin-right: 12px;
 	float: right;
 	position: absolute;
@@ -2512,6 +2513,14 @@ input[type='tel'] {
 		width: 95px;
 		text-decoration: none!important;
 		color: #535353!important;
+	}
+	.buyrecord{
+		position: relative;
+		right:15px;
+	}
+	.run_adress{
+		position: relative;
+		left:15px;
 	}
 	.nav_wrapper {
 		margin-left: -190px;
