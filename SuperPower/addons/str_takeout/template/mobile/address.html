@@ -175,8 +175,10 @@
 		var r = "{$_GPC['r']}";
 		var return_url1 = "{php echo $this->createMobileUrl('order', array('op' => 'get','sid' => $sid, 'r' => 1));}";
 		var return_url2 = "{php echo $this->createMobileUrl('dish');}";
+		var return_url3 = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
 		return_url1 = (return_url1.split('#'))[0];
 		return_url2 = (return_url2.split('#'))[0];
+		return_url3 = (return_url3.split('#'))[0];
 		var map = new BMap.Map("allmap");
 		var myGeo = new BMap.Geocoder();
 		map.centerAndZoom(user_iploc.content.address,12);
@@ -219,6 +221,7 @@
 		});
 		$(".home-position").click(function(){
 			if($(this).hasClass("hdisabled")){return false;}
+			$(this).text("定位中，请稍候");
 			var geolocation = new BMap.Geolocation();
 			geolocation.getCurrentPosition(function(r){
 				user_detail=r;
@@ -314,11 +317,11 @@
 			if(address_id) {
 				$.post("{php echo $this->createMobileUrl('address', array('op' => 'default', 'sid' => $sid))}", {'id':address_id},function(){
 					if(r==1) {
-						location.href=return_url1 + '&address_id='+address_id;
+						location.href = return_url1 + '&address_id='+address_id;
 					} else if(r==2) {
-						location.href=return_url2 + '&address_id='+address_id+'&sid='+address_sid;
+						location.href = return_url2 + '&address_id='+address_id+'&sid='+address_sid;
 					} else {
-						location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid));}";
+						location.href = return_url3 + '&address_id='+address_id+'&sid='+address_sid;
 					}
 				});
 			}
@@ -393,9 +396,9 @@
 									location.href=return_url1 + '&address_id='+address_id;
 								}
 							} else if(r==2) {
-								location.href=return_url2 + '&address_id='+address_id+'&sid='+sid;
+								location.href = return_url2 + '&address_id='+address_id+'&sid='+sid;
 							} else {
-								location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid));}"
+								location.href = return_url3 + '&address_id='+address_id+'&sid='+sid;
 							}
 						});
 					} else {
