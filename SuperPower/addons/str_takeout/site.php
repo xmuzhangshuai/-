@@ -179,6 +179,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			pdo_delete('str_print', array('uniacid' => $_W['uniacid'], 'sid' => $id));
 			pdo_delete('str_clerk', array('uniacid' => $_W['uniacid'], 'sid' => $id));
 			pdo_delete('str_store', array('uniacid' => $_W['uniacid'], 'id' => $id));
+			pdo_delete('str_address', array('uniacid' => $_W['uniacid'], 'sid' => $id));
 			message('删除门店成功', $this->createWebUrl('store', array('op' => 'list')), 'success');
 		}
 		/**
@@ -1489,6 +1490,10 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		$address = get_address($address_id);
 		if(empty($address)) {
 			$address = get_default_address();
+		}
+		if(empty($address)){
+			header('Location: '.$this->createMobileUrl('address', array('op' => 'init','r' => 2))); 
+			exit;
 		}
 		if((!empty($address))&&intval($address['sid'])!=$sid){
 			header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
