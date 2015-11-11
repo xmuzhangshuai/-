@@ -2133,8 +2133,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$id = intval($_GPC['id']);
 			$address = get_address($id);
 			if($op == 'init') {
-				if((!empty($address))&&intval($address['sid'])){
-					header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
+				if((!empty($currentadd))&&intval($currentadd['sid'])){
+					header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($currentadd['sid'])))); 
 					exit;
 				}
 			}
