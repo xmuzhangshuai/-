@@ -36,6 +36,12 @@
 				</div>
 				<ul class="menu_list order_list" id="orderList">
 					{loop $dish_info $li}
+					{if $li['dish_type']=='TAOCAN'}
+						{php $li['kucun'] = -1; }
+					{/if}
+					{if $li['kucun']==''}
+						{php $li['kucun'] = 0;}
+					{/if}
 					<li id="{$li['id']}" class="cont_box">
 						<div class="order_item">
 							<h3>{$li['title']}</h3>

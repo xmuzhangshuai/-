@@ -35,6 +35,9 @@
 					{if $ds['dish_type']=='TAOCAN'}
 						{php $ds['kucun'] = -1; }
 					{/if}
+					{if $ds['kucun']==''}
+						{php $ds['kucun'] = 0;}
+					{/if}
 					<li id="{$ds['id']}" class="auto_height {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}out{/if}">
 						<div>
 							<div class="menu_type">{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></div>
