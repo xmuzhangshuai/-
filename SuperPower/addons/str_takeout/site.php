@@ -1682,7 +1682,22 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$data['delivery_fee'] = $store['delivery_price'];
 			$data['note'] = trim($_GPC['note']);
 			$data['pay_type'] = '';
+			$data['num'] = 0;
+			$data['price'] = 0;
 			$cart = get_order_cart($sid);
+			//取得订单
+			foreach($cart['data'] as $k => $v) {
+				$k = intval($k);
+				$v = intval($v);
+				if($_GPC['dish'.$k]){
+					$v=intval($_GPC['dish'.$k]);
+					$cart['data'][$k] = $v;
+					$data['num'] = $v + intval($data['num']);
+					$cart['num'] = $data['num'];
+				}else{
+					$v=0;
+				}
+			}
 			if($cart['num'] == 0) {
 				$out['errno'] = 1;
 				$out['error'] = '菜品为空';
@@ -1695,7 +1710,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$fakecart = $cart['data'];
 			foreach($temcart as $k => $v){
 				$dtype = pdo_fetch('SELECT dish_type FROM '.tablename('str_dish').' WHERE id=:id',array(':id' => $k));
-				if(!empty($dtype)&&$dtype == 'TAOCAN'){
+				if(!empty($dtype)&&$dtype == 'TAOCAN'&&$v){
 					$zuhe = pdo_fetch('SELECT zuhe FROM '.tablename('str_dish'). ' WHERE id=:id',array(':id' => $k));
 					$zuhe = explode('+', $zuhe);
 					//先取出套餐中的每一份单品
@@ -1752,18 +1767,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$ids_str = implode(',', array_keys($cart['data']));
 				$dish_info = pdo_fetchall('SELECT ' . $str_dish . '.*,'. $str_store_dish . '.selling,'. $str_store_dish .'.kucun FROM ' . $str_dish . ',' .$str_store_dish .' WHERE ' . $condition . ' AND '.$str_dish.'.id IN ('.$ids_str.') ORDER BY displayorder DESC,'. $str_dish .'.id ASC', $params);
 			}
-			$data['num'] = 0;
-			$data['price'] = 0;
 			
 			foreach($cart['data'] as $k => $v) {
-
-				$k = intval($k);
-				$v = intval($v);
-				if($_GPC['dish'.$k]){
-					$v=intval($_GPC['dish'.$k]);
-				}else{
-					$v=0;
-				}
 				pdo_query('UPDATE ' . tablename('str_dish') . " set sailed = sailed + {$v} WHERE uniacid = :aid AND id = :id", array(':aid' => $_W['uniacid'], ':id' => $k));
 				$stat = array();
 				if($k && $v) {
@@ -1772,7 +1777,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					$stat['sid'] = $sid;
 					$stat['dish_id'] = $k;
 					$stat['dish_num'] = $v;
-					$data['num'] = $v + intval($data['num']);
 					$d_info = pdo_fetchall('SELECT ' . $str_dish . '.* FROM ' . $str_dish . ',' .$str_store_dish .' WHERE '.$str_dish.'.id='.$k.' ORDER BY displayorder DESC,'. $str_dish .'.id ASC', $params);
 					$stat['dish_title'] = $d_info[0]['title'];
 					$stat['dish_price'] = ($v * $d_info[0]['price']);
