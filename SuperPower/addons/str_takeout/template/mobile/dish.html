@@ -32,7 +32,6 @@
 			<div class="menu_container">
 				<ul class="menu_list">
 					{loop $dish $ds}
-					{php echo $ds['dish_type'];}
 					{if $ds['dish_type']=='TAOCAN'}
 						{php $ds['kucun'] = -1; }
 					{/if}

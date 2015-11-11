@@ -1708,51 +1708,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$out['error'] = '菜品为空';
 				exit(json_encode($out));
 			}
-			/**
-			* 二次开发：套餐转化成单品，并加上已点单品的数量，加起来之后一项项比对是否超过库存
-			*/
-			$temcart = $cart['data'];
-			$fakecart = $cart['data'];
-			foreach($temcart as $k => $v){
-				$dtype = pdo_fetch('SELECT dish_type FROM '.tablename('str_dish').' WHERE id=:id',array(':id' => $k));
-				if(!empty($dtype)&&$dtype == 'TAOCAN'&&$v){
-					$zuhe = pdo_fetch('SELECT zuhe FROM '.tablename('str_dish'). ' WHERE id=:id',array(':id' => $k));
-					$zuhe = explode('+', $zuhe);
-					//先取出套餐中的每一份单品
-					for($i = 0; $i < count($zuhe); $i++){
-						//查找是否已经买了该单品
-						$dish_id = pdo_fetch('SELECT id FROM '.tablename('str_dish').' WHERE title=:title',array(':title' => $zuhe[$i]));
-						if(!empty($dish_id)){
-							$comtem = $fakecart;
-							$times = 0;
-							foreach($comtem as $m => $n){
-								//如果买了，则加上数量
-								if($dish_id == $m){
-									$fakecart[$m] = $n+1;
-									break;
-								}
-								
-								$times++;
-							}
-							if($times==count($comtem)){//单品中不包含套餐中的单品，则加入套餐中的单品
-								$fakecart[$dish_id] = 1;
-								//同时删除套餐
-								unset($fakecart[$dish_id]);
-							}
-						}
-					}
-					
-				}
-			}
-			//看下每份菜品的库存是否合格
-			foreach($fakecart as $k => $v){
-				$kucun = pdo_fetch('SELECT kucun FROM '.tablename('str_store_dish').' WHERE dish_id=:id AND store_id=:sid AND uniacid=:aid', array(':id' => $k, ':sid' => $sid, ':aid' => $_W['uniacid']));
-				if(!empty($kucun)&&$v>$kucun){
-					$out['errno'] = 1;
-					$out['error'] = '库存不足';
-					exit(json_encode($out));
-				}
-			}
 			
 			$data['addtime'] = TIMESTAMP;
 			$data['status'] = 1;
@@ -2130,6 +2085,12 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$currentadd = get_default_address();
 			$id = intval($_GPC['id']);
 			$address = get_address($id);
+			if($op == 'init') {
+				if((!empty($address))&&intval($address['sid'])){
+					header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
+					exit;
+				}
+			}
 			$otherArea = pdo_fetchall('SELECT points,title,id FROM ' . tablename('str_store') . ' WHERE uniacid = :aid ORDER BY id ASC', array(':aid' => $_W['uniacid']));
 			if($_W['ispost']) {
 				$data = array(
