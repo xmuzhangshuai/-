@@ -22,11 +22,11 @@ else{
 	print_order();
 }
 function getPrinterCount() {	//获取打印机个数	
-	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  
+	LODOP=getLodop();  
 	return LODOP.GET_PRINTER_COUNT();	
 };
 function getPrinterName(iPrinterNO) {	//获取打印机名称	
-	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  
+	LODOP=getLodop();  
 	return LODOP.GET_PRINTER_NAME(iPrinterNO);	
 };
 function PreviewByPrinterIndex(intPrinterIndex) { //通过ID预览打印内容		
@@ -50,7 +50,7 @@ function PrintByPrinterName(strPrinterName) {	//通过名称命令打印机打�
 	LODOP.PRINT();		
 };	
 function SelectAsDefaultPrinter() {
-	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  
+	LODOP=getLodop();  
     	if (LODOP.SELECT_PRINTER()>=0) 
     	alert("选择成功!"); else alert("选择失败！");
 };
@@ -64,7 +64,7 @@ function PrintMoreCopies(intCopies) {
 	else  alert("设置打印份数失败！");
 };		
 function CreatePrintPage() {	//打印内容设置
-	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  	
+	LODOP=getLodop();  	
 	LODOP.PRINT_INIT("打印控件功能演示_Lodop功能_测试页一");
 	LODOP.SET_PRINT_PAGESIZE(1,500,500,"A4");
 	LODOP.ADD_PRINT_TEXT(10,10,90,11,"测试页标题");
@@ -96,7 +96,7 @@ function setContent(data) {	//打印内容设置
 	if(data.type == 'error'){
 		return false;
 	}
-	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  	
+	LODOP=getLodop();  	
 	LODOP.PRINT_INIT("企鹅造饭-订单打印");
 	//根据订单长度计算订单
 	var dishes = data.dish;
@@ -125,7 +125,7 @@ function setContent(data) {	//打印内容设置
 	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '总价：' + data.price + '元');			
 };	
 function CreateHTMPrintPage() {	
-	LODOP=getLodop(document.getElementById('LODOP_OB'),document.getElementById('LODOP_EM'));  	
+	LODOP=getLodop();  	
 	LODOP.PRINT_INIT("打印控件功能演示_Lodop功能_测试页二");
 	var strHTML="<!doctype><body><font style='font-size:16px;'>字体大小:16px</font><br>";
 	strHTML=strHTML+"<font style='font-size:16pt;'>字体大小:16pt</font><br>";
@@ -175,8 +175,9 @@ function print_order(){
 }
 function order_notice() {
 	$.post("{php echo $this->createWebUrl('cron', array('op' => 'order'));}", function(data){
-		if(data == 'success') {
-			$("#musicClick")[0].play();
+		var data = JSON.parse(data);
+		if(data.resutl == 'success') {
+			$("#musicClick")[0].play();			
 		}
 		setTimeout(order_notice, 5000);
 	});
