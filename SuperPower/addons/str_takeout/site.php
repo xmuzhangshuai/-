@@ -772,6 +772,10 @@ class Str_takeoutModuleSite extends WeModuleSite {
 
 			$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') .  $condition, $params);
 			$data = pdo_fetchall('SELECT * FROM ' . tablename('str_order') . $condition . ' ORDER BY addtime DESC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			/**
+			 * 二次开发
+			 */
+			pdo_update('str_order', array('is_refresh' => 1), array('uniacid' => $_W['uniacid'], 'sid' => $sid));
 			if(!empty($data)) {
 				foreach($data as &$da) {
 					$da['is_trash'] = check_trash($da['sid'], $da['uid'], 'fetch');
@@ -1691,13 +1695,27 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			/**
 			* 二次开发：套餐转化成单品，并加上已点单品的数量，加起来之后一项项比对是否超过库存
 			*/
+			
 			$temcart = $cart['data'];
 			$fakecart = $cart['data'];
+			foreach($fakecart as $k => $v){
+				$k = intval($k);
+				$v = intval($v);
+				if($_GPC['dish'.$k]){
+					$v=intval($_GPC['dish'.$k]);
+					$fakecart[$k] = $v;
+					$temcart[$k] = $v;
+				}else{
+					$fakecart[$k] = 0;
+					$temcart[$k] = 0;
+				}
+			}
+
 			foreach($temcart as $k => $v){
 				$dtype = pdo_fetch('SELECT dish_type FROM '.tablename('str_dish').' WHERE id=:id',array(':id' => $k));
-				if(!empty($dtype)&&$dtype == 'TAOCAN'){
+				if(!empty($dtype)&&$dtype['dish_type'] == 'TAOCAN'){
 					$zuhe = pdo_fetch('SELECT zuhe FROM '.tablename('str_dish'). ' WHERE id=:id',array(':id' => $k));
-					$zuhe = explode('+', $zuhe);
+					$zuhe = explode('+', $zuhe['zuhe']);
 					//先取出套餐中的每一份单品
 					for($i = 0; $i < count($zuhe); $i++){
 						//查找是否已经买了该单品
@@ -1707,7 +1725,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 							$times = 0;
 							foreach($comtem as $m => $n){
 								//如果买了，则加上数量
-								if($dish_id == $m){
+								if($dish_id['id'] == $m){
 									$fakecart[$m] = $n+1;
 									break;
 								}
@@ -1715,23 +1733,27 @@ class Str_takeoutModuleSite extends WeModuleSite {
 								$times++;
 							}
 							if($times==count($comtem)){//单品中不包含套餐中的单品，则加入套餐中的单品
-								$fakecart[$dish_id] = 1;
-								//同时删除套餐
-								unset($fakecart[$dish_id]);
+								$fakecart[$dish_id['id']] = $v;
 							}
 						}
 					}
-					
+					//同时删除套餐
+					unset($fakecart[$k]);
 				}
 			}
+			
 			//看下每份菜品的库存是否合格
 			foreach($fakecart as $k => $v){
-				$kucun = pdo_fetch('SELECT kucun FROM '.tablename('str_store_dish').' WHERE dish_id=:id AND store_id=:sid AND uniacid=:aid', array(':id' => $k, ':sid' => $sid, ':aid' => $_W['uniacid']));
-				if(!empty($kucun)&&$v>$kucun){
+				$dish = pdo_fetch('SELECT kucun,dish_name FROM '.tablename('str_store_dish').' WHERE dish_id=:id AND store_id=:sid AND uniacid=:aid', array(':id' => $k, ':sid' => $sid, ':aid' => $_W['uniacid']));
+				if(!empty($dish)&&$v>$dish['kucun']){
 					$out['errno'] = 1;
-					$out['error'] = '库存不足';
+					$out['error'] = $dish['dish_name'].'库存不足';
 					exit(json_encode($out));
 				}
+			}
+			//更新单品库存
+			foreach($fakecart as $k => $v){
+				pdo_query('UPDATE ' . tablename('str_store_dish') . " set kucun = kucun - {$v} WHERE uniacid = :aid AND dish_id = :id AND store_id = :sid", array(':aid' => $_W['uniacid'], ':id' => $k, ':sid' => $sid));
 			}
 			
 			$data['addtime'] = TIMESTAMP;
@@ -1987,11 +2009,16 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			//订单提醒功能
 			$sid = intval($_GPC['__sid']);//店铺id
 			$order = pdo_fetch('SELECT id FROM ' . tablename('str_order') . ' WHERE uniacid = :uniacid AND sid = :sid AND is_notice = 0 ORDER BY addtime DESC', array(':uniacid' => $_W['uniacid'], ':sid' => $sid));
+			$neworders = pdo_fetchcolumn('SELECT COUNT(*) FROM '  .tablename('str_order') . ' WHERE uniacid = :uniacid AND sid = :sid AND is_refresh = 0 ORDER BY addtime DESC', array(':uniacid' => $_W['uniacid'], ':sid' => $sid));
 			if(!empty($order)) {
 				pdo_update('str_order', array('is_notice' => 1), array('uniacid' => $_W['uniacid'], 'id' => $order['id']));
-				exit('success');
+				$result['result'] = 'success';
+				$result['neworder'] = $neworders;
+				exit(json_encode($result));
 			}
-			exit('error');
+			$result['result'] = 'error';
+			$result['neworder'] = $neworders;
+			exit(json_encode($result));
 		} elseif($op == 'auto_print'){
 			
 		}
