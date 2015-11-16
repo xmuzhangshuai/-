@@ -1,7 +1,7 @@
 {template 'common/header-gw'}
 <ol class="breadcrumb">
 	<li><a href="./?refresh"><i class="fa fa-home"></i></a></li>
-	<li><a href="{url 'system/welcome'}">系统</a></li>
+	<!-- <li><a href="{url 'system/welcome'}">系统</a></li> -->
 	<li class="active">{if intval($_GPC['status']) == 1}审核用户{else}用户列表{/if}</li>
 </ol>
 <script type="text/javascript">

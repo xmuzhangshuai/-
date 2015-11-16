@@ -435,6 +435,79 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			exit('error');
 		}
+		/**
+		 * 二次开发：手机是否需要验证
+		 */
+		if($op == 'tel_checkauth'){
+			$tel = trim($_GPC['tel']);
+			$record = pdo_fetch('SELECT * FROM ' . tablename('str_telauth') . ' WHERE tel = :tel', array(':tel' => $tel));
+			if(empty($record)){
+				exit('authed');
+			}
+			exit('notauth');
+		}
+		/**
+		 * 二次开发：发送手机验证码
+		 */
+		 if($op == 'send_auth_code'){
+		 	if(isset($_SESSION['last_send_time'])){
+		 		$period = time() - $_SESSION['last_send_time'];
+		 		if($period<120){
+		 			exit('request too many times');
+		 		}
+		 	}
+		 	$statusStr = array(
+				"0" => "短信发送成功",
+				"-1" => "参数不全",
+				"-2" => "服务器空间不支持,请确认支持curl或者fsocket，联系您的空间商解决或者更换空间！",
+				"30" => "密码错误",
+				"40" => "账号不存在",
+				"41" => "余额不足",
+				"42" => "帐户已过期",
+				"43" => "IP地址限制",
+				"50" => "内容含有敏感词"
+			);	
+			$smsapi = "http://www.smsbao.com/"; //短信网关
+			$user = "superpower"; //短信平台帐号
+			$pass = md5("superpower"); //短信平台密码
+			$code = rand(100000,999999);
+			$time = 2;
+			$content="【企鹅造饭】您的验证码为{$code},在{$time}分钟内有效";//要发送的短信内容
+			$phone = trim($_GPC['tel']);;
+			$sendurl = $smsapi."sms?u=".$user."&p=".$pass."&m=".$phone."&c=".urlencode($content);
+			$result =file_get_contents($sendurl) ;
+			
+			$status = $statusStr[$result];
+			
+			if($status == '0'){
+				$_SESSION['last_send_time'] = time();//发送成功时间
+				$_SESSION['code'] = $code;
+				exit('success');//发送成功
+			}
+			exit('fail');//发送失败
+		 	
+		 }
+		 /**
+		  * 二次开发：手机验证
+		  */
+		  if($op == 'authtel'){
+		  	$code = trim($_GPC['code']);
+		  	$tel = trim($_GPC['tel']);
+		  	if(isset($_SESSION['last_send_time'])){
+		  		$period = time() - $_SESSION['last_send_time'];	  		
+		  		if($period>120){
+		  			exit('time out');//超过两分钟
+		  		}
+		  	}
+		  	if($code == $_SESSION['code']){
+		  		//数据入库
+		  		$data['tel'] = $tel;
+		  		pdo_insert('str_telauth'.$data);
+		  		exit('success');//验证成功
+		  	}else{
+		  		exit('fail');//验证失败
+		  	}
+		  }
 	}
 
 	public function doWebSwitch() {
@@ -1837,6 +1910,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 	}
 	public function doMobileMyorder() {
 		global $_W, $_GPC;
+		//二次开发用于获取用户微信昵称头像等的函数
+		load()->model('mc');
 		checkauth();
 		$sid = intval($_GPC['sid']);
 		check_trash($sid);
@@ -1869,6 +1944,19 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') . $where, $params);
 		$data = pdo_fetchall('SELECT * FROM ' . tablename('str_order') . $where . $limit, $params);
 		$pager = pagination($total, $pindex, $psize, '', array('before' => 0, 'after' => 0));
+		/**
+		 * 二次开发：获取用户的微信头像还有昵称
+		 */
+		 if(!empty($_W['openid'])){
+		 	$sql = 'SELECT `fanid`,`openid`,`uid` FROM ' . tablename('mc_mapping_fans') . ' WHERE `uniacid`=:uniacid AND `openid`=:openid';
+			$pars = array();
+			$pars[':uniacid'] = $_W['uniacid'];
+			$pars[':openid'] = $_W['openid'];
+			$fan = pdo_fetch($sql, $pars);
+			if(!empty($fan) && !empty($fan['uid'])) {
+				$user = mc_fetch($fan['uid'], array('nickname', 'gender', 'residecity', 'resideprovince', 'nationality', 'avatar'));
+			}
+		 }
 		include $this->template('myorder');
 	}
 	public function doMobileOrderDetail() {
@@ -2121,6 +2209,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 
 	public function doMobileAddress() {
 		global $_W, $_GPC;
+		//二次开发用于获取用户微信昵称头像等的函数
+		load()->model('mc');
+		
 		checkauth();
 		$id = intval($_GPC['id']);
 		$sid = intval($_GPC['sid']);
@@ -2204,6 +2295,20 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			exit(json_encode(array('errorno' => 0, 'message' => '')));
 		}
 
+		/**
+		 * 二次开发：获取用户的微信头像还有昵称
+		 */
+		 if(!empty($_W['openid'])){
+		 	$sql = 'SELECT `fanid`,`openid`,`uid` FROM ' . tablename('mc_mapping_fans') . ' WHERE `uniacid`=:uniacid AND `openid`=:openid';
+			$pars = array();
+			$pars[':uniacid'] = $_W['uniacid'];
+			$pars[':openid'] = $_W['openid'];
+			$fan = pdo_fetch($sql, $pars);
+			if(!empty($fan) && !empty($fan['uid'])) {
+				$user = mc_fetch($fan['uid'], array('nickname', 'gender', 'residecity', 'resideprovince', 'nationality', 'avatar'));
+			}
+		 }
+		 
 		include $this->template('address');
 	}
 	public function doMobileComment_list() {

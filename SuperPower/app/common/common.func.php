@@ -49,6 +49,62 @@ function message($msg, $redirect = '', $type = '') {
 function checkauth() {
 	global $_W, $engine;
 	load()->model('mc');
+	
+	/**
+	二次开发：更新用户头像信息等
+	*/
+	if(!empty($_W['openid'])) {
+		$sql = 'SELECT `fanid`,`openid`,`uid` FROM ' . tablename('mc_mapping_fans') . ' WHERE `uniacid`=:uniacid AND `openid`=:openid';
+		$pars = array();
+		$pars[':uniacid'] = $_W['uniacid'];
+		$pars[':openid'] = $_W['openid'];
+		if (defined('IN_API')) {
+			$sql .= ' AND `acid`=:acid';
+			$pars[':acid'] = $_W['acid'];
+		}
+		$fan = pdo_fetch($sql, $pars);
+		if(!empty($fan) && !empty($fan['uid'])) {
+			//获取用户头像，信息等
+			//第一步获取access_token
+			$url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx532b192c33eb81c8&secret=065e72721eb8673a92e781a1619be4ad";
+			$result = file_get_contents($url);
+			$ret = json_decode($result,true);
+			$access_token = $ret['access_token'];
+			//第二步，获取用户信息
+			$infourl = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={$access_token}&openid={$_W['openid']}&lang=zh_CN";
+			$userinfo = json_decode(file_get_contents($infourl),true);
+			$name = $userinfo['nickname'];
+			//第三步，信息入库
+			$user = mc_fetch($fan['uid'], array('nickname', 'gender', 'residecity', 'resideprovince', 'nationality', 'avatar'));
+			$rec = array();
+			if(empty($user['nickname']) && !empty($userinfo['nickname'])) {
+				$rec['nickname'] = stripslashes($userinfo['nickname']);
+			}
+			if(empty($user['gender']) && !empty($userinfo['sex'])) {
+				$rec['gender'] = $userinfo['sex'];
+			}
+			if(empty($user['residecity']) && !empty($userinfo['city'])) {
+				$rec['residecity'] = $userinfo['city'] . '市';
+			}
+			if(empty($user['resideprovince']) && !empty($userinfo['province'])) {
+				$rec['resideprovince'] = $userinfo['province'] . '省';
+			}
+			if(empty($user['nationality']) && !empty($userinfo['country'])) {
+				$rec['nationality'] = $userinfo['country'];
+			}
+			if(empty($user['avatar']) && !empty($userinfo['headimgurl'])) {
+				$rec['avatar'] = rtrim($userinfo['headimgurl'], '0') . 132;
+			}
+			if(!empty($rec)) {
+				pdo_update('mc_members', $rec, array('uid' => $user['uid']));
+			}
+			
+		}
+	}
+	
+	
+	/*更新结束*/
+	
 	if(!empty($_W['member']) && (!empty($_W['member']['mobile']) || !empty($_W['member']['email']))) {
 		return true;
 	}

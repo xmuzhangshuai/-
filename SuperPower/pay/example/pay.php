@@ -43,7 +43,7 @@ switch ($channel) {
         break;
     case 'wx_pub':
         $extra = array(
-            'open_id' => 'Openid'
+            'open_id' => $input_data['open_id']
         );
         break;
     case 'wx_pub_qr':
@@ -71,7 +71,7 @@ switch ($channel) {
         break;
 }
 
-\Pingpp\Pingpp::setApiKey('sk_test_ibbTe5jLGCi5rzfH4OqPW9KC');
+\Pingpp\Pingpp::setApiKey('sk_test_iXvbfD1OG4KC9iPOOKuXfn9O');
 try {
     $ch = \Pingpp\Charge::create(
         array(
@@ -83,7 +83,7 @@ try {
             'extra'     => $extra,
             'channel'   => $channel,
             'client_ip' => $_SERVER['REMOTE_ADDR'],
-            'app'       => array('id' => 'app_1Gqj58ynP0mHeX1q')
+            'app'       => array('id' => 'app_mzXP8ODWj508qfHa')
         )
     );
     echo $ch;

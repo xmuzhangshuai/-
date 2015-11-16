@@ -1,7 +1,7 @@
 {template 'common/header-gw'}
 	<ol class="breadcrumb">
 		<li><a href="./?refresh"><i class="fa fa-home"></i></a></li>
-		<li><a href="{url 'system/welcome'}">系统</a></li>
+		<!-- <li><a href="{url 'system/welcome'}">系统</a></li> -->
 		<li class="active">公众号列表</li>
 	</ol>
 	<div class="clearfix" style="margin-bottom:5em;">
@@ -72,7 +72,7 @@
 								<!-- 
 									<a href="{php echo url('account/bind/details', array('acid' => $account['acid'], 'uniacid' => $account['uniacid']))}" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="查看详细信息"><i class="fa fa-bar-chart-o"></i></a>
 									<a href="{php echo url('account/bind/post', array('acid' => $account['acid'], 'uniacid' => $account['uniacid']))}" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="编辑"><i class="fa fa-pencil"></i></a>
-									 -->
+									 -->  
 									{if count($uni['details']) > 1}
 										<a href="{php echo url('account/bind/delete', array('acid' => $account['acid'], 'uniacid' => $account['uniacid']))}" onclick="return confirm('确认删除吗？');return false;" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="删除"><i class="fa fa-times"></i></a>
 									{/if}

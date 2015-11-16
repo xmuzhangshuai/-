@@ -37,7 +37,7 @@
 			<tbody>
 			{loop $permission $row}
 				<tr {if !empty($_GPC['fromuid']) && $_GPC['fromuid']== $row['uid']}style="background:#dddddd;"{/if}>
-					<td class="row-first"><input class="member" type="checkbox" value="{$row['id']}" /></td>
+					<td class="row-first"><input class="member" type="checkbox" value="{$row['id']}" {if $row['role']== 'manager'}disabled="disabled"{/if} /></td>
 					<td>{$row['uid']}</td>
 					<td>{$member[$row['uid']]['username']}</td>
 					<td>
