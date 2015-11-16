@@ -1837,6 +1837,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 	}
 	public function doMobileMyorder() {
 		global $_W, $_GPC;
+		//二次开发用于获取用户微信昵称头像等的函数
+		load()->model('mc');
 		checkauth();
 		$sid = intval($_GPC['sid']);
 		check_trash($sid);
@@ -1869,6 +1871,19 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') . $where, $params);
 		$data = pdo_fetchall('SELECT * FROM ' . tablename('str_order') . $where . $limit, $params);
 		$pager = pagination($total, $pindex, $psize, '', array('before' => 0, 'after' => 0));
+		/**
+		 * 二次开发：获取用户的微信头像还有昵称
+		 */
+		 if(!empty($_W['openid'])){
+		 	$sql = 'SELECT `fanid`,`openid`,`uid` FROM ' . tablename('mc_mapping_fans') . ' WHERE `uniacid`=:uniacid AND `openid`=:openid';
+			$pars = array();
+			$pars[':uniacid'] = $_W['uniacid'];
+			$pars[':openid'] = $_W['openid'];
+			$fan = pdo_fetch($sql, $pars);
+			if(!empty($fan) && !empty($fan['uid'])) {
+				$user = mc_fetch($fan['uid'], array('nickname', 'gender', 'residecity', 'resideprovince', 'nationality', 'avatar'));
+			}
+		 }
 		include $this->template('myorder');
 	}
 	public function doMobileOrderDetail() {
@@ -2121,6 +2136,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 
 	public function doMobileAddress() {
 		global $_W, $_GPC;
+		//二次开发用于获取用户微信昵称头像等的函数
+		load()->model('mc');
+		
 		checkauth();
 		$id = intval($_GPC['id']);
 		$sid = intval($_GPC['sid']);
@@ -2204,6 +2222,20 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			exit(json_encode(array('errorno' => 0, 'message' => '')));
 		}
 
+		/**
+		 * 二次开发：获取用户的微信头像还有昵称
+		 */
+		 if(!empty($_W['openid'])){
+		 	$sql = 'SELECT `fanid`,`openid`,`uid` FROM ' . tablename('mc_mapping_fans') . ' WHERE `uniacid`=:uniacid AND `openid`=:openid';
+			$pars = array();
+			$pars[':uniacid'] = $_W['uniacid'];
+			$pars[':openid'] = $_W['openid'];
+			$fan = pdo_fetch($sql, $pars);
+			if(!empty($fan) && !empty($fan['uid'])) {
+				$user = mc_fetch($fan['uid'], array('nickname', 'gender', 'residecity', 'resideprovince', 'nationality', 'avatar'));
+			}
+		 }
+		 
 		include $this->template('address');
 	}
 	public function doMobileComment_list() {

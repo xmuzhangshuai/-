@@ -13,10 +13,16 @@
 </style>
 <div class="cont_box">
 	<div class="cont_box">
+		{if $user!=null}
+		<img class="cont_userimg" src="{$user['avatar']}" />
+		<!--src="../resource/images/penguin.png"-->
+		<span class="cont_userdec">{$user['nickname']}</span>
+		{else}
 		<img class="cont_userimg" src="../addons/str_takeout/template/resource/images/penguin.png" />
 		<!--src="../resource/images/penguin.png"-->
 
-		<span class="cont_userdec">微信昵称</span>
+		<span class="cont_userdec">非微信用户</span>
+		{/if}
 		<br>
 		<br>
 		<span class="cont_userdec1">共{$total}个订单</span>

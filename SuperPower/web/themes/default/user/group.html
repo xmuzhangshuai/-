@@ -1,7 +1,7 @@
 {template 'common/header-gw'}
 <ol class="breadcrumb">
 	<li><a href="./?refresh"><i class="fa fa-home"></i></a></li>
-	<li><a href="{url 'system/welcome'}">系统</a></li>
+	<!-- <li><a href="{url 'system/welcome'}">系统</a></li> -->
 	<li><a href="{url 'user/group'}">用户组</a></li>
 	<li class="active">{if $do == 'display'}用户组列表{elseif $do == 'post'}{if $id}编辑{else}添加{/if}用户组{/if}</li>
 </ol>
