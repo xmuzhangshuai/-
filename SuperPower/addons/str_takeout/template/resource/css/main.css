@@ -406,13 +406,13 @@ body>div:first-child {
 	 max-width: 70%;
 	 display: inline-block;
 }
-@media(max-width: 1024px) {
+@media (max-width: 1024px) {
 	.nav_address span.nav_add_add{
 		max-width: 65%;
 		display: inline-block;
 	}
 }
-@media(max-width: 720px) {
+@media (max-width: 720px) {
 	.nav_address span.nav_add_add{
 		max-width: 60%;
 		display: inline-block;

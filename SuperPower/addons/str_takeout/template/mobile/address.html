@@ -53,7 +53,7 @@
 			<p class="phone_number" name="mobile" id="mobile" data-id="{$currentadd['id']}"><span>{$currentadd['mobile']}</span>
 				<input class="hidden" type="text" name="mobile" id="mobileipt" value="{$currentadd['mobile']}" data-id="{$currentadd['id']}"  placeholder="手机" />
 			</p>
-			<img class="compiler" src="../addons/str_takeout/template/resource/images/edit.png" />
+			<img id="update_mobile" class="compiler" src="../addons/str_takeout/template/resource/images/edit.png" />
 		</div>
 		<div class="cont_box vaild person_info hidden" id="phone_vaild">
 			<a class="comm_btn disabled hidden" id="phone_vaild_submit">发送短信，验证手机号</a>
@@ -77,7 +77,7 @@
 		</li>
 				{php $addinstore=pdo_fetchall('SELECT * FROM ' . tablename('str_address').' WHERE sid='.$store['sid'].' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));}
 				{loop $addinstore $address}
-			<li style="padding: 0;width: 100%;margin: 0;" class="cont_box">
+			<li style="padding: 0;width: 100%;max-width:100%;display: inline-block;margin: 0;" class="cont_box">
 				<span class="adress_detailed addressChecked {if $_GPC['r']!=3}addressChecking{$address['is_default']}{/if}" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}<br />{$address['room']}</span>
 				<a class="adress_delete deladdress" data-id="{$address['id']}" data-sid="{$address['sid']}"></a>
 			</li>
@@ -241,17 +241,6 @@
 		}).blur(function (){
 			$(this).attr("placeholder","请输入您所在的楼宇");
 		});
-		if(0){
-			$("#location_input").focus(function (){
-				$(this).css("position","fixed").css("top","0").css("left","0").css("z-index","1000");
-				$("#search").addClass("hidden");
-				$(this).change();
-			}).blur(function (){
-				$("#search").removeClass("hidden");
-				$(this).css("position","static");
-				$(this).change();
-			});
-		}
 		$("#location_input").change(function() {
 			user_loc = this.value;
 			local.search(user_loc);
@@ -365,7 +354,7 @@
 			return false;
 		});
 		{/if}
-		$(".compiler").click(function(){
+		$("#update_mobile").click(function(){
 			if($("#mobileipt").hasClass("hidden")){
 				$("#mobileipt").removeClass("hidden");
 				$("#mobile span").addClass("hidden");
