@@ -442,9 +442,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$tel = trim($_GPC['tel']);
 			$record = pdo_fetch('SELECT * FROM ' . tablename('str_telauth') . ' WHERE tel = :tel', array(':tel' => $tel));
 			if(empty($record)){
-				exit('authed');
+				exit('notauth');
 			}
-			exit('notauth');
+			exit('authed');
 		}
 		/**
 		 * 二次开发：发送手机验证码

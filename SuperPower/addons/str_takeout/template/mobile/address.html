@@ -16,8 +16,8 @@
 		overflow: hidden;
 		white-space: nowrap;
 	}
-	.vaild{text-align: center;clear: both;float: none;padding-top: 15px;}
-	#phone_code_wrapper{background:#F1F1F1;}
+	.vaild{text-align: center;clear: both;float: none;padding-top: 1px;}
+	#phone_code_wrapper{background:#F1F1F1;margin:0 5%}
 </style>
 <div class="cont_box">
 	<div class="cont_box">
@@ -56,7 +56,7 @@
 			<img class="compiler" src="../addons/str_takeout/template/resource/images/edit.png" />
 		</div>
 		<div class="cont_box vaild person_info hidden" id="phone_vaild">
-			<a class="comm_btn disabled" id="phone_vaild_submit">发送短信，验证手机号</a>
+			<a class="comm_btn disabled hidden" id="phone_vaild_submit">发送短信，验证手机号</a>
 			<div id="phone_code_wrapper" class="cont_box hidden">
 				<label class="left">验证码</label>
 				<div class="mid">
@@ -185,7 +185,7 @@
 </footer>
 {/if}
 <script type="text/javascript">
-	var user_iploc={php $url='http://api.map.baidu.com/location/ip?ak=6E7C75E41980283b39d3c61e81f16a39&ip='.$_SERVER["REMOTE_ADDR"];  $html = file_get_contents($url);  echo $html;} ;
+	var user_iploc={php $ip=$_SERVER["REMOTE_ADDR"]=='127.0.0.1'?'117.30.118.137':$_SERVER["REMOTE_ADDR"];$url='http://api.map.baidu.com/location/ip?ak=6E7C75E41980283b39d3c61e81f16a39&ip='.$ip;  $html = file_get_contents($url);  echo $html;} ;
 	var user_loc="";
 	var user_point=null;
 	var ha_detail=null;
@@ -371,7 +371,7 @@
 				$("#mobile span").addClass("hidden");
 			}
 		});
-		int vaild_times_rem=3;
+		var vaild_times_rem=3;
 		$("#mobileipt").blur(function(){
 			var id = $(this).attr('data-id');
 			if($("#mobile span").hasClass("hidden")){
@@ -384,7 +384,7 @@
 				$("#mobileipt").val($("#mobile span").text());
 				alert('手机号格式不正确');
 			}else{
-				$.post('{php echo $this->createWebUrl('ajax', array('op' => 'tel_checkauth'))}', {'tel':newmobile}, function(data){
+				$.post('/web/'+'{php echo $this->createWebUrl('ajax', array('op' => 'tel_checkauth'))}', {'tel':newmobile}, function(data){
 					if(data == 'authed') {
 						$("#mobile span").html(newmobile);
 						$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
@@ -392,40 +392,48 @@
 						vaild_times_rem=3;
 						$("#mobile span").html(newmobile);
 						$("#phone_vaild").removeClass("hidden");
-						$('#phone_vaild_submit').removeClass("disabled");
+						$('#phone_vaild_submit').removeClass("hidden").removeClass("disabled");
 					}
 				});
 			}
 		});
-		#('#phone_vaild_submit').click(function(){
-			if(!$(this).hasClass("disabled")){
-				$(this).addClass("disabled").addClass("hidden");
+		$('#phone_vaild_submit').click(function(){
+			if(!$('#phone_vaild_submit').hasClass("disabled")){
+				$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
 				var newmobile=$.trim($("#mobileipt").val());
-				$.post('{php echo $this->createWebUrl('ajax', array('op' => 'send_auth_code'))}', {'tel':newmobile}, function(data){
+				$.post('/web/'+'{php echo $this->createWebUrl('ajax', array('op' => 'send_auth_code'))}', {'tel':newmobile}, function(data){
 					if(data == 'success') {
 						$("#phone_code_wrapper").removeClass("hidden");
 						$('#phone_code_submit').removeClass("disabled").removeClass("hidden");
 					}else if(data == 'request too many times') {
-						$(this).removeClass("hidden").text("两分钟内发送过验证码，请稍等");
-						setTimeout(function(){$(this).removeClass("disabled").text("发送短信，验证手机号");},10000);
+						$('#phone_vaild_submit').removeClass("hidden").text("两分钟内发送过验证码，请稍等");
+						setTimeout(function(){$('#phone_vaild_submit').removeClass("disabled").text("发送短信，验证手机号");},10000);
 					}else{
 						alert("验证码发送失败");
-						$(this).removeClass("hidden").removeClass("disabled");
+						$('#phone_vaild_submit').removeClass("hidden").removeClass("disabled");
 					}
 				});
 			}
 		});
-		#('#phone_code_submit').click(function(){
-			if(!$(this).hasClass("disabled")){
+		$('#phone_code_submit').click(function(){
+			if(!$('#phone_code_submit').hasClass("disabled")){
+				$('#phone_code_submit').addClass("disabled");
 				var newmobile=$.trim($("#mobileipt").val());
 				var code=$.trim($("#code").val());
-				$.post('{php echo $this->createWebUrl('ajax', array('op' => 'authtel'))}', {'tel':newmobile,'code':code}, function(data){
+				$("#code").val("");
+				var id = $("mobileipt").attr('data-id');
+				$.post('/web/'+'{php echo $this->createWebUrl('ajax', array('op' => 'authtel'))}', {'tel':newmobile,'code':code}, function(data){
 					vaild_times_rem--;
 					if(data == 'success') {
-						$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
-						$("#phone_code_wrapper").addClass("hidden");
-						$('#phone_code_submit').addClass("disabled").addClass("hidden");
-						$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
+						$('#phone_code_submit').text("验证成功");
+						setTimeout(function(){
+							$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
+							$("#phone_code_wrapper").addClass("hidden");
+							$("#phone_vaild").addClass("hidden");
+							$('#phone_code_submit').addClass("disabled").addClass("hidden");
+							$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
+						},2000);
+
 					}else if(data == 'time out'){
 						alert("验证码超时");
 						$("#phone_code_wrapper").addClass("hidden");
@@ -434,8 +442,10 @@
 					}else{
 						if(vaild_times_rem){
 							alert("验证码错误,还有"+vaild_times_rem+"次重试");
+							$('#phone_code_submit').removeClass("disabled");
 						}else{
 							alert("验证码错误,请重新发送验证码");
+							vaild_times_rem=3;
 							$("#phone_code_wrapper").addClass("hidden");
 							$('#phone_code_submit').addClass("disabled").addClass("hidden");
 							$('#phone_vaild_submit').removeClass("disabled").removeClass("hidden");
