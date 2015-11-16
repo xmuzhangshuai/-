@@ -16,6 +16,8 @@
 		overflow: hidden;
 		white-space: nowrap;
 	}
+	.vaild{text-align: center;clear: both;float: none;padding-top: 15px;}
+	#phone_code_wrapper{background:#F1F1F1;}
 </style>
 <div class="cont_box">
 	<div class="cont_box">
@@ -46,6 +48,16 @@
 				<input class="hidden" type="text" name="mobile" id="mobileipt" value="{$currentadd['mobile']}" data-id="{$currentadd['id']}"  placeholder="手机" />
 			</p>
 			<img class="compiler" src="../addons/str_takeout/template/resource/images/edit.png" />
+		</div>
+		<div class="cont_box vaild person_info hidden" id="phone_vaild">
+			<a class="comm_btn disabled" id="phone_vaild_submit">发送短信，验证手机号</a>
+			<div id="phone_code_wrapper" class="cont_box hidden">
+				<label class="left">验证码</label>
+				<div class="mid">
+					<input type="text" id="code" name="code" value=""></input>
+				</div>
+			</div>
+			<a class="comm_btn disabled hidden" id="phone_code_submit">验证手机</a>
 		</div>
 		{/if}
 	</div>
@@ -167,7 +179,7 @@
 </footer>
 {/if}
 <script type="text/javascript">
-	var user_iploc={php $url='http://api.map.baidu.com/location/ip?ak=6E7C75E41980283b39d3c61e81f16a39&ip='.'120.35.71.61'/*$_SERVER["REMOTE_ADDR"]*/;  $html = file_get_contents($url);  echo $html;} ;
+	var user_iploc={php $url='http://api.map.baidu.com/location/ip?ak=6E7C75E41980283b39d3c61e81f16a39&ip='.$_SERVER["REMOTE_ADDR"];  $html = file_get_contents($url);  echo $html;} ;
 	var user_loc="";
 	var user_point=null;
 	var ha_detail=null;
@@ -353,20 +365,77 @@
 				$("#mobile span").addClass("hidden");
 			}
 		});
+		int vaild_times_rem=3;
 		$("#mobileipt").blur(function(){
 			var id = $(this).attr('data-id');
 			if($("#mobile span").hasClass("hidden")){
 				$("#mobileipt").addClass("hidden");
 				$("#mobile span").removeClass("hidden");
 			}
-			var newmobile=$("#mobileipt").val();
+			var newmobile=$.trim($("#mobileipt").val());
 			var valid = !!newmobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
 			if(!valid){
 				$("#mobileipt").val($("#mobile span").text());
 				alert('手机号格式不正确');
 			}else{
-				$("#mobile span").html(newmobile);
-				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
+				$.post('{php echo $this->createWebUrl('ajax', array('op' => 'tel_checkauth'))}', {'tel':newmobile}, function(data){
+					if(data == 'authed') {
+						$("#mobile span").html(newmobile);
+						$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
+					} else {
+						vaild_times_rem=3;
+						$("#mobile span").html(newmobile);
+						$("#phone_vaild").removeClass("hidden");
+						$('#phone_vaild_submit').removeClass("disabled");
+					}
+				});
+			}
+		});
+		#('#phone_vaild_submit').click(function(){
+			if(!$(this).hasClass("disabled")){
+				$(this).addClass("disabled").addClass("hidden");
+				var newmobile=$.trim($("#mobileipt").val());
+				$.post('{php echo $this->createWebUrl('ajax', array('op' => 'send_auth_code'))}', {'tel':newmobile}, function(data){
+					if(data == 'success') {
+						$("#phone_code_wrapper").removeClass("hidden");
+						$('#phone_code_submit').removeClass("disabled").removeClass("hidden");
+					}else if(data == 'request too many times') {
+						$(this).removeClass("hidden").text("两分钟内发送过验证码，请稍等");
+						setTimeout(function(){$(this).removeClass("disabled").text("发送短信，验证手机号");},10000);
+					}else{
+						alert("验证码发送失败");
+						$(this).removeClass("hidden").removeClass("disabled");
+					}
+				});
+			}
+		});
+		#('#phone_code_submit').click(function(){
+			if(!$(this).hasClass("disabled")){
+				var newmobile=$.trim($("#mobileipt").val());
+				var code=$.trim($("#code").val());
+				$.post('{php echo $this->createWebUrl('ajax', array('op' => 'authtel'))}', {'tel':newmobile,'code':code}, function(data){
+					vaild_times_rem--;
+					if(data == 'success') {
+						$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
+						$("#phone_code_wrapper").addClass("hidden");
+						$('#phone_code_submit').addClass("disabled").addClass("hidden");
+						$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
+					}else if(data == 'time out'){
+						alert("验证码超时");
+						$("#phone_code_wrapper").addClass("hidden");
+						$('#phone_code_submit').addClass("disabled").addClass("hidden");
+						$('#phone_vaild_submit').removeClass("disabled").removeClass("hidden");
+					}else{
+						if(vaild_times_rem){
+							alert("验证码错误,还有"+vaild_times_rem+"次重试");
+						}else{
+							alert("验证码错误,请重新发送验证码");
+							$("#phone_code_wrapper").addClass("hidden");
+							$('#phone_code_submit').addClass("disabled").addClass("hidden");
+							$('#phone_vaild_submit').removeClass("disabled").removeClass("hidden");
+						}
+					}
+				});
 			}
 		});
 		$('#submit').click(function(){
