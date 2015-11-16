@@ -1,5 +1,5 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.1" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="../addons/str_takeout/template/resource/js/main.js"></script>
 <script src="../addons/str_takeout/template/resource/js/menu.js"></script>
@@ -13,7 +13,7 @@
     	描述：TODO:定位、选择
     -->
 	{if $address['address']}
-	<div class="nav_address"><span>送货到：</span><span>{$address['address']}</span>{if $address['room']} - {/if}<span>{$address['room']}</span>
+	<div class="nav_address"><span>送货到：</span><span class="nav_add_add">{$address['address']}</span>{if $address['room']} - {/if}<span  class="nav_add_room">{$address['room']}</span>
 		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a>
 	</div>
 	{else}

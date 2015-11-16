@@ -1,6 +1,6 @@
 {template 'common/header'}
 <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6E7C75E41980283b39d3c61e81f16a39"></script>
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.1" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="../addons/str_takeout/template/resource/js/intersectPolygon.js"></script>
 <div id="allmap"></div>
@@ -10,6 +10,12 @@
 	.cont_box, .menu_list li.cont_box{float: none;}
 	.buyrecord{border-bottom-color: rgba(243,152,1,0);}
 	.phone_number input{width: auto;font-size: 20px;max-width: 170px;}
+	.cont_box.order_list,.cont_box.person{width:96%;margin: 15px 2%;}
+	.adress_detailed{
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+	}
 </style>
 <div class="cont_box">
 	<div class="cont_box">
@@ -31,7 +37,7 @@
 		</div>
 	</div>
 	<hr width="102%" class="division" />
-	<div class="cont_box">
+	<div class="cont_box person">
 		{if $stores}
 		<div class="cont_box person_info">
 			<img class="phone" src="../addons/str_takeout/template/resource/images/phone.png" />
@@ -54,7 +60,7 @@
 				{php $addinstore=pdo_fetchall('SELECT * FROM ' . tablename('str_address').' WHERE sid='.$store['sid'].' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));}
 				{loop $addinstore $address}
 			<li style="padding: 0;width: 100%;margin: 0;" class="cont_box">
-				<span class="adress_detailed addressChecked {if $_GPC['r']!=3}addressChecking{$address['is_default']}{/if}" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}{if $address['room']} - {/if}{$address['room']}</span>
+				<span class="adress_detailed addressChecked {if $_GPC['r']!=3}addressChecking{$address['is_default']}{/if}" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}<br />{$address['room']}</span>
 				<a class="adress_delete deladdress" data-id="{$address['id']}" data-sid="{$address['sid']}"></a>
 			</li>
 				{/loop}
@@ -91,12 +97,15 @@
 		width: 100%;
 		height:52px!important;
 		line-height:24px;
-		padding-top: 14px;
 		font-size:23px;
 		border: 1px solid #F7B74D;
 		color: #F7B74D;
 		border-radius: 3px;
 		padding: 0px 20px;
+		padding-right: 50px;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
 	}
 	.line{
 		margin: 10px 0;
@@ -136,7 +145,7 @@
 	<div class="cont_box" style="text-align: center;"><img src="../addons/str_takeout/template/resource/images/logo.png" style="width: 60%;max-width: 367px;margin-top: 30px;"></div>
 	<div style="position: relative;">
 		<a name="#ddress"></a>
-		<input type="text" name="address" id="location_input" autocomplete="off" placeholder="请输入您所在的楼宇" /><img id="search" style="position: absolute;height: 40px;display: block;top: 5px;right: 20px;" src="../addons/str_takeout/template/resource/images/search.png" /></div>
+		<input type="text" name="address" id="location_input" autocomplete="off" placeholder="请输入您所在的楼宇" /><img id="search" style="position: absolute;height: 30px;display: block;top: 10px;right: 20px;" src="../addons/str_takeout/template/resource/images/search.png" /></div>
 	<div style="position: relative;"><a class="home-position">定位到我所在的楼宇</a><img style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/position.png" /></div>
 	<div class="hidden">
 		<input type="text" name="realname" value="{$address['realname']}" placeholder="姓名">
