@@ -13,7 +13,7 @@
 <div class="container">
 	<form name="cart_confirm_form" id="cart_confirm_form" method="post">
 		<section class="menu_wrap">
-			<div class="cont_box delivery_info">
+			<div class="cont_box delivery_info" style="margin-bottom: 0;">
 				<input type="hidden" name="address_id" value="{$address['id']}" id="address_id">
 				<label class="left">送餐地址</label>
 				<div class="mid"><span id="showAddres">{$address['address']}</span><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 1));}"><i class="ico_forward"></i></a></div>
@@ -25,6 +25,18 @@
 				<br />
 				<input type="text" id="showName" name="realname" value="{$address['realname']}" class="half"  placeholder="姓名"></input>
 				<input type="tel" id="showTel" name="mobile" value="{$address['mobile']}" class="half" placeholder="手机号"></input>
+			</div>
+			<div class="cont_box delivery_info" style="margin-top: 0;padding-top: 0;">
+				<label class="left">送餐时间</label>
+				<div class="mid" id="showTime" name="time">
+					<select>
+					    <option value ="立即送出">立即送出</option>
+					    <option value ="开店时间">开店时间</option>
+					</select>
+				</div>
+				<br />
+				<label class="left">备注信息</label>
+				<div class="mid"><input type="text" id="showNote" name="note" value=""></input></div>
 			</div>
 			<div class="cont_box">
 				<div class="shopping_info cont_box">
@@ -126,6 +138,8 @@
 				$(this).removeClass('disabled');
 				return false;
 			}
+			var note = $("#showNote").val();
+			var time = $("#showTime").val();
 			if($("#totalPrice").text()<=0){
 				alert('请点单');
 				$(this).removeClass('disabled');
@@ -134,8 +148,8 @@
 			var param = {
 				'order_type' :2,
 				'address_id':address_id,
-				'note':'',
-				'delivery_time':'',
+				'note':note,
+				'delivery_time':time,
 				'realname':realname,
 				'mobile':mobile,
 				'room':room
