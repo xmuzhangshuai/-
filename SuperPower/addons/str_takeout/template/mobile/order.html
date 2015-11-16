@@ -30,9 +30,9 @@
 				<div class="shopping_info cont_box">
 					<time>{php echo date('Y-m-d',time());}</time>
 					<span id="shopName">
-						{php $sname=pdo_fetchall('SELECT title FROM ' . tablename('str_store').' WHERE id='.$address['sid']);}
+						{php $sname=pdo_fetchall('SELECT title,telephone FROM ' . tablename('str_store').' WHERE id='.$address['sid']);}
 						{$sname[0]['title']}
-					<a class="ico_tel" href="tel:18888888888"></a></span>
+					<a class="ico_tel" href="tel:{$sname[0]['telephone']}"></a></span>
 				</div>
 				<ul class="menu_list order_list" id="orderList">
 					{loop $dish_info $li}
