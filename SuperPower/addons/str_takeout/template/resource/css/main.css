@@ -740,6 +740,9 @@ i.cantype3,
 	color: #000000;
 	display: inline;
 }
+.menu_list li a>h3 {
+	display: block;
+}
 .menu_list li h3 span {
 	color: #ff510c;
 }

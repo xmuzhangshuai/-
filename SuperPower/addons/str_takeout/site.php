@@ -1578,7 +1578,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		}
 		$str_store_dish = tablename('str_store_dish');
 		$str_dish = tablename('str_dish');
-		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id AND '. $str_dish . '.share = 1';
+		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id AND '. $str_dish . '.share = 1 AND '.$str_store_dish . '.selling=1';
 		$params[':aid'] = $_W['uniacid'];
 		$params[':sid'] = $sid;
 		
@@ -1690,7 +1690,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		if(empty($address)) {
 			$address = get_default_address();
 		}
-		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = :did AND ' . $str_dish . '.id = :did  AND '. $str_dish . '.share = 1';
+		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = :did AND ' . $str_dish . '.id = :did  AND '. $str_dish . '.share = 1 AND '.$str_store_dish . '.selling=1';
 		$params[':did'] = $dish_id;
 		//获取购物车的信息
 		$cart = get_order_cart($sid);
@@ -1732,7 +1732,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 	public function doMobileOrder() {
 		global $_W, $_GPC;
 		checkauth();
-		if(!$_W['isajax']) {
+		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'post';
+		$r = intval(trim($_GPC['r']) ? trim($_GPC['r']) : 0);
+		if(!$_W['isajax']||$op=='detail') {
 			$sid = intval($_GPC['sid']);
 			checkclerk($sid);
 			check_trash($sid);
@@ -1749,11 +1751,24 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				message('门店不存在', '', 'error');
 			}
 			//购物车
-			$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'post';
-			if($op=='get'){
-				$cart = get_order_cart($sid);
+			if(!($op=='detail'&&$r==1)){
+				if($op=='get'){
+					$cart = get_order_cart($sid);
+				}else{
+					$cart = set_order_cart($sid);
+				}
 			}else{
-				$cart = set_order_cart($sid);
+				$cart = get_order_cart($sid);
+				foreach($_GPC['dish'] as $k => $v) {
+					$k = intval($k);
+					$v = intval($v);
+					if($k && $v) {
+						$cart['data'][$k]=$v;
+					}
+				}
+				$cart['data'] = iserializer($cart['data']);
+				$id = pdo_fetchcolumn('SELECT id FROM ' . tablename('str_order_cart') . " WHERE uniacid = :aid AND sid = :sid AND uid = :uid", array(':aid' => $_W['uniacid'], ':sid' => $sid, ':uid' => $_W['member']['uid']));
+				pdo_update('str_order_cart', $cart, array('uniacid' => $_W['uniacid'], 'id' => $id, 'uid' => $_W['member']['uid']));
 			}
 			if(is_error($cart)) {
 				message("购物车错误".$cart.message, '', 'error');
@@ -1841,7 +1856,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					$temcart[$k] = 0;
 				}
 			}
-
 			foreach($temcart as $k => $v){
 				$dtype = pdo_fetch('SELECT dish_type FROM '.tablename('str_dish').' WHERE id=:id',array(':id' => $k));
 				if(!empty($dtype)&&$dtype['dish_type'] == 'TAOCAN'){

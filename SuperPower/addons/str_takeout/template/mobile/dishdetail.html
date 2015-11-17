@@ -21,6 +21,7 @@
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="../addons/str_takeout/template/resource/js/main_d.js"></script>
 <script src="../addons/str_takeout/template/resource/js/menu.js"></script>
+<script src="../addons/str_takeout/template/resource/js/form.js"></script>
 <script src="../addons/str_takeout/template/resource/js/common.js"></script>
 <div class="container" onselectstart="return true;" ondragstart="return false;">
 	{template 'header'}
@@ -38,7 +39,15 @@
 		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'op' =>'post', 'r' => 2));}" class="nav_sp_location"></a>
 	</div>
 	{/if}
-	<form name="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
+	
+	{loop $dish $ds}
+	{if $ds['dish_type']=='TAOCAN'}
+		{php $ds['kucun'] = -1; }
+	{/if}
+	{if $ds['kucun']==''}
+		{php $ds['kucun'] = 0;}
+	{/if}
+	<form name="cart_form" id="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
 		<input type="hidden" name="more" value="{$_GPC['more']}">
 		<input type="hidden" name="dish_str" value="{$dish_str}">
 		<section class="menu_wrap" id="menuWrap">
@@ -48,13 +57,7 @@
 			{/if}
 			<div class="menu_container">
 				<ul class="menu_list">
-					{loop $dish $ds}
-					{if $ds['dish_type']=='TAOCAN'}
-						{php $ds['kucun'] = -1; }
-					{/if}
-					{if $ds['kucun']==''}
-						{php $ds['kucun'] = 0;}
-					{/if}
+
 					<li id="{$ds['id']}" class="auto_height {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}out{/if}">
 						<div>
 							<div class="menu_type">{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></div>
@@ -93,7 +96,7 @@
 							</div>
 						</div>
 					</li>
-					{/loop}
+					
 				</ul>
 			</div>
 		</section>
@@ -101,20 +104,33 @@
 			<div class="fixed hidden" id="fix_bar">
 				<div>
 					<span class="comm_btn disabled"><span id="sendCondition" class="hide">0元</span>点餐</span>
-					<a id="settlement" class="comm_btn {if !$address['address']}disabled{/if}" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 {if $address['address']}立即下单{else}请添加地址{/if}</a>
+					<a id="settlement" data-href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}" class="comm_btn {if !$address['address']}disabled{/if}" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份{$ds['title']} {if $address['address']}继续点单{else}请添加地址{/if}</a>
 				</div>
 			</div>
 		</footer>
 	</form>
+	{/loop}
 </div>
 
 <script type="text/javascript">
 	$(function() {
 		$("#settlement").click(function() {
 			if (!$("#settlement").hasClass("disabled")) {
-				document.cart_form.submit();
+				var action=$('#cart_form').attr("action");
+				action=action.split("#")[0];
+				action+='&op=detail&r=1#wechat_redirect';
+				$('#cart_form').attr("action",action);
+				var href=$(this).attr("data-href");
+				var ajax_option={
+					success:function(data){
+						location.href=href;
+					},
+					url:action
+				};
+				$('#cart_form').ajaxSubmit(ajax_option);
 			}
 		});
+
 	});
 	var menu = {
 		offsetAry: [0],

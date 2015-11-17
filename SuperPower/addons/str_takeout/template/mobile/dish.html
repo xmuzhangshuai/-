@@ -2,6 +2,7 @@
 <link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.1" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="../addons/str_takeout/template/resource/js/main.js"></script>
+<script src="../addons/str_takeout/template/resource/js/form.js"></script>
 <script src="../addons/str_takeout/template/resource/js/menu.js"></script>
 <script src="../addons/str_takeout/template/resource/js/common.js"></script>
 <script src="../addons/str_takeout/template/resource/js/resp_slide.js"></script>
@@ -21,7 +22,7 @@
 		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'op' =>'post', 'r' => 2));}" class="nav_sp_location"></a>
 	</div>
 	{/if}
-	<form name="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
+	<form name="cart_form" id="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
 		<input type="hidden" name="more" value="{$_GPC['more']}">
 		<input type="hidden" name="dish_str" value="{$dish_str}">
 		<section class="menu_wrap" id="menuWrap">
@@ -61,7 +62,7 @@
 							{/if}
 						</div>
 						<div class="menu_desc">
-							<a href="{php echo $this->createMobileUrl('dishdetail', array('sid' => $sid, 'dish_id' => $ds['id']));}" style="text-decoration: none!important;"><h3>{$ds['title']}</h3></a>
+							<a data-href="{php echo $this->createMobileUrl('dishdetail', array('sid' => $sid, 'dish_id' => $ds['id']));}" class="dish_detail" style="text-decoration: none!important;"><h3>{$ds['title']}</h3></a>
 							<div class="info">{$ds['zuhe']}</div>
 						</div>
 						<div class="price_wrap menu_desc">
@@ -102,6 +103,21 @@
 			if (!$("#settlement").hasClass("disabled")) {
 				document.cart_form.submit();
 			}
+		});
+		
+		$(".dish_detail").click(function() {
+			var action=$('#cart_form').attr("action");
+			action=action.split("#")[0];
+			action+='&op=detail#wechat_redirect';
+			$('#cart_form').attr("action",action);
+			var href=$(this).attr("data-href");
+			var ajax_option={
+				success:function(data){
+					location.href=href;
+				},
+				url:action
+			};
+			$('#cart_form').ajaxSubmit(ajax_option);
 		});
 	});
 	var menu = {
