@@ -1628,11 +1628,36 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		include $this->template('dish');
 	}
 
-	public function doMobileAjaxDish() {
+	public function doMobileDishDetail() {
 		global $_W, $_GPC;
 		$sid = intval($_GPC['sid']);
-		$cid = intval($_GPC['cid']);
-		$store = pdo_fetch('SELECT delivery_price,business_hours,send_price FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
+		checkauth();
+		$address_id = intval($_GPC['address_id']);
+		$address = get_address($address_id);
+		if(empty($address)) {
+			$address = get_default_address();
+		}
+		if(empty($address)){
+			header('Location: '.$this->createMobileUrl('address', array('op' => 'init','r' => 2))); 
+			exit;
+		}
+		if((!empty($address))&&intval($address['sid'])!=$sid){
+			header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
+			exit;
+		}
+		$str_store_dish = tablename('str_store_dish');
+		$str_dish = tablename('str_dish');
+		$params[':aid'] = $_W['uniacid'];
+		$params[':sid'] = $sid;
+		
+		checkclerk($sid);
+		check_trash($sid);
+		$store = pdo_fetch('SELECT * FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
+		$title = $store['title'];
+		$_share = get_share($store);
+		if($store['comment_status'] == 1) {
+			$comment_stat = comment_stat($sid);
+		}
 		$store['business_hours_flag'] = 0;
 		$store['business_hours'] = iunserializer($store['business_hours']);
 		if(is_array($store['business_hours'])) {
@@ -1652,12 +1677,25 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			$hour_str = trim($hour_str, '、');
 		}
+
+		if(empty($store)) {
+			message('门店信息不存在', $this->createMobileUrl('index'), 'error');
+		}
+		if(!empty($_GPC['f'])) {
+			del_order_cart($sid);
+		}
+		$dish_id = intval($_GPC['dish_id']);
+		$address_id = intval($_GPC['address_id']);
+		$address = get_address($address_id);
+		if(empty($address)) {
+			$address = get_default_address();
+		}
+		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = :did AND ' . $str_dish . '.id = :did  AND '. $str_dish . '.share = 1';
+		$params[':did'] = $dish_id;
 		//获取购物车的信息
 		$cart = get_order_cart($sid);
-		$category = pdo_fetch('SELECT title, id FROM ' . tablename('str_dish_category') . ' WHERE uniacid = :aid AND sid = :sid AND id = :id', array(':aid' => $_W['uniacid'], ':sid' => $sid, ':id' => $cid));
-		$dish = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') . ' WHERE uniacid = :aid AND sid = :sid AND cid = :cid AND is_display = 1 ORDER BY displayorder DESC, id ASC', array(':aid' => $_W['uniacid'], ':sid' => $sid, ':cid' => $cid));
-		include $this->template('dish_model');
-		exit();
+		$dish = pdo_fetchall('SELECT ' . $str_dish . '.*,'. $str_store_dish . '.selling,'. $str_store_dish .'.kucun FROM ' . $str_dish . ',' .$str_store_dish .' WHERE ' . $condition, $params);
+		include $this->template('dishdetail');
 	}
 	public function doMobileStore() {
 		global $_W, $_GPC;

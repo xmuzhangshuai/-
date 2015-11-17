@@ -1,10 +1,27 @@
 {template 'common/header'}
 <link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.1" />
+<style>
+	.menu_list li > div.menu_desc_wrap{
+		position: fixed;
+		top: 45px;
+		left: 0px;
+		width: 100%;
+		background-color: #FFF;
+		z-index: 100;
+		border-bottom: 2px rgb(229, 229, 229) solid;
+	}
+	.menu_desc_wrap .menu_desc{
+		margin: 0;
+	}
+	.menu_desc_wrap .menu_desc:last-child{
+		position: relative;
+		bottom: 5px;
+	}
+</style>
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
-<script src="../addons/str_takeout/template/resource/js/main.js"></script>
+<script src="../addons/str_takeout/template/resource/js/main_d.js"></script>
 <script src="../addons/str_takeout/template/resource/js/menu.js"></script>
 <script src="../addons/str_takeout/template/resource/js/common.js"></script>
-<script src="../addons/str_takeout/template/resource/js/resp_slide.js"></script>
 <div class="container" onselectstart="return true;" ondragstart="return false;">
 	{template 'header'}
 	<!--
@@ -43,7 +60,7 @@
 							<div class="menu_type">{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></div>
 							{if $ds['thumb']} {php $ds['thumb'] = explode(';',$ds['thumb']); }
 							<div class="slider_wrap">
-								<ul class="rslides" id="slider{$ds['id']}">
+								<ul>
 									{loop $ds['thumb'] $thu}
 									<li>
 										<img src="{php echo tomedia($thu);}" alt="" />
@@ -60,17 +77,19 @@
 							<div class="nopic"></div>
 							{/if}
 						</div>
-						<div class="menu_desc">
-							<a href="{php echo $this->createMobileUrl('dishdetail', array('sid' => $sid, 'dish_id' => $ds['id']));}" style="text-decoration: none!important;"><h3>{$ds['title']}</h3></a>
-							<div class="info">{$ds['zuhe']}</div>
-						</div>
-						<div class="price_wrap menu_desc">
-							<strong>￥<span class="unit_price">{$ds['price']}</span></strong>
-							<div class="fr buy_btn {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}buy_btn_out{/if}" max="{$ds['kucun']}">
-								<a href="javascript:void(0);" class="btn_n add" data-num="{$cart['data'][$ds['id']]}"></a>
-								{if $store['open']}
-								<a href="javascript:void(0);" class="btn_fork"></a>{else}预订{/if}
-								<input autocomplete="off" class="h_num" type="hidden" name="dish[{$ds['id']}]" value="{$cart['data'][$ds['id']]}">
+						<div class="menu_desc_wrap">
+							<div class="menu_desc">
+								<h3>{$ds['title']}</h3>
+								<div class="info">{$ds['zuhe']}</div>
+							</div>
+							<div class="price_wrap menu_desc">
+								<strong>￥<span class="unit_price">{$ds['price']}</span></strong>
+								<div class="fr buy_btn {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}buy_btn_out{/if}" max="{$ds['kucun']}">
+									<a href="javascript:void(0);" class="btn_n add" data-num="{$cart['data'][$ds['id']]}"></a>
+									{if $store['open']}
+									<a href="javascript:void(0);" class="btn_fork"></a>{else}预订{/if}
+									<input autocomplete="off" class="h_num" type="hidden" name="dish[{$ds['id']}]" value="{$cart['data'][$ds['id']]}">
+								</div>
 							</div>
 						</div>
 					</li>
@@ -91,13 +110,6 @@
 
 <script type="text/javascript">
 	$(function() {
-		$(".rslides").responsiveSlides({
-			auto: true,
-			nav: true,
-			speed: 500,
-			namespace: "callbacks",
-			pager: true,
-		});
 		$("#settlement").click(function() {
 			if (!$("#settlement").hasClass("disabled")) {
 				document.cart_form.submit();
