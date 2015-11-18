@@ -253,6 +253,7 @@
 					return false;
 				}else{
 					$.post('{php echo $this->createWebUrl('manage', array('op' => 'update_kucun'))}', {'dish_id':id, 'kucun':kucun}, function(data){
+						//alert(data);
 						if(data == 'success') {
 							u.message('设置成功');
 							//location.reload();
