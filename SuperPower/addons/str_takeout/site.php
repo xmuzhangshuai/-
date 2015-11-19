@@ -1276,6 +1276,37 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			 $state = pdo_update('str_store_dish', $data, array('uniacid' => $_W['uniacid'], 'store_id' => $sid, 'dish_id' => $dish_id));
 			
 			if($state !== false){
+				//更新单品库存的同时检查是否更新包含该单品套餐库存
+				$dish = pdo_fetch('SELECT dish_name FROM '.tablename('str_store_dish').' WHERE dish_id=:id AND store_id=:sid AND uniacid=:aid', array(':id' => $dish_id, ':sid' => $sid, ':aid' => $_W['uniacid']));
+				$result = '';
+				if(!empty($dish)){
+					//获取门店中包含该单品的套餐
+					$taocan = pdo_fetchall('SELECT '.tablename('str_dish') .'.id,zuhe FROM '.tablename('str_dish').",".tablename('str_store_dish')." WHERE zuhe LIKE '%" 
+					. $dish['dish_name'] . "%' AND dish_type='TAOCAN' AND store_id=:sid AND ".tablename('str_store_dish').".dish_id=".
+					tablename('str_dish').".id",array(':sid'=>$sid));
+					if(!empty($taocan)){
+						foreach($taocan as $one){
+							$zuhe = explode('+',$one['zuhe']);
+							$change = 1;
+							foreach($zuhe as $danpin){
+								$dp = pdo_fetch('SELECT kucun FROM '. tablename('str_store_dish') . " WHERE dish_name=:name AND store_id=:sid AND uniacid=:aid", array(':name'=>$danpin, ':sid'=>$sid, ':aid'=>$_W['uniacid']));
+								if(!empty($dp)){
+									$change *= $dp['kucun'];
+									if($dp['kucun'] == 0){
+										$data['kucun'] = 0;
+										pdo_update('str_store_dish',$data,array('dish_id'=>$one['id'], 'store_id'=>$sid, 'uniacid'=>$_W['uniacid']));
+										break;
+									}
+								}
+							}
+							if($change!=0){//change不为0说明所有套餐中单品的库存都不为0，则设置成-1
+								$data['kucun'] = -1;
+								pdo_update('str_store_dish',$data,array('dish_id'=>$one['id'], 'store_id'=>$sid, 'uniacid'=>$_W['uniacid']));
+							
+							}
+						}
+					}
+				}
 				exit('success');
 			}
 			exit('error');
@@ -1813,8 +1844,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 							}
 							if($times==count($comtem)){//单品中不包含套餐中的单品，则加入套餐中的单品
 								$fakecart[$dish_id] = $v;
-								//同时删除套餐
-								unset($fakecart[$dish_id]);
 							}
 						}
 					}
@@ -1835,12 +1864,20 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			//更新单品库存
 			foreach($fakecart as $k => $v){
 				pdo_query('UPDATE ' . tablename('str_store_dish') . " set kucun = kucun - {$v} WHERE uniacid = :aid AND dish_id = :id AND store_id = :sid", array(':aid' => $_W['uniacid'], ':id' => $k, ':sid' => $sid));
+				//如果单品库存变为0，则包含该单品的套餐的库存也变为0	
+				$dish = pdo_fetch('SELECT kucun,dish_name FROM '.tablename('str_store_dish').' WHERE dish_id=:id AND store_id=:sid AND uniacid=:aid', array(':id' => $k, ':sid' => $sid, ':aid' => $_W['uniacid']));			
+				if(!empty($dish)&&$dish['kucun'] == 0){
+					pdo_query('UPDATE ' . tablename('str_store_dish') . "," . tablename('str_dish') . 
+					" set kucun = 0 WHERE". tablename('str_store_dish') .".uniacid = :aid AND zuhe like '%" . $dish['dish_name'] ."%' AND dish_id=" . 
+					tablename('str_dish') .".id  AND store_id = :sid", 
+					array(':aid' => $_W['uniacid'], ':sid' => $sid));
+				}
 			}
 			
 			$data['addtime'] = TIMESTAMP;
 			$data['status'] = 1;
 			$data['is_notice'] = 0;
-			$data['grant_credit'] = $cart['grant_credit'];;
+			$data['grant_credit'] = $cart['grant_credit'];
 			$data['is_grant'] = 0;
 			pdo_insert('str_order', $data);
 			$id = pdo_insertid();
