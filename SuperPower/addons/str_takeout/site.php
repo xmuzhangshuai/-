@@ -1527,8 +1527,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$address = get_default_address();
 		}
 		if(empty($address)){
-			header('Location: '.$this->createMobileUrl('address', array('op' => 'init','r' => 2))); 
-			exit;
+			$sid=-1;
 		}
 		if((!empty($address))&&intval($address['sid'])!=$sid){
 			header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
@@ -1573,11 +1572,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		}
 		if(!empty($_GPC['f'])) {
 			del_order_cart($sid);
-		}
-		$address_id = intval($_GPC['address_id']);
-		$address = get_address($address_id);
-		if(empty($address)) {
-			$address = get_default_address();
 		}
 		//获取购物车的信息
 		$cart = get_order_cart($sid);

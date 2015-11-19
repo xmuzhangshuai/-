@@ -3,7 +3,7 @@
 {if $address['address']}
 location.href = "{php echo $this->createMobileUrl('dish', array('sid' => $address['sid']));}";
 {else}
-location.href = "{php echo $this->createMobileUrl('address', array('op' => 'init','r' => 2));}";
+location.href = "{php echo $this->createMobileUrl('dish', array('sid' => -1));}";
 {/if}
 </script>
 {template 'common'}

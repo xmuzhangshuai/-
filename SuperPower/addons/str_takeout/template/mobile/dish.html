@@ -18,7 +18,7 @@
 		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a>
 	</div>
 	{else}
-	<div class="nav_address"><span>添加送餐地址才能点餐哟</span>
+	<div class="nav_address"><span>添加送餐地址才能点餐哟--></span>
 		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'op' =>'post', 'r' => 2));}" class="nav_sp_location"></a>
 	</div>
 	{/if}
@@ -33,9 +33,6 @@
 			<div class="menu_container">
 				<ul class="menu_list">
 					{loop $dish $ds}
-					{if $ds['dish_type']=='TAOCAN'}
-						{php $ds['kucun'] = -1; }
-					{/if}
 					{if $ds['kucun']==''}
 						{php $ds['kucun'] = 0;}
 					{/if}
@@ -67,7 +64,7 @@
 						</div>
 						<div class="price_wrap menu_desc">
 							<strong>￥<span class="unit_price">{$ds['price']}</span></strong>
-							<div class="fr buy_btn {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}buy_btn_out{/if}" max="{$ds['kucun']}">
+							<div class="fr buy_btn {if (!($ds['kucun'] == -1 || $ds['kucun'] > 0)||(!$address['address']))}buy_btn_out{/if}" max="{php echo $address['address']?$ds['kucun']:0}">
 								<a href="javascript:void(0);" class="btn_n add" data-num="{$cart['data'][$ds['id']]}"></a>
 								{if $store['open']}
 								<a href="javascript:void(0);" class="btn_fork"></a>{else}预订{/if}
@@ -80,10 +77,9 @@
 			</div>
 		</section>
 		<footer class="shopping_cart">
-			<div class="fixed hidden" id="fix_bar">
+			<div class="fixed {php if($address['address'])echo "hidden";}" id="fix_bar">
 				<div>
-					<span class="comm_btn disabled"><span id="sendCondition" class="hide">0元</span>点餐</span>
-					<a id="settlement" class="comm_btn {if !$address['address']}disabled{/if}" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 {if $address['address']}立即下单{else}请添加地址{/if}</a>
+					<a id="settlement" class="comm_btn {if !$address['address']}disabled{/if}">{if $address['address']}￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 立即下单{else}请添加地址{/if}</a>
 				</div>
 			</div>
 		</footer>
