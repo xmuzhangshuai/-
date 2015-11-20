@@ -1,6 +1,6 @@
 {template 'common/header'}
 <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6E7C75E41980283b39d3c61e81f16a39"></script>
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.1" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="../addons/str_takeout/template/resource/js/intersectPolygon.js"></script>
 <div id="allmap"></div>
@@ -10,6 +10,14 @@
 	.cont_box, .menu_list li.cont_box{float: none;}
 	.buyrecord{border-bottom-color: rgba(243,152,1,0);}
 	.phone_number input{width: auto;font-size: 20px;max-width: 170px;}
+	.cont_box.order_list,.cont_box.person{width:96%;margin: 15px 2%;}
+	.adress_detailed{
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+	.vaild{text-align: center;clear: both;float: none;padding-top: 1px;}
+	#phone_code_wrapper{background:#F1F1F1;margin:0 5%}
 </style>
 <div class="cont_box">
 	<div class="cont_box">
@@ -37,15 +45,25 @@
 		</div>
 	</div>
 	<hr width="102%" class="division" />
-	<div class="cont_box">
+	<div class="cont_box person">
 		{if $stores}
 		<div class="cont_box person_info">
 			<img class="phone" src="../addons/str_takeout/template/resource/images/phone.png" />
 			<br />
-			<p class="phone_number" name="mobile" id="mobile" data-id="{$currentadd['id']}"><span>{$currentadd['mobile']}</span>
+			<p class="phone_number" name="mobile" id="mobile" data-id="{$currentadd['id']}" data-mobile="{$currentadd['mobile']}"><span>{$currentadd['mobile']}</span>
 				<input class="hidden" type="text" name="mobile" id="mobileipt" value="{$currentadd['mobile']}" data-id="{$currentadd['id']}"  placeholder="手机" />
 			</p>
-			<img class="compiler" src="../addons/str_takeout/template/resource/images/edit.png" />
+			<img id="update_mobile" class="compiler" src="../addons/str_takeout/template/resource/images/edit.png" />
+		</div>
+		<div class="cont_box vaild person_info hidden" id="phone_vaild">
+			<a class="comm_btn hidden" id="phone_vaild_submit">发送短信，验证手机号</a>
+			<div id="phone_code_wrapper" class="cont_box hidden">
+				<label class="left">验证码</label>
+				<div class="mid">
+					<input type="text" id="code" name="code" value=""></input>
+				</div>
+			</div>
+			<a class="comm_btn disabled hidden" id="phone_code_submit">验证手机</a>
 		</div>
 		{/if}
 	</div>
@@ -59,8 +77,8 @@
 		</li>
 				{php $addinstore=pdo_fetchall('SELECT * FROM ' . tablename('str_address').' WHERE sid='.$store['sid'].' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));}
 				{loop $addinstore $address}
-			<li style="padding: 0;width: 100%;margin: 0;" class="cont_box">
-				<span class="adress_detailed addressChecked {if $_GPC['r']!=3}addressChecking{$address['is_default']}{/if}" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}{if $address['room']} - {/if}{$address['room']}</span>
+			<li style="padding: 0;width: 100%;max-width:100%;display: inline-block;margin: 0;" class="cont_box">
+				<span class="adress_detailed addressChecked {if $_GPC['r']!=3}addressChecking{$address['is_default']}{/if}" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}<br />{$address['room']}</span>
 				<a class="adress_delete deladdress" data-id="{$address['id']}" data-sid="{$address['sid']}"></a>
 			</li>
 				{/loop}
@@ -97,12 +115,15 @@
 		width: 100%;
 		height:52px!important;
 		line-height:24px;
-		padding-top: 14px;
 		font-size:23px;
 		border: 1px solid #F7B74D;
 		color: #F7B74D;
 		border-radius: 3px;
 		padding: 0px 20px;
+		padding-right: 50px;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
 	}
 	.line{
 		margin: 10px 0;
@@ -142,7 +163,7 @@
 	<div class="cont_box" style="text-align: center;"><img src="../addons/str_takeout/template/resource/images/logo.png" style="width: 60%;max-width: 367px;margin-top: 30px;"></div>
 	<div style="position: relative;">
 		<a name="#ddress"></a>
-		<input type="text" name="address" id="location_input" autocomplete="off" placeholder="请输入您所在的楼宇" /><img id="search" style="position: absolute;height: 40px;display: block;top: 5px;right: 20px;" src="../addons/str_takeout/template/resource/images/search.png" /></div>
+		<input type="text" name="address" id="location_input" autocomplete="off" placeholder="请输入您所在的楼宇" /><img id="search" style="position: absolute;height: 30px;display: block;top: 10px;right: 20px;" src="../addons/str_takeout/template/resource/images/search.png" /></div>
 	<div style="position: relative;"><a class="home-position">定位到我所在的楼宇</a><img style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/position.png" /></div>
 	<div class="hidden">
 		<input type="text" name="realname" value="{$address['realname']}" placeholder="姓名">
@@ -164,7 +185,7 @@
 </footer>
 {/if}
 <script type="text/javascript">
-	var user_iploc={php $url='http://api.map.baidu.com/location/ip?ak=6E7C75E41980283b39d3c61e81f16a39&ip='.'120.35.71.61'/*$_SERVER["REMOTE_ADDR"]*/;  $html = file_get_contents($url);  echo $html;} ;
+	var user_iploc={php $ip=$_SERVER["REMOTE_ADDR"]=='127.0.0.1'?'117.30.118.137':$_SERVER["REMOTE_ADDR"];$url='http://api.map.baidu.com/location/ip?ak=6E7C75E41980283b39d3c61e81f16a39&ip='.$ip;  $html = file_get_contents($url);  echo $html;} ;
 	var user_loc="";
 	var user_point=null;
 	var ha_detail=null;
@@ -220,17 +241,6 @@
 		}).blur(function (){
 			$(this).attr("placeholder","请输入您所在的楼宇");
 		});
-		if(0){
-			$("#location_input").focus(function (){
-				$(this).css("position","fixed").css("top","0").css("left","0").css("z-index","1000");
-				$("#search").addClass("hidden");
-				$(this).change();
-			}).blur(function (){
-				$("#search").removeClass("hidden");
-				$(this).css("position","static");
-				$(this).change();
-			});
-		}
 		$("#location_input").change(function() {
 			user_loc = this.value;
 			local.search(user_loc);
@@ -344,26 +354,106 @@
 			return false;
 		});
 		{/if}
-		$(".compiler").click(function(){
-			if($("#mobileipt").hasClass("hidden")){
-				$("#mobileipt").removeClass("hidden");
-				$("#mobile span").addClass("hidden");
+		$("#update_mobile").click(function(){
+			if((!$('#phone_vaild_submit').hasClass("disabled"))&&$('#phone_vaild_submit').hasClass("hidden")){
+				if($("#mobileipt").hasClass("hidden")){
+					$("#mobileipt").removeClass("hidden");
+					$("#mobile span").addClass("hidden");
+				}else{
+					$("#phone_code_wrapper").addClass("hidden");
+					$("#phone_vaild").addClass("hidden");
+					$('#phone_code_submit').addClass("disabled").addClass("hidden");
+					$('#phone_vaild_submit').removeClass("disabled").addClass("hidden");
+					$("#mobileipt").text($("#mobileipt").attr("data-mobile"));
+					$("#mobileipt").addClass("hidden");
+					$("#mobile span").removeClass("hidden").text($("#mobileipt").attr("data-mobile"));
+				}
 			}
 		});
+		var vaild_times_rem=3;
 		$("#mobileipt").blur(function(){
-			var id = $(this).attr('data-id');
-			if($("#mobile span").hasClass("hidden")){
-				$("#mobileipt").addClass("hidden");
-				$("#mobile span").removeClass("hidden");
+			if((!$('#phone_vaild_submit').hasClass("disabled"))&&$('#phone_vaild_submit').hasClass("hidden")){
+				var id = $(this).attr('data-id');
+				if($("#mobile span").hasClass("hidden")){
+					$("#mobileipt").addClass("hidden");
+					$("#mobile span").removeClass("hidden");
+				}
+				var newmobile=$.trim($("#mobileipt").val());
+				var valid = !!newmobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
+				if(!valid){
+					$("#mobileipt").val($("#mobile span").text());
+					alert('手机号格式不正确');
+				}else{
+					$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'tel_checkauth'))}', {'tel':newmobile}, function(data){
+						if(data == 'authed') {
+							$("#mobile span").html(newmobile);
+							$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
+						} else {
+							vaild_times_rem=3;
+							$("#mobile span").html(newmobile);
+							$("#phone_vaild").removeClass("hidden");
+							$('#phone_vaild_submit').removeClass("hidden");
+						}
+					});
+				}
 			}
-			var newmobile=$("#mobileipt").val();
-			var valid = !!newmobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
-			if(!valid){
-				$("#mobileipt").val($("#mobile span").text());
-				alert('手机号格式不正确');
-			}else{
-				$("#mobile span").html(newmobile);
-				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
+		});
+		$('#phone_vaild_submit').click(function(){
+			if(!$('#phone_vaild_submit').hasClass("disabled")){
+				$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
+				var newmobile=$.trim($("#mobileipt").val());
+				$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'send_auth_code'))}', {'tel':newmobile}, function(data){
+					if(data == 'success') {
+						$("#phone_code_wrapper").removeClass("hidden");
+						$('#phone_code_submit').removeClass("hidden").removeClass("disabled");
+					}else if(data == 'request too many times') {
+						$('#phone_vaild_submit').removeClass("hidden").text("两分钟内发送过验证码，请稍等");
+						setTimeout(function(){$('#phone_vaild_submit').removeClass("disabled").text("发送短信，验证手机号");},10000);
+					}else{
+						alert("验证码发送失败");
+						$('#phone_vaild_submit').removeClass("hidden").removeClass("disabled");
+					}
+				});
+			}
+		});
+		$('#phone_code_submit').click(function(){
+			if(!$('#phone_code_submit').hasClass("disabled")){
+				$('#phone_code_submit').addClass("disabled");
+				var newmobile=$.trim($("#mobileipt").val());
+				var code=$.trim($("#code").val());
+				$("#code").val("");
+				var id = $("mobileipt").attr('data-id');
+				$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'authtel'))}', {'tel':newmobile,'code':code}, function(data){
+					vaild_times_rem--;
+					if(data == 'success') {
+						$('#phone_code_submit').text("验证成功");
+						setTimeout(function(){
+							$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
+							$("#phone_code_wrapper").addClass("hidden");
+							$("#phone_vaild").addClass("hidden");
+							$('#phone_code_submit').addClass("disabled").addClass("hidden");
+							$('#phone_vaild_submit').removeClass("disabled").addClass("hidden");
+							$('#phone_code_submit').text("验证手机");
+							$("#mobileipt").attr("data-mobile",newmobile);
+						},2000);
+					}else if(data == 'time out'){
+						alert("验证码超时");
+						$("#phone_code_wrapper").addClass("hidden");
+						$('#phone_code_submit').addClass("disabled").addClass("hidden");
+						$('#phone_vaild_submit').removeClass("disabled").removeClass("hidden");
+					}else{
+						if(vaild_times_rem){
+							alert("验证码错误,还有"+vaild_times_rem+"次重试");
+							$('#phone_code_submit').removeClass("disabled");
+						}else{
+							alert("验证码错误,请重新发送验证码");
+							vaild_times_rem=3;
+							$("#phone_code_wrapper").addClass("hidden");
+							$('#phone_code_submit').addClass("disabled").addClass("hidden");
+							$('#phone_vaild_submit').removeClass("disabled").removeClass("hidden");
+						}
+					}
+				});
 			}
 		});
 		$('#submit').click(function(){

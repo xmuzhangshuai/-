@@ -435,79 +435,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			exit('error');
 		}
-		/**
-		 * 二次开发：手机是否需要验证
-		 */
-		if($op == 'tel_checkauth'){
-			$tel = trim($_GPC['tel']);
-			$record = pdo_fetch('SELECT * FROM ' . tablename('str_telauth') . ' WHERE tel = :tel', array(':tel' => $tel));
-			if(empty($record)){
-				exit('authed');
-			}
-			exit('notauth');
-		}
-		/**
-		 * 二次开发：发送手机验证码
-		 */
-		 if($op == 'send_auth_code'){
-		 	if(isset($_SESSION['last_send_time'])){
-		 		$period = time() - $_SESSION['last_send_time'];
-		 		if($period<120){
-		 			exit('request too many times');
-		 		}
-		 	}
-		 	$statusStr = array(
-				"0" => "短信发送成功",
-				"-1" => "参数不全",
-				"-2" => "服务器空间不支持,请确认支持curl或者fsocket，联系您的空间商解决或者更换空间！",
-				"30" => "密码错误",
-				"40" => "账号不存在",
-				"41" => "余额不足",
-				"42" => "帐户已过期",
-				"43" => "IP地址限制",
-				"50" => "内容含有敏感词"
-			);	
-			$smsapi = "http://www.smsbao.com/"; //短信网关
-			$user = "superpower"; //短信平台帐号
-			$pass = md5("superpower"); //短信平台密码
-			$code = rand(100000,999999);
-			$time = 2;
-			$content="【企鹅造饭】您的验证码为{$code},在{$time}分钟内有效";//要发送的短信内容
-			$phone = trim($_GPC['tel']);;
-			$sendurl = $smsapi."sms?u=".$user."&p=".$pass."&m=".$phone."&c=".urlencode($content);
-			$result =file_get_contents($sendurl) ;
-			
-			$status = $statusStr[$result];
-			
-			if($status == '0'){
-				$_SESSION['last_send_time'] = time();//发送成功时间
-				$_SESSION['code'] = $code;
-				exit('success');//发送成功
-			}
-			exit('fail');//发送失败
-		 	
-		 }
-		 /**
-		  * 二次开发：手机验证
-		  */
-		  if($op == 'authtel'){
-		  	$code = trim($_GPC['code']);
-		  	$tel = trim($_GPC['tel']);
-		  	if(isset($_SESSION['last_send_time'])){
-		  		$period = time() - $_SESSION['last_send_time'];	  		
-		  		if($period>120){
-		  			exit('time out');//超过两分钟
-		  		}
-		  	}
-		  	if($code == $_SESSION['code']){
-		  		//数据入库
-		  		$data['tel'] = $tel;
-		  		pdo_insert('str_telauth'.$data);
-		  		exit('success');//验证成功
-		  	}else{
-		  		exit('fail');//验证失败
-		  	}
-		  }
 	}
 
 	public function doWebSwitch() {
@@ -1600,8 +1527,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$address = get_default_address();
 		}
 		if(empty($address)){
-			header('Location: '.$this->createMobileUrl('address', array('op' => 'init','r' => 2))); 
-			exit;
+			$sid=-1;
 		}
 		if((!empty($address))&&intval($address['sid'])!=$sid){
 			header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
@@ -1609,7 +1535,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		}
 		$str_store_dish = tablename('str_store_dish');
 		$str_dish = tablename('str_dish');
-		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id AND '. $str_dish . '.share = 1';
+		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = ' . $str_dish . '.id AND '. $str_dish . '.share = 1 AND '.$str_store_dish . '.selling=1';
 		$params[':aid'] = $_W['uniacid'];
 		$params[':sid'] = $sid;
 		
@@ -1647,11 +1573,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		if(!empty($_GPC['f'])) {
 			del_order_cart($sid);
 		}
-		$address_id = intval($_GPC['address_id']);
-		$address = get_address($address_id);
-		if(empty($address)) {
-			$address = get_default_address();
-		}
 		//获取购物车的信息
 		$cart = get_order_cart($sid);
 		$dish = pdo_fetchall('SELECT ' . $str_dish . '.*,'. $str_store_dish . '.selling,'. $str_store_dish .'.kucun FROM ' . $str_dish . ',' .$str_store_dish .' WHERE ' . $condition . ' ORDER BY displayorder DESC,'. $str_dish .'.id ASC', $params);
@@ -1659,11 +1580,36 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		include $this->template('dish');
 	}
 
-	public function doMobileAjaxDish() {
+	public function doMobileDishDetail() {
 		global $_W, $_GPC;
 		$sid = intval($_GPC['sid']);
-		$cid = intval($_GPC['cid']);
-		$store = pdo_fetch('SELECT delivery_price,business_hours,send_price FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
+		checkauth();
+		$address_id = intval($_GPC['address_id']);
+		$address = get_address($address_id);
+		if(empty($address)) {
+			$address = get_default_address();
+		}
+		if(empty($address)){
+			header('Location: '.$this->createMobileUrl('address', array('op' => 'init','r' => 2))); 
+			exit;
+		}
+		if((!empty($address))&&intval($address['sid'])!=$sid){
+			header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
+			exit;
+		}
+		$str_store_dish = tablename('str_store_dish');
+		$str_dish = tablename('str_dish');
+		$params[':aid'] = $_W['uniacid'];
+		$params[':sid'] = $sid;
+		
+		checkclerk($sid);
+		check_trash($sid);
+		$store = pdo_fetch('SELECT * FROM ' . tablename('str_store') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $sid));
+		$title = $store['title'];
+		$_share = get_share($store);
+		if($store['comment_status'] == 1) {
+			$comment_stat = comment_stat($sid);
+		}
 		$store['business_hours_flag'] = 0;
 		$store['business_hours'] = iunserializer($store['business_hours']);
 		if(is_array($store['business_hours'])) {
@@ -1683,12 +1629,25 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			$hour_str = trim($hour_str, '、');
 		}
+
+		if(empty($store)) {
+			message('门店信息不存在', $this->createMobileUrl('index'), 'error');
+		}
+		if(!empty($_GPC['f'])) {
+			del_order_cart($sid);
+		}
+		$dish_id = intval($_GPC['dish_id']);
+		$address_id = intval($_GPC['address_id']);
+		$address = get_address($address_id);
+		if(empty($address)) {
+			$address = get_default_address();
+		}
+		$condition = $str_store_dish.'.uniacid = :aid AND '. $str_store_dish .'.store_id = :sid AND ' . $str_store_dish . '.dish_id = :did AND ' . $str_dish . '.id = :did  AND '. $str_dish . '.share = 1 AND '.$str_store_dish . '.selling=1';
+		$params[':did'] = $dish_id;
 		//获取购物车的信息
 		$cart = get_order_cart($sid);
-		$category = pdo_fetch('SELECT title, id FROM ' . tablename('str_dish_category') . ' WHERE uniacid = :aid AND sid = :sid AND id = :id', array(':aid' => $_W['uniacid'], ':sid' => $sid, ':id' => $cid));
-		$dish = pdo_fetchall('SELECT * FROM ' . tablename('str_dish') . ' WHERE uniacid = :aid AND sid = :sid AND cid = :cid AND is_display = 1 ORDER BY displayorder DESC, id ASC', array(':aid' => $_W['uniacid'], ':sid' => $sid, ':cid' => $cid));
-		include $this->template('dish_model');
-		exit();
+		$dish = pdo_fetchall('SELECT ' . $str_dish . '.*,'. $str_store_dish . '.selling,'. $str_store_dish .'.kucun FROM ' . $str_dish . ',' .$str_store_dish .' WHERE ' . $condition, $params);
+		include $this->template('dishdetail');
 	}
 	public function doMobileStore() {
 		global $_W, $_GPC;
@@ -1725,7 +1684,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 	public function doMobileOrder() {
 		global $_W, $_GPC;
 		checkauth();
-		if(!$_W['isajax']) {
+		$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'post';
+		$r = intval(trim($_GPC['r']) ? trim($_GPC['r']) : 0);
+		if(!$_W['isajax']||$op=='detail') {
 			$sid = intval($_GPC['sid']);
 			checkclerk($sid);
 			check_trash($sid);
@@ -1742,11 +1703,24 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				message('门店不存在', '', 'error');
 			}
 			//购物车
-			$op = trim($_GPC['op']) ? trim($_GPC['op']) : 'post';
-			if($op=='get'){
-				$cart = get_order_cart($sid);
+			if(!($op=='detail'&&$r==1)){
+				if($op=='get'){
+					$cart = get_order_cart($sid);
+				}else{
+					$cart = set_order_cart($sid);
+				}
 			}else{
-				$cart = set_order_cart($sid);
+				$cart = get_order_cart($sid);
+				foreach($_GPC['dish'] as $k => $v) {
+					$k = intval($k);
+					$v = intval($v);
+					if($k && $v) {
+						$cart['data'][$k]=$v;
+					}
+				}
+				$cart['data'] = iserializer($cart['data']);
+				$id = pdo_fetchcolumn('SELECT id FROM ' . tablename('str_order_cart') . " WHERE uniacid = :aid AND sid = :sid AND uid = :uid", array(':aid' => $_W['uniacid'], ':sid' => $sid, ':uid' => $_W['member']['uid']));
+				pdo_update('str_order_cart', $cart, array('uniacid' => $_W['uniacid'], 'id' => $id, 'uid' => $_W['member']['uid']));
 			}
 			if(is_error($cart)) {
 				message("购物车错误".$cart.message, '', 'error');
@@ -1785,6 +1759,12 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				'mobile' => trim($_GPC['mobile']),
 				'room' => trim($_GPC['room']),
 			);
+			if(!empty($addrdata['mobile'])){
+				$record = pdo_fetch('SELECT * FROM ' . tablename('str_telauth') . ' WHERE tel = :tel', array(':tel' => $addrdata['mobile']));
+				if(empty($record)){
+					exit(json_encode(array('errorno' => 1, 'message' => '手机号未成功验证')));
+				}
+			}
 			pdo_update('str_address', $addrdata, array('uniacid' => $_W['uniacid'], 'id' => $_GPC['address_id']));
 			$address = get_address($_GPC['address_id']);
 			$data['address'] = trim($address['address']).' - '.trim($address['room']);
@@ -1834,7 +1814,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					$temcart[$k] = 0;
 				}
 			}
-
 			foreach($temcart as $k => $v){
 				$dtype = pdo_fetch('SELECT dish_type FROM '.tablename('str_dish').' WHERE id=:id',array(':id' => $k));
 				if(!empty($dtype)&&$dtype['dish_type'] == 'TAOCAN'){
@@ -2015,26 +1994,83 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		$order['dish'] = get_dish($order['id']);
 		include $this->template('orderdetail');
 	}
-	public function doMobileAjaxOrder() {
+	public function doMobileAjax() {
 		global $_W, $_GPC;
-		checkauth();
-		$id = intval($_GPC['id']);
 		$op = trim($_GPC['op']);
-		$order = pdo_fetch('SELECT id FROM ' . tablename('str_order') . ' WHERE uniacid = :aid AND id = :id', array(':aid' => $_W['uniacid'], ':id' => $id));
-		$out['errno'] = 0;
-		$out['error'] = 0;
-		if(empty($order)) {
-			$out['errno'] = 1;
-			$out['error'] = '订单不存在';
-			exit(json_encode($out));
+		if($op == 'tel_checkauth'){
+			$tel = trim($_GPC['tel']);
+			$record = pdo_fetch('SELECT * FROM ' . tablename('str_telauth') . ' WHERE tel = :tel', array(':tel' => $tel));
+			if(empty($record)){
+				exit('notauth');
+			}
+			exit('authed');
 		}
-		if($op == 'editstatus') {
-			pdo_update('str_order', array('status' => 3), array('uniacid' => $_W['uniacid'], 'id' => $id));
-		} elseif($op == 'del') {
-			pdo_update('str_order', array('status' => 7), array('uniacid' => $_W['uniacid'], 'id' => $id));
-			$out['error'] = $this->createMobileUrl('myorder');
+		/**
+		 * 二次开发：发送手机验证码
+		 */
+		 if($op == 'send_auth_code'){
+		 	if(isset($_SESSION['last_send_time'])){
+		 		$period = time() - $_SESSION['last_send_time'];
+		 		if($period<1){
+		 			exit('request too many times');
+		 		}
+		 	}
+//				$code = 11111;
+//				$_SESSION['last_send_time'] = time();//发送成功时间
+//				$_SESSION['code'] = $code;
+//				exit('success');//发送成功
+		 	$statusStr = array(
+				"0" => "短信发送成功",
+				"-1" => "参数不全",
+				"-2" => "服务器空间不支持,请确认支持curl或者fsocket，联系您的空间商解决或者更换空间！",
+				"30" => "密码错误",
+				"40" => "账号不存在",
+				"41" => "余额不足",
+				"42" => "帐户已过期",
+				"43" => "IP地址限制",
+				"50" => "内容含有敏感词"
+			);	
+			$smsapi = "http://www.smsbao.com/"; //短信网关
+			$user = "superpower"; //短信平台帐号
+			$pass = md5("superpower"); //短信平台密码
+			$code = rand(100000,999999);
+			$time = 2;
+			$content="【企鹅造饭】您的验证码为{$code},在{$time}分钟内有效";//要发送的短信内容
+			$phone = trim($_GPC['tel']);;
+			$sendurl = $smsapi."sms?u=".$user."&p=".$pass."&m=".$phone."&c=".urlencode($content);
+			$result =file_get_contents($sendurl) ;
+			
+			$status = $statusStr[$result];
+			
+			if($status == '0'){
+				$_SESSION['last_send_time'] = time();//发送成功时间
+				$_SESSION['code'] = $code;
+				exit('success');//发送成功
+			}
+			exit('fail');//发送失败
+		 	
+		 }
+		/**
+		 * 二次开发：手机验证
+		 */
+		if($op == 'authtel'){
+		  	$code = trim($_GPC['code']);
+		  	$tel = trim($_GPC['tel']);
+		  	if(isset($_SESSION['last_send_time'])){
+		  		$period = time() - $_SESSION['last_send_time'];	  		
+		  		if($period>120){
+		  			exit('time out');//超过两分钟
+		  		}
+		  	}
+		  	if($code == $_SESSION['code']){
+		  		//数据入库
+		  		$data['tel'] = $tel;
+		  		pdo_insert('str_telauth',$data);
+		  		exit('success');//验证成功
+		  	}else{
+		  		exit('fail');//验证失败
+		  	}
 		}
-		exit(json_encode($out));
 	}
 	public function doMobilePay() {
 		global $_W, $_GPC;
@@ -2305,6 +2341,12 @@ class Str_takeoutModuleSite extends WeModuleSite {
 					'room'=> trim($_GPC['room']),
 					'sid'=> trim($_GPC['sid'])
 				);
+				if(!empty($data['mobile'])){
+					$record = pdo_fetch('SELECT * FROM ' . tablename('str_telauth') . ' WHERE tel = :tel', array(':tel' => $data['mobile']));
+					if(empty($record)){
+						exit(json_encode(array('errorno' => 1, 'message' => '手机号未验证')));
+					}
+				}
 				if(!empty($address)) {
 					pdo_update('str_address', $data, array('uniacid' => $_W['uniacid'], 'id' => $id));
 				} else {

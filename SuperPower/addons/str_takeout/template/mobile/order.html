@@ -8,12 +8,26 @@
 	body {
 		background-color: #E5E5E5;
 	}
+	#phone_vaild {
+		margin: 0;
+		width: 100%;
+		padding: 0 0 15px 0;
+		text-align: center;
+	}
+	#phone_vaild a.comm_btn{
+		width: 100%;
+	}
+	#phone_code_wrapper{
+		margin: 0;
+		width: 100%;
+		padding: 0 0 15px 0;
+	}
 </style>
 {template 'header'}
 <div class="container">
 	<form name="cart_confirm_form" id="cart_confirm_form" method="post">
 		<section class="menu_wrap">
-			<div class="cont_box delivery_info">
+			<div class="cont_box delivery_info" style="margin-bottom: 0;">
 				<input type="hidden" name="address_id" value="{$address['id']}" id="address_id">
 				<label class="left">送餐地址</label>
 				<div class="mid"><span id="showAddres">{$address['address']}</span><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 1));}"><i class="ico_forward"></i></a></div>
@@ -24,7 +38,29 @@
 				</div>
 				<br />
 				<input type="text" id="showName" name="realname" value="{$address['realname']}" class="half"  placeholder="姓名"></input>
-				<input type="tel" id="showTel" name="mobile" value="{$address['mobile']}" class="half" placeholder="手机号"></input>
+				<input type="tel" id="showTel" name="mobile" value="{$address['mobile']}" data-mobile="{$address['mobile']}" class="half" placeholder="手机号"></input>
+			</div>
+			<div class="cont_box delivery_info" style="margin-top: 0;padding-top: 0;">
+				<div class="cont_box vaild hidden" id="phone_vaild">
+					<a class="comm_btn hidden" id="phone_vaild_submit">发送短信，验证手机号</a>
+					<div id="phone_code_wrapper" class="cont_box hidden">
+						<label class="left">验证码</label>
+						<div class="mid">
+							<input type="text" id="code" name="code" value=""></input>
+						</div>
+					</div>
+					<a class="comm_btn disabled hidden" id="phone_code_submit">验证手机</a>
+				</div>
+				<label class="left">送餐时间</label>
+				<div class="mid" id="showTime" name="time">
+					<select>
+					    <option value ="立即送出">立即送出</option>
+					    <option value ="开店时间">开店时间</option>
+					</select>
+				</div>
+				<br />
+				<label class="left">备注信息</label>
+				<div class="mid"><input type="text" id="showNote" name="note" value=""></input></div>
 			</div>
 			<div class="cont_box">
 				<div class="shopping_info cont_box">
@@ -91,6 +127,86 @@
 			}
 			_add.amount(count, amountCb);
 		});
+		$("#showTel").change(function(){
+			$("#phone_code_wrapper").addClass("hidden");
+			$("#phone_vaild").addClass("hidden");
+			$('#phone_code_submit').addClass("disabled").addClass("hidden");
+			$('#phone_vaild_submit').removeClass("disabled").addClass("hidden");
+			var newmobile=$.trim($("#showTel").val());
+			var valid = !!newmobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
+			if(!valid){
+				$("#showTel").val($("#showTel").attr("data-mobile"));
+				alert('手机号格式不正确');
+			}else{
+				$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'tel_checkauth'))}', {'tel':newmobile}, function(data){
+					if(data == 'authed') {
+						$("#mobile span").html(newmobile);
+					} else {
+						vaild_times_rem=3;
+						$("#mobile span").html(newmobile);
+						$("#phone_vaild").removeClass("hidden");
+						$('#phone_vaild_submit').removeClass("hidden");
+					}
+				});
+			}
+		}).blur();
+		$('#phone_vaild_submit').click(function(){
+			if(!$('#phone_vaild_submit').hasClass("disabled")){
+				$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
+				var newmobile=$.trim($("#mobileipt").val());
+				$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'send_auth_code'))}', {'tel':newmobile}, function(data){
+					if(data == 'success') {
+						$("#phone_code_wrapper").removeClass("hidden");
+						$('#phone_code_submit').removeClass("hidden").removeClass("disabled");
+					}else if(data == 'request too many times') {
+						$('#phone_vaild_submit').removeClass("hidden").text("两分钟内发送过验证码，请稍等");
+						setTimeout(function(){$('#phone_vaild_submit').removeClass("disabled").text("发送短信，验证手机号");},10000);
+					}else{
+						alert("验证码发送失败");
+						$('#phone_vaild_submit').removeClass("hidden").removeClass("disabled");
+					}
+				});
+			}
+		});
+		$('#phone_code_submit').click(function(){
+			if(!$('#phone_code_submit').hasClass("disabled")){
+				$('#phone_code_submit').addClass("disabled");
+				var newmobile=$.trim($("#showTel").val());
+				var code=$.trim($("#code").val());
+				$("#code").val("");
+				$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'authtel'))}', {'tel':newmobile,'code':code}, function(data){
+					vaild_times_rem--;
+					if(data == 'success') {
+						$('#phone_code_submit').text("验证成功");
+						setTimeout(function(){
+							$("#phone_code_wrapper").addClass("hidden");
+							$("#phone_vaild").addClass("hidden");
+							$('#phone_code_submit').addClass("disabled").addClass("hidden");
+							$('#phone_vaild_submit').removeClass("disabled").addClass("hidden");
+							$('#phone_code_submit').text("验证手机");
+							$("#showTel").attr("data-mobile",newmobile);
+						},2000);
+
+					}else if(data == 'time out'){
+						alert("验证码超时");
+						$("#phone_code_wrapper").addClass("hidden");
+						$('#phone_code_submit').addClass("disabled").addClass("hidden");
+						$('#phone_vaild_submit').removeClass("disabled").removeClass("hidden");
+					}else{
+						if(vaild_times_rem){
+							alert("验证码错误,还有"+vaild_times_rem+"次重试");
+							$('#phone_code_submit').removeClass("disabled");
+						}else{
+							alert("验证码错误,请重新发送验证码");
+							vaild_times_rem=3;
+							$("#phone_code_wrapper").addClass("hidden");
+							$('#phone_code_submit').addClass("disabled").addClass("hidden");
+							$('#phone_vaild_submit').removeClass("disabled").removeClass("hidden");
+						}
+					}
+				});
+			}
+		});
 	});
 	$(".submit_order").click(function(){
 		if(!$(this).hasClass('disabled')){
@@ -118,6 +234,12 @@
 					alert('手机号格式不正确');
 					$(this).removeClass('disabled');
 					return false;
+				}else{
+					$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'tel_checkauth'))}', {'tel':mobile}, function(data){
+					if(data != 'authed') {
+						alert('手机号未验证');
+					}
+				});
 				}
 			}
 			var realname = $("#showName").val();
@@ -126,6 +248,8 @@
 				$(this).removeClass('disabled');
 				return false;
 			}
+			var note = $("#showNote").val();
+			var time = $("#showTime").val();
 			if($("#totalPrice").text()<=0){
 				alert('请点单');
 				$(this).removeClass('disabled');
@@ -134,8 +258,8 @@
 			var param = {
 				'order_type' :2,
 				'address_id':address_id,
-				'note':'',
-				'delivery_time':'',
+				'note':note,
+				'delivery_time':time,
 				'realname':realname,
 				'mobile':mobile,
 				'room':room
