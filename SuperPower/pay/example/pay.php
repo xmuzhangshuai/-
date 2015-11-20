@@ -21,8 +21,8 @@ $extra = array();
 switch ($channel) {
     case 'alipay_wap':
         $extra = array(
-            'success_url' => 'http://www.yourdomain.com/success',
-            'cancel_url' => 'http://www.yourdomain.com/cancel'
+            'success_url' => 'http://www.11yaoyao.com/pay/alipay_success.php',
+            'cancel_url' => 'http://www.11yaoyao.com/pay/alipay_cancel.php'
         );
         break;
     case 'upmp_wap':
@@ -75,8 +75,8 @@ switch ($channel) {
 try {
     $ch = \Pingpp\Charge::create(
         array(
-            'subject'   => 'Your Subject',
-            'body'      => 'Your Body',
+            'subject'   => '企鹅造饭',
+            'body'      => '企鹅造饭订单支付',
             'amount'    => $amount,
             'order_no'  => $orderNo,
             'currency'  => 'cny',
