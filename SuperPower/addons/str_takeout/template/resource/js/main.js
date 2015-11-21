@@ -6,6 +6,12 @@ $.fn.amount = function(num, callback){
 		activeClass = 'active';
 
 	function add(){
+		var id = "{php echo $store['id'];}";
+		alert(id);
+		if(id=="-1"){
+			alert('要先添加送餐地址才能點餐哦！');
+			return false;
+		}
 		var obj = $(this).prev(),
 			_num = obj.find('.num'),
 			curNum = parseInt(_num.text(), 10);

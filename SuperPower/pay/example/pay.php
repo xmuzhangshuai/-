@@ -5,7 +5,13 @@
  * 以下代码只是为了方便商户测试而提供的样例代码，商户可以根据自己网站的需要，按照技术文档编写, 并非一定要使用该代码。
  * 该代码仅供学习和研究 Ping++ SDK 使用，只是提供一个参考。
 */
+define('IN_SYS', true);
+require '../framework/bootstrap.inc.php';
+require IA_ROOT . '/web/common/bootstrap.sys.inc.php';
+load()->web('common');
 
+defined('IN_IA') or exit('Access Denied');
+define('IN_GW', true);
 require_once(dirname(__FILE__) . '/../init.php');
 $input_data = json_decode(file_get_contents('php://input'), true);
 if (empty($input_data['channel']) || empty($input_data['amount'])) {
@@ -14,7 +20,18 @@ if (empty($input_data['channel']) || empty($input_data['amount'])) {
 }
 $channel = strtolower($input_data['channel']);
 $amount = $input_data['amount'];
-$orderNo = substr(md5(time()), 0, 12);
+$orderNo = $input_data['order_no'];
+
+$order = pdo_fetch('SELECT * FROM '.tablename('str_order').' WHERE id=:id',array(':id'=>$orderNo));
+if(!empty($order)){
+	$payAmount = $order['price']*100;
+	if($payAmount!=$amount){
+		$out['status'] = 0;
+		$out['msg'] = '支付金额不正确';
+		exit(json_encode($out));
+	}
+	
+}
 
 //$extra 在使用某些渠道的时候，需要填入相应的参数，其它渠道则是 array() .具体见以下代码或者官网中的文档。其他渠道时可以传空值也可以不传。
 $extra = array();
@@ -71,7 +88,7 @@ switch ($channel) {
         break;
 }
 
-\Pingpp\Pingpp::setApiKey('sk_test_iXvbfD1OG4KC9iPOOKuXfn9O');
+\Pingpp\Pingpp::setApiKey('sk_live_0eTCuP5aL0qHfXrz5O54qbf5');
 try {
     $ch = \Pingpp\Charge::create(
         array(
