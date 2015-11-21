@@ -81,7 +81,7 @@
 		<footer class="shopping_cart">
 			<div class="fixed {php if($address['address'])echo "hidden";}" id="fix_bar">
 				<div>
-					<a id="settlement" class="comm_btn {if !$address['address']}disabled{/if}">{if $address['address']}￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 立即下单{else}请添加地址{/if}</a>
+					<a id="settlement" class="comm_btn {if !$address['address']}disabled init{/if}">{if $address['address']}￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 立即下单{else}请添加地址{/if}</a>
 				</div>
 			</div>
 		</footer>
@@ -98,6 +98,9 @@
 			pager: true,
 		});
 		$("#settlement").click(function() {
+			if ($("#settlement").hasClass("init")){
+				location.href="{php echo $this->createMobileUrl('address', array('op' => 'init','r' => 2));}";
+			}
 			if (!$("#settlement").hasClass("disabled")) {
 				document.cart_form.submit();
 			}
