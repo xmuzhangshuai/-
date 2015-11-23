@@ -89,6 +89,30 @@
 		<div class="cont_box adress_add_wrapper"><a class="adress_add" href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid ,'r'=> $_GPC['r']))}" class="add">新增地址</a></div>
 	</ul>
 </div>
+<div class="fixed">
+	<nav class="nav_common">
+		<ul class="box_nav">
+			<li class="more ">
+				<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}">
+					 <span class="order">&nbsp;</span>
+				 <label>门店菜单</label>
+				</a>
+			</li>
+			<li class="more ">
+				<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}">
+					<span class="my">&nbsp;</span>
+				<label> 我的订单</label>
+			</a>
+			</li>
+			<li class="more on">
+				<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">
+					<span class="introx">&nbsp;</span>
+				<label> 地址管理</label>
+				</a>
+			</li>
+		</ul>
+	</nav>
+</div>
 {elseif $op == 'post'||$op == 'init'}
 <style>
 	.home-position {
@@ -179,7 +203,7 @@
 <footer class="shopping_cart">
 	<div class="fixed hidden" id="fix_bar">
 		<div>
-			<a id="submit" class="comm_btn">添加地址</a>
+			<a id="submit" class="comm_btn">转到我所在的门店</a>
 		</div>
 	</div>
 </footer>
