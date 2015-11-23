@@ -13,15 +13,9 @@
     	时间：2015-10-14
     	描述：TODO:定位、选择
     -->
-	{if ($address['address']||$store['id']==-1)}
-	<div class="nav_address"><span>送货到：</span><span class="nav_add_add">{$address['address']}</span>{if $address['room']} - {/if}<span  class="nav_add_room">{$address['room']}</span>
+	<div class="nav_address"><span>当前门店：</span><span class="nav_add_add">{$store['title']}</span></span>
 		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a>
 	</div>
-	{else}
-	<div class="nav_address"><span>添加送餐地址才能点餐哟--></span>
-		<a href="{php echo $this->createMobileUrl('address', array('op' => 'init','r' => 2));}" class="nav_sp_location"></a>
-	</div>
-	{/if}
 	<form name="cart_form" id="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
 		<input type="hidden" name="more" value="{$_GPC['more']}">
 		<input type="hidden" name="dish_str" value="{$dish_str}">
@@ -67,8 +61,6 @@
 							<strong>￥<span class="unit_price">{$ds['price']}</span></strong>
 							<div class="fr buy_btn {if (!($ds['kucun'] == -1 || $ds['kucun'] > 0)||(!$address['address']))}buy_btn_out{/if}" max="{php echo $address['address']?$ds['kucun']:0}">
 								<a href="javascript:void(0);" class="btn_n add" data-num="{$cart['data'][$ds['id']]}"></a>
-								{if $store['open']}
-								<a href="javascript:void(0);" class="btn_fork"></a>{else}预订{/if}
 								<input autocomplete="off" class="h_num" type="hidden" name="dish[{$ds['id']}]" value="{$cart['data'][$ds['id']]}">
 							</div>
 						</div>

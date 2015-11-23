@@ -41,15 +41,9 @@
     	时间：2015-10-14
     	描述：TODO:定位、选择
     -->
-	{if $address['address']}
-	<div class="nav_address"><span>送货到：</span><span class="nav_add_add">{$address['address']}</span>{if $address['room']} - {/if}<span  class="nav_add_room">{$address['room']}</span>
+	<div class="nav_address"><span>当前门店：</span><span class="nav_add_add">{$store['title']}</span></span>
 		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a>
 	</div>
-	{else}
-	<div class="nav_address"><span>添加送餐地址才能点餐哟</span>
-		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'op' =>'post', 'r' => 2));}" class="nav_sp_location"></a>
-	</div>
-	{/if}
 	
 	{loop $dish $ds}
 	{if $ds['dish_type']=='TAOCAN'}
@@ -100,8 +94,6 @@
 								<strong>￥<span class="unit_price">{$ds['price']}</span></strong>
 								<div class="fr buy_btn {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}buy_btn_out{/if}" max="{$ds['kucun']}">
 									<a href="javascript:void(0);" class="btn_n add" data-num="{$cart['data'][$ds['id']]}"></a>
-									{if $store['open']}
-									<a href="javascript:void(0);" class="btn_fork"></a>{else}预订{/if}
 									<input autocomplete="off" class="h_num" type="hidden" name="dish[{$ds['id']}]" value="{$cart['data'][$ds['id']]}">
 								</div>
 							</div>
