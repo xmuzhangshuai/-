@@ -697,7 +697,7 @@ i.cantype3,
 .cont_box .menu_list li.cont_box {
 	background-color: #F1F1F1;
 }
-.menu_list>li:last-child {
+.menu_list>li.auto_height:last-child {
 	margin-bottom: 60px;
 }
 @media (min-width: 7200px) {
@@ -783,7 +783,8 @@ font-size: 22px;
 border: 1px #ccc solid;
 line-height: 26px;
 margin-top: -1px;
-width: 26px;
+min-width: 36px;
+text-align: center;
 padding-left: 6px;
 }
 .menu_list .btn_fork {
@@ -2513,15 +2514,15 @@ input[type='tel'] {
 	margin: 0;
 }
 .adress_delete {
-	float: right;
-	width: 28px;
-	margin-right: 16px;
-	padding-bottom: 15px;
-	margin-top: 5px;
+	float: left;
+position: relative;
+top: 22px;
+left: 15px;
+color: #AAA;
 }
 a.deladdress.adress_delete {
 	text-decoration: none!important;
-	color: #000000!important;
+	color: #AAA!important;
 }
 a.deladdress.adress_delete:before {
 	content: "X";
@@ -2540,15 +2541,14 @@ a.deladdress.adress_delete:before {
 	text-align: center;
 	clear: both;
 	float: none;
-	padding-top: 30px;
 }
 .adress_add {
 	color: #FFF!important;
 	text-decoration: none!important;
-	padding: 10px 30px;
+	padding: 10px;
 	border-radius: 5px;
 	background-color: rgb(243, 152, 1);
-	font-size: 16px;
+	font-size: 14px;
 	color: #FFF;
 }
 .person_info {

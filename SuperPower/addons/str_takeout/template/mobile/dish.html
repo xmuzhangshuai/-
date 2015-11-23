@@ -84,7 +84,7 @@
 		</section>
 		<footer class="shopping_cart">
 			<div class="fixed">
-				<div id="fix_bar">
+				<div id="fix_bar" {if $address['address']}class="hidden"{/if}">
 					<a id="settlement" class="comm_btn {if !$address['address']}disabled init{/if}">{if $address['address']}￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 立即下单{else}请添加地址{/if}</a>
 				</div>
 <nav class="nav_common">

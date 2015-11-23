@@ -1,6 +1,6 @@
 {template 'common/header'}
 <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6E7C75E41980283b39d3c61e81f16a39"></script>
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.1" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.16" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="../addons/str_takeout/template/resource/js/intersectPolygon.js"></script>
 <div id="allmap"></div>
@@ -18,6 +18,20 @@
 	}
 	.vaild{text-align: center;clear: both;float: none;padding-top: 1px;}
 	#phone_code_wrapper{background:#F1F1F1;margin:0 5%}
+	.cont_box .edit_icon{
+	float: right;
+	margin-right: 16px;
+	padding-bottom: 15px;
+	}
+	.cont_box .edit_icon span {
+		background: url(../addons/str_takeout/template/resource/images/s.png) no-repeat;
+		background-size: 149px auto;
+		background-position: -78px -73px;
+		width: 21px;
+		height: 20px;
+		display: block;
+		margin: 0 auto;
+	}
 </style>
 <div class="cont_box">
 	<div class="cont_box">
@@ -78,15 +92,17 @@
 				{php $addinstore=pdo_fetchall('SELECT * FROM ' . tablename('str_address').' WHERE sid='.$store['sid'].' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));}
 				{loop $addinstore $address}
 			<li style="padding: 0;width: 100%;max-width:100%;display: inline-block;margin: 0;" class="cont_box">
-				<span class="adress_detailed addressChecked {if $_GPC['r']!=3}addressChecking{$address['is_default']}{/if}" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}<br />{$address['room']}</span>
 				<a class="adress_delete deladdress" data-id="{$address['id']}" data-sid="{$address['sid']}"></a>
+				<span class="adress_detailed addressChecked {if $_GPC['r']!=3}addressChecking{$address['is_default']}{/if}" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}<br />{$address['room']}</span>
+				<a href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'id' => $address['id'],'sid' => $sid, 'r' => $_GPC['r']))}" class="edit_icon"><span></span></a>
 			</li>
 				{/loop}
+			<div class="cont_box adress_add_wrapper"><a class="adress_add" href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $store['sid'] ,'r'=> $_GPC['r']))}" class="add">新增地址</a></div>
 			{/loop}
 		{else}
 		<li class="on-info"><i class="fa fa-info-circle"></i> 请添加地址</li>
 		{/if}
-		<div class="cont_box adress_add_wrapper"><a class="adress_add" href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid ,'r'=> $_GPC['r']))}" class="add">新增地址</a></div>
+					<div class="cont_box adress_add_wrapper"><a class="comm_btn" href="{php echo $this->createMobileUrl('address', array('op' => 'init' ,'r'=> $_GPC['r']))}" class="add">定位到我所在的门店</a></div>
 	</ul>
 </div>
 <div class="fixed">
@@ -113,101 +129,6 @@
 		</ul>
 	</nav>
 </div>
-{elseif $op == 'post'||$op == 'init'}
-<style>
-	.home-position {
-		margin-top: 30px;
-		display:block;
-		width: 100%;
-		height:52px!important;
-		line-height:52px;
-		font-size:23px;
-		background-color: #FFF;
-		color: #F7B74D;
-		border: 1px solid #F7B74D;
-		border-radius: 3px;
-		padding: 0px 20px;
-	}
-	.home-position:active,.home-position:hover,.home-position:visited{
-		background-color: #FFF;
-		color: #F7B74D;
-		text-decoration: none;
-	}
-	.nav_sp_logo,.nav_sp_home{display:none;}
-	.nav_sp{border: none;}
-	input#location_input{
-		width: 100%;
-		height:52px!important;
-		line-height:24px;
-		font-size:23px;
-		border: 1px solid #F7B74D;
-		color: #F7B74D;
-		border-radius: 3px;
-		padding: 0px 20px;
-		padding-right: 50px;
-		text-overflow: ellipsis;
-		overflow: hidden;
-		white-space: nowrap;
-	}
-	.line{
-		margin: 10px 0;
-	}
-	.line input{
-		line-height: 30px;
-		height: 30px!important;
-		font-size: 20px;
-		text-align:center ;
-	}
-	@media (max-width: 720px) {
-		input#location_input{
-			font-size: 16px;
-		}
-		.home-position {
-			margin-top: 10px;
-			font-size: 16px;
-		}
-	}
-	input#location_input::-webkit-input-placeholder { /* WebKit browsers */
-	    color:    #F7B74D;
-	}
-	input#location_input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-	   color:    #F7B74D;
-	   opacity:  1;
-	}
-	input#location_input::-moz-placeholder { /* Mozilla Firefox 19+ */
-	   color:    #F7B74D;
-	   opacity:  1;
-	}
-	input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
-	   color:    #F7B74D;
-	}
-</style>
-
-<div class="cont_box">
-	<div class="cont_box" style="text-align: center;"><img src="../addons/str_takeout/template/resource/images/logo.png" style="width: 60%;max-width: 367px;margin-top: 30px;"></div>
-	<div style="position: relative;">
-		<a name="#ddress"></a>
-		<input type="text" name="address" id="location_input" autocomplete="off" placeholder="请输入您所在的楼宇" /><img id="search" style="position: absolute;height: 30px;display: block;top: 10px;right: 20px;" src="../addons/str_takeout/template/resource/images/search.png" /></div>
-	<div style="position: relative;"><a class="home-position">定位到我所在的楼宇</a><img style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/position.png" /></div>
-	<div class="hidden">
-		<input type="text" name="realname" value="{$address['realname']}" placeholder="姓名">
-	</div>
-	<div class="hidden">
-		<input type="text" name="mobile" id="mobile" value="{$address['mobile']}" placeholder="手机">
-	</div>
-	<div class="address addr1 hidden">
-		<input name="room" value="{$address['room']}" type="text" placeholder="楼层房号">
-	</div>
-</div>
-{template 'header'}
-<footer class="shopping_cart">
-	<div class="fixed hidden" id="fix_bar">
-		<div>
-			<a id="submit" class="comm_btn">转到我所在的门店</a>
-		</div>
-	</div>
-</footer>
-{/if}
 <script type="text/javascript">
 	var user_iploc={php $ip=$_SERVER["REMOTE_ADDR"]=='127.0.0.1'?'117.30.118.137':$_SERVER["REMOTE_ADDR"];$url='http://api.map.baidu.com/location/ip?ak=6E7C75E41980283b39d3c61e81f16a39&ip='.$ip;  $html = file_get_contents($url);  echo $html;} ;
 	var user_loc="";
@@ -233,133 +154,6 @@
 		var map = new BMap.Map("allmap");
 		var myGeo = new BMap.Geocoder();
 		map.centerAndZoom(user_iploc.content.address,12);
-		{if $op == 'post'|| $op == 'init'}
-		var ac = new BMap.Autocomplete(    //建立一个自动完成的对象
-			{"input" : "location_input"
-			,"location" : map
-		});
-		var local = new BMap.LocalSearch(map, { //智能搜索
-		    onSearchComplete: findPoint
-		});
-		function findPoint(){
-			if(local.getResults().getCurrentNumPois()<=0){
-				$(".home-position").text("很抱歉，暂时无法解析您的地址");
-				setTimeout(function (){$(".home-position").text("定位到我所在的楼宇");},5000);
-				return false;
-			}
-			var point = local.getResults().getPoi(0).point;
-			user_detail.point=user_point=point;
-			checkPointAvail();
-		}
-		ac.addEventListener("onconfirm", function(e) {    //鼠标点击下拉列表后的事件
-			var _value = e.item.value;
-			user_loc = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
-			user_detail = _value;
-			user_point = _value.point;
-			$("#location_input").value = user_loc;
-			$("#location_input").change();
-			return false;
-		});
-		$("#location_input").focus(function (){
-			$(this).attr("placeholder","");
-		}).blur(function (){
-			$(this).attr("placeholder","请输入您所在的楼宇");
-		});
-		$("#location_input").change(function() {
-			user_loc = this.value;
-			local.search(user_loc);
-		});
-		$(".home-position").click(function(){
-			if($(this).hasClass("hdisabled")){return false;}
-			$(this).text("定位中，请稍候");
-			var geolocation = new BMap.Geolocation();
-			geolocation.getCurrentPosition(function(r){
-				user_detail=r;
-				if((!!r.accuracy)&&r.accuracy<=200){
-					ha_detail=r;
-				}
-				if((!!user_point)&&map.getDistance(user_point,r.point)<=(r.accuracy)&&(user_loc)){
-					$("#location_input").val(user_loc);
-				}else{
-					var addr=r.address;
-					$("#location_input").val(addr.province+addr.city+addr.street);
-				}
-				$("#location_input").change();
-				user_point=r.point;
-				checkPointAvail();
-			},{enableHighAccuracy: true});
-		});
-		
-		function checkPointAvail(){
-			if(user_point){
-				if(ha_detail&&ha_detail.accuracy){
-					var dis=map.getDistance(user_point,ha_detail.point);
-					if(dis<3*ha_detail.accuracy||!user_detail.accuracy){
-						user_point=ha_detail.point;
-					}else{
-						ha_detail=null;
-					}
-				}
-				//显示输入框
-				showInput();
-				sid=-1;
-				checkStore();
-			}else{
-				sid=-1;
-				hideInput();
-				//隐藏输入框
-				if(ha_detail&&ha_detail.accuracy){
-					user_point=ha_detail.point;
-					checkPointAvail();
-				}
-			}
-		}
-		function showInput(){
-			$("#fix_bar").removeClass("hidden");
-			$(".line").removeClass("hidden");
-			
-		}
-		function hideInput(){
-			$(".line").addClass("hidden");
-			$("#fix_bar").addClass("hidden");
-		}
-		function checkStore(){
-			var storePoint="";
-			{loop $otherArea $one}
-			storePoint= '{$one['points']}';
-			storePoints[{$one['id']}]  = eval(storePoint.replace(/&quot;/g,"\""));
-			storeNames[{$one['id']}] = '{$one['title']}';
-			{/loop}
-			for(var i=0;i<=storeCount;++i) {
-				console.log("checking"+i);
-				if((storePoints[i])&&(isIn(storePoints[i],{x:user_point.lng,y:user_point.lat}))){
-					sid=i;
-					break;
-				}
-			}
-			if(sid>=0){
-				$(".home-position").text("定位成功，门店"+storeNames[sid]+"将为您服务");
-			}else{
-				$(".home-position").text("很抱歉，您暂时不在我们的配送范围");
-				hideInput();
-			}
-			if(!$(this).hasClass("hdisabled")){
-				$(".home-position").addClass("hdisabled");
-				setTimeout(function (){$(".home-position").text("定位到我所在的楼宇").removeClass("hdisabled");},10000);
-			}
-		}
-		function isIn(storePoints,point){
-		    var p1 = [];
-		    for(var i = 0; i < storePoints.length; i++){
-		        p1.push({x:storePoints[i].lng,y:storePoints[i].lat});
-		    }
-		    if(containsPointByLinearRing(point,p1)){
-		        return true;
-		    }else{
-		        return false;
-		    }
-	 	}
-		{/if}
 		{if $_GPC['r']!=3}
 		$('.addressChecked').click(function(){
 			var address_id = $(this).attr('data-id');
@@ -480,65 +274,6 @@
 				});
 			}
 		});
-		$('#submit').click(function(){
-			var id = '{$id}';
-			var room = $.trim($(':text[name="room"]').val());
-			var realname = $.trim($(':text[name="realname"]').val());
-			var mobile = $.trim($(':text[name="mobile"]').val());
-/*			var realname = $.trim($(':text[name="realname"]').val());
-			if(!realname) {
-				alert('预定人不能为空');
-				return false;
-			}
-			var mobile = $.trim($(':text[name="mobile"]').val());
-			if(!mobile) {
-				alert('手机号不能为空');
-				return false;
-			}else{
-				var valid = !!mobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
-				if(!valid){
-					alert('手机号格式不正确');
-					return false;
-				}
-			}*/
-			var address = $.trim($(':text[name="address"]').val());
-			if(!address) {
-				alert('收件地址不能为空');
-				return false;
-			}
-			/*var room = $.trim($(':text[name="room"]').val());
-			if(!room) {
-				alert('楼层房号不能为空');
-				return false;
-			}*/
-			if(!$(this).hasClass('disabled')){
-				$(this).addClass('disabled');	
-				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post'))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid}, function(data){
-					var data = $.parseJSON(data);
-					if(!data.errorno) {
-						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default'))}", {'id':data.message,'sid':sid},function(){
-							address_id=data.message;
-							if(r==1) {
-								var oldsid={$sid};
-								if(oldsid!=sid){
-									location.href=return_url2 + '&address_id='+address_id+'&sid='+sid;
-								}else{
-									location.href=return_url1 + '&address_id='+address_id;
-								}
-							} else if(r==2) {
-								location.href = return_url2 + '&address_id='+address_id+'&sid='+sid;
-							} else {
-								location.href = return_url3 + '&address_id='+address_id+'&sid='+sid;
-							}
-						});
-					} else {
-						alert(data.message);
-						$(this).removeClass('disabled');	
-						return false;
-					}
-				});
-			}
-		});
 
 		$('.deladdress').click(function(){
 			var id = $(this).attr('data-id');
@@ -574,4 +309,570 @@
 		});
 	});
 </script>
+{elseif $op == 'init'}
+<style>
+	.home-position {
+		margin-top: 30px;
+		display:block;
+		width: 100%;
+		height:52px!important;
+		line-height:52px;
+		font-size:23px;
+		background-color: #FFF;
+		color: #F7B74D;
+		border: 1px solid #F7B74D;
+		border-radius: 3px;
+		padding: 0px 20px;
+	}
+	.home-position:active,.home-position:hover,.home-position:visited{
+		background-color: #FFF;
+		color: #F7B74D;
+		text-decoration: none;
+	}
+	.nav_sp_logo,.nav_sp_home{display:none;}
+	.nav_sp{border: none;}
+	input#location_input{
+		width: 100%;
+		height:52px!important;
+		line-height:24px;
+		font-size:23px;
+		border: 1px solid #F7B74D;
+		color: #F7B74D;
+		border-radius: 3px;
+		padding: 0px 20px;
+		padding-right: 50px;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+	.line{
+		margin: 10px 0;
+	}
+	.line input{
+		line-height: 30px;
+		height: 30px!important;
+		font-size: 20px;
+		text-align:center ;
+	}
+	@media (max-width: 720px) {
+		input#location_input{
+			font-size: 16px;
+		}
+		.home-position {
+			margin-top: 10px;
+			font-size: 16px;
+		}
+	}
+	input#location_input::-webkit-input-placeholder { /* WebKit browsers */
+	    color:    #F7B74D;
+	}
+	input#location_input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+	   color:    #F7B74D;
+	   opacity:  1;
+	}
+	input#location_input::-moz-placeholder { /* Mozilla Firefox 19+ */
+	   color:    #F7B74D;
+	   opacity:  1;
+	}
+	input#location_input:-ms-input-placeholder { /* Internet Explorer 10+ */
+	   color:    #F7B74D;
+	}
+</style>
+
+<div class="cont_box">
+	<div class="cont_box" style="text-align: center;"><img src="../addons/str_takeout/template/resource/images/logo.png" style="width: 60%;max-width: 367px;margin-top: 30px;"></div>
+	<div style="position: relative;">
+		<a name="#ddress"></a>
+		<input type="text" name="address" id="location_input" autocomplete="off" placeholder="请输入您所在的地址"/><img id="search" style="position: absolute;height: 30px;display: block;top: 10px;right: 20px;" src="../addons/str_takeout/template/resource/images/search.png" /></div>
+	<div style="position: relative;"><a class="home-position">定位到我所在的门店</a><img style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/position.png" /></div>
+	<div class="hidden">
+		<input type="text" name="realname" value="{$address['realname']}" placeholder="姓名">
+	</div>
+	<div class="hidden">
+		<input type="text" name="mobile" id="mobile" value="{$address['mobile']}" placeholder="手机">
+	</div>
+	<div class="address addr1 hidden">
+		<input name="room" value="{$address['room']}" type="text" placeholder="楼层房号">
+	</div>
+</div>
+<footer class="shopping_cart">
+	<div class="fixed" id="fix_bar">
+		<div>
+			<a id="submit" class="comm_btn">进入示范门店</a>
+		</div>
+	</div>
+</footer>
+<script type="text/javascript">
+	var user_iploc={php $ip=$_SERVER["REMOTE_ADDR"]=='127.0.0.1'?'117.30.118.137':$_SERVER["REMOTE_ADDR"];$url='http://api.map.baidu.com/location/ip?ak=6E7C75E41980283b39d3c61e81f16a39&ip='.$ip;  $html = file_get_contents($url);  echo $html;} ;
+	var user_loc="";
+	var user_point=null;
+	var ha_detail=null;
+	var user_detail={'point':''};
+	{php $max=0;}
+	{loop $otherArea $one}
+		{php $max=intval($one['id'])>$max?intval($one['id']):$max;}
+	{/loop}
+	var storePoints=new Array({$max});
+	var storeNames=new Array({$max});
+	var storeCount={$max};
+	var sid=-1;
+	$(function(){
+		var r = "{$_GPC['r']}";
+		var return_url1 = "{php echo $this->createMobileUrl('order', array('op' => 'get','sid' => $sid, 'r' => 1));}";
+		var return_url2 = "{php echo $this->createMobileUrl('dish');}";
+		var return_url3 = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
+		return_url1 = (return_url1.split('#'))[0];
+		return_url2 = (return_url2.split('#'))[0];
+		return_url3 = (return_url3.split('#'))[0];
+		var map = new BMap.Map("allmap");
+		var myGeo = new BMap.Geocoder();
+		map.centerAndZoom(user_iploc.content.address,12);
+		var ac = new BMap.Autocomplete(    //建立一个自动完成的对象
+			{"input" : "location_input"
+			,"location" : map
+		});
+		var local = new BMap.LocalSearch(map, { //智能搜索
+		    onSearchComplete: findPoint
+		});
+		function findPoint(){
+			if(local.getResults().getCurrentNumPois()<=0){
+				$(".home-position").text("很抱歉，暂时无法解析您的地址");
+				setTimeout(function (){$(".home-position").text("定位到我所在的门店");},5000);
+				return false;
+			}
+			var point = local.getResults().getPoi(0).point;
+			user_detail.point=user_point=point;
+			checkPointAvail();
+		}
+		ac.addEventListener("onconfirm", function(e) {    //鼠标点击下拉列表后的事件
+			var _value = e.item.value;
+			user_loc = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+			user_detail = _value;
+			user_point = _value.point;
+			$("#location_input").value = user_loc;
+			$("#location_input").change();
+			return false;
+		});
+		$("#location_input").focus(function (){
+			$(this).attr("placeholder","");
+		}).blur(function (){
+			$(this).attr("placeholder","请输入您所在的地址");
+		});
+		$("#location_input").change(function() {
+			user_loc = this.value;
+			local.search(user_loc);
+		});
+		$(".home-position").click(function(){
+			if($(this).hasClass("hdisabled")){return false;}
+			$(this).text("定位中，请稍候");
+			var geolocation = new BMap.Geolocation();
+			geolocation.getCurrentPosition(function(r){
+				user_detail=r;
+				if((!!r.accuracy)&&r.accuracy<=200){
+					ha_detail=r;
+				}
+				if((!!user_point)&&map.getDistance(user_point,r.point)<=(r.accuracy)&&(user_loc)){
+					$("#location_input").val(user_loc);
+				}else{
+					var addr=r.address;
+					$("#location_input").val(addr.province+addr.city+addr.street);
+				}
+				$("#location_input").change();
+				user_point=r.point;
+				checkPointAvail();
+			},{enableHighAccuracy: true});
+		});
+		
+		function checkPointAvail(){
+			if(user_point){
+				if(ha_detail&&ha_detail.accuracy){
+					var dis=map.getDistance(user_point,ha_detail.point);
+					if(dis<3*ha_detail.accuracy||!user_detail.accuracy){
+						user_point=ha_detail.point;
+					}else{
+						ha_detail=null;
+					}
+				}
+				//显示输入框
+				showInput();
+				sid=-1;
+				checkStore();
+			}else{
+				sid=-1;
+				hideInput();
+				//隐藏输入框
+				if(ha_detail&&ha_detail.accuracy){
+					user_point=ha_detail.point;
+					checkPointAvail();
+				}
+			}
+		}
+		function showInput(){
+			$("#submit").text("转到我所在的门店");
+			$(".line").removeClass("hidden");
+		}
+		function hideInput(){
+			$(".line").addClass("hidden");
+			$("#submit").text("进入示范门店");
+		}
+		function checkStore(){
+			var storePoint="";
+			{loop $otherArea $one}
+			storePoint= '{$one['points']}';
+			storePoints[{$one['id']}]  = eval(storePoint.replace(/&quot;/g,"\""));
+			storeNames[{$one['id']}] = '{$one['title']}';
+			{/loop}
+			for(var i=0;i<=storeCount;++i) {
+				console.log("checking"+i);
+				if((storePoints[i])&&(isIn(storePoints[i],{x:user_point.lng,y:user_point.lat}))){
+					sid=i;
+					break;
+				}
+			}
+			if(sid>=0){
+				$(".home-position").text("定位成功，门店"+storeNames[sid]+"将为您服务");
+			}else{
+				$(".home-position").text("很抱歉，您暂时不在我们的配送范围");
+				hideInput();
+			}
+			if(!$(this).hasClass("hdisabled")){
+				$(".home-position").addClass("hdisabled");
+				setTimeout(function (){$(".home-position").text("定位到我所在的楼宇").removeClass("hdisabled");},10000);
+			}
+		}
+		function isIn(storePoints,point){
+		    var p1 = [];
+		    for(var i = 0; i < storePoints.length; i++){
+		        p1.push({x:storePoints[i].lng,y:storePoints[i].lat});
+		    }
+		    if(containsPointByLinearRing(point,p1)){
+		        return true;
+		    }else{
+		        return false;
+		    }
+	 	}
+		$('#submit').click(function(){
+			var id = '{$id}';
+			var room = $.trim($(':text[name="room"]').val());
+			var realname = $.trim($(':text[name="realname"]').val());
+			var mobile = $.trim($(':text[name="mobile"]').val());
+			var address = $.trim($(':text[name="address"]').val());
+			if(sid==-1){location.href=return_url2 +'&sid='+sid;return false;}
+			if(!address) {
+				alert('收件地址不能为空');
+				return false;
+			}
+			if(!$(this).hasClass('disabled')){
+				$(this).addClass('disabled');	
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post'))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid}, function(data){
+					var data = $.parseJSON(data);
+					if(!data.errorno) {
+						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default'))}", {'id':data.message,'sid':sid},function(){
+							address_id=data.message;
+							if(r==1) {
+								var oldsid={$sid};
+								if(oldsid!=sid){
+									location.href=return_url2 + '&address_id='+address_id+'&sid='+sid;
+								}else{
+									location.href=return_url1 + '&address_id='+address_id;
+								}
+							} else if(r==2) {
+								location.href = return_url2 + '&address_id='+address_id+'&sid='+sid;
+							} else {
+								location.href = return_url3 + '&address_id='+address_id+'&sid='+sid;
+							}
+						});
+					} else {
+						alert(data.message);
+						$(this).removeClass('disabled');	
+						return false;
+					}
+				});
+			}
+		});
+	});
+</script>
+{elseif $op == 'post'}
+<style>
+	.home-position {
+		margin-top: 16px;
+		display:block;
+		width: 100%;
+		height:32px!important;
+		line-height:32px;
+		font-size:16px;
+		background-color: #FFF;
+		color: #F7B74D;
+		border: 1px solid #F7B74D;
+		border-radius: 3px;
+		padding: 0px 20px;
+	}
+	.home-position:active,.home-position:hover,.home-position:visited{
+		background-color: #FFF;
+		color: #F7B74D;
+		text-decoration: none;
+	}
+	.nav_sp_logo,.nav_sp_home{display:none;}
+	.nav_sp{border: none;}
+	.line{
+		margin: 10px 0;
+	}
+	.line input{
+		line-height: 30px;
+		height: 30px!important;
+		font-size: 20px;
+		text-align:center ;
+	}
+	@media (max-width: 720px) {
+		input#location_input{
+			font-size: 16px;
+		}
+		.home-position {
+			margin-top: 10px;
+			font-size: 16px;
+		}
+	}
+	#phone_vaild_submit,#phone_code_submit{width: 100%;}
+	.vaild .comm_btn,.cont_box input {
+		margin-top: 10px;
+	}
+	.left {
+		padding-right: 15px;
+		white-space: nowrap;
+		position: relative;
+		top: 6px;
+	}
+	.addr_cnfrm:before{
+		content: "确认送货地址";		
+	}
+</style>
+
+<div class="cont_box">
+	<div class="cont_box" style="text-align: center;"><img src="../addons/str_takeout/template/resource/images/logo.png" style="width: 60%;max-width: 367px;margin-top: 30px;"></div>
+	<div style="position: relative;">
+		<a name="#ddress"></a>
+	<input type="text" name="address" id="location_input" autocomplete="off" placeholder="送餐地点" value="{$address['address']}" /></div>
+	<input name="room" value="{$address['room']}" type="text" placeholder="楼层房号">
+	<input type="text" name="realname" value="{$address['realname']}" placeholder="姓名">
+	<input type="text" name="mobile" id="mobileipt" value="{$address['mobile']}" placeholder="手机">
+	<div class="vaild hidden" id="phone_vaild">
+		<a class="comm_btn hidden" id="phone_vaild_submit">发送短信，验证手机号</a>
+		<div id="phone_code_wrapper" class="hidden">
+			<label class="left">验证码</label>
+			<div class="mid">
+				<input type="text" id="code" name="code" value=""></input>
+			</div>
+		</div>
+		<a class="comm_btn disabled hidden" id="phone_code_submit">验证手机</a>
+	</div>
+</div>
+<footer class="shopping_cart">
+	<div class="fixed" id="fix_bar">
+		<div>
+			<a href="javascript:;" class="comm_btn addr_cnfrm" id="submit"></a>
+		</div>
+	</div>
+</footer>
+<script type="text/javascript">
+	var sid={$sid};
+	$(function(){
+		var r = "{$_GPC['r']}";
+		var return_url1 = "{php echo $this->createMobileUrl('order', array('op' => 'get','sid' => $sid, 'r' => 1));}";
+		var return_url2 = "{php echo $this->createMobileUrl('dish');}";
+		var return_url3 = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
+		return_url1 = (return_url1.split('#'))[0];
+		return_url2 = (return_url2.split('#'))[0];
+		return_url3 = (return_url3.split('#'))[0];
+		var vaild_times_rem=3;
+		$("#mobileipt").blur(function(){
+			if((!$('#phone_vaild_submit').hasClass("disabled"))&&$('#phone_vaild_submit').hasClass("hidden")){
+				var id = $(this).attr('data-id');
+				if($("#mobile span").hasClass("hidden")){
+					$("#mobileipt").addClass("hidden");
+					$("#mobile span").removeClass("hidden");
+				}
+				var newmobile=$.trim($("#mobileipt").val());
+				var valid = !!newmobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
+				if(!valid){
+					$("#mobileipt").val($("#mobile span").text());
+					alert('手机号格式不正确');
+				}else{
+					$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'tel_checkauth'))}', {'tel':newmobile}, function(data){
+						if(data == 'authed') {
+							$("#mobile span").html(newmobile);
+							$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
+						} else {
+							vaild_times_rem=3;
+							$("#mobile span").html(newmobile);
+							$("#phone_vaild").removeClass("hidden");
+							$('#phone_vaild_submit').removeClass("hidden");
+						}
+					});
+				}
+			}
+		});
+		$('#phone_vaild_submit').click(function(){
+			if(!$('#phone_vaild_submit').hasClass("disabled")){
+				var newmobile=$.trim($("#mobileipt").val());
+				$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'send_auth_code'))}', {'tel':newmobile}, function(data){
+					$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
+					if(data == 'success') {
+						$("#phone_code_wrapper").removeClass("hidden");
+						$('#phone_code_submit').removeClass("hidden").removeClass("disabled");
+					}else if(data == 'request too many times') {
+						$('#phone_vaild_submit').removeClass("hidden").text("两分钟内发送过验证码，请稍等");
+						setTimeout(function(){$('#phone_vaild_submit').removeClass("disabled").text("发送短信，验证手机号");},10000);
+					}else{
+						alert("验证码发送失败");
+						$('#phone_vaild_submit').removeClass("hidden").removeClass("disabled");
+					}
+				});
+			}
+		});
+		$('#phone_code_submit').click(function(){
+			if(!$('#phone_code_submit').hasClass("disabled")){
+				$('#phone_code_submit').addClass("disabled");
+				var newmobile=$.trim($("#mobileipt").val());
+				var code=$.trim($("#code").val());
+				$("#code").val("");
+				var id = $("mobileipt").attr('data-id');
+				$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'authtel'))}', {'tel':newmobile,'code':code}, function(data){
+					vaild_times_rem--;
+					if(data == 'success') {
+						$('#phone_code_submit').text("验证成功");
+						setTimeout(function(){
+							$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
+							$("#phone_code_wrapper").addClass("hidden");
+							$("#phone_vaild").addClass("hidden");
+							$('#phone_code_submit').addClass("disabled").addClass("hidden");
+							$('#phone_vaild_submit').removeClass("disabled").addClass("hidden");
+							$('#phone_code_submit').text("验证手机");
+							$("#mobileipt").attr("data-mobile",newmobile);
+						},2000);
+					}else if(data == 'time out'){
+						alert("验证码超时");
+						$("#phone_code_wrapper").addClass("hidden");
+						$('#phone_code_submit').addClass("disabled").addClass("hidden");
+						$('#phone_vaild_submit').removeClass("disabled").removeClass("hidden");
+					}else{
+						if(vaild_times_rem){
+							alert("验证码错误,还有"+vaild_times_rem+"次重试");
+							$('#phone_code_submit').removeClass("disabled");
+						}else{
+							alert("验证码错误,请重新发送验证码");
+							vaild_times_rem=3;
+							$("#phone_code_wrapper").addClass("hidden");
+							$('#phone_code_submit').addClass("disabled").addClass("hidden");
+							$('#phone_vaild_submit').removeClass("disabled").removeClass("hidden");
+						}
+					}
+				});
+			}
+		});
+		$('#submit').click(function(){
+			var id = '{$id}';
+			var realname = $.trim($(':text[name="realname"]').val());
+			var mobile = $.trim($(':text[name="mobile"]').val());
+			var realname = $.trim($(':text[name="realname"]').val());
+			if(!$(this).hasClass('disabled')){
+				if(!realname) {
+					alert('预定人不能为空');
+					return false;
+				}
+				var mobile = $.trim($(':text[name="mobile"]').val());
+				if(!mobile) {
+					alert('手机号不能为空');
+					return false;
+				}else{
+					var valid = !!mobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
+					var valid = !!mobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
+					if(!valid){
+						alert('手机号格式不正确');
+						return false;
+					}else{
+						$(this).addClass('disabled');
+						$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'tel_checkauth'))}', {'tel':mobile}, function(data){
+							if(data != 'authed') {
+								alert('手机号未验证');
+								$('#submit').removeClass('disabled');
+								return false;
+							}
+						});
+					}
+				}
+				var address = $.trim($(':text[name="address"]').val());
+				if(!address) {
+					alert('收件地址不能为空');$('#submit').removeClass('disabled');
+					return false;
+				}
+				var room = $.trim($(':text[name="room"]').val());
+				if(!room) {
+					alert('楼层房号不能为空');$('#submit').removeClass('disabled');
+					return false;
+				}
+				$(this).addClass('disabled');
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post'))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid}, function(data){
+					var data = $.parseJSON(data);
+					if(!data.errorno) {
+						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default'))}", {'id':data.message,'sid':sid},function(){
+							address_id=data.message;
+							if(r==1) {
+								var oldsid={$sid};
+								if(oldsid!=sid){
+									location.href=return_url2 + '&address_id='+address_id+'&sid='+sid;
+								}else{
+									location.href=return_url1 + '&address_id='+address_id;
+								}
+							} else if(r==2) {
+								location.href = return_url2 + '&address_id='+address_id+'&sid='+sid;
+							} else {
+								location.href = return_url3 + '&address_id='+address_id+'&sid='+sid;
+							}
+						});
+					} else {
+						alert(data.message);
+						$('#submit').removeClass('disabled');
+						return false;
+					}
+				});
+			}
+		});
+		$('.deladdress').click(function(){
+			var id = $(this).attr('data-id');
+			if(!id) {
+				return false;
+			}
+			if(!confirm('确定删除吗')) return false;
+			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(data){
+				var data = $.parseJSON(data);
+				if(!data.errorno) {
+					location.reload();
+				} else {
+					alert(data.message);
+					return false;
+				}
+			});
+		});
+		$('#deladdress').click(function(){
+			var id = '{$id}';
+			if(!id) {
+				return false;
+			}
+			if(!confirm('确定删除吗')) return false;
+			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(data){
+				var data = $.parseJSON(data);
+				if(!data.errorno) {
+					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid, 'r' => $_GPC['r']));}";
+				} else {
+					alert(data.message);
+					return false;
+				}
+			});
+		});
+		setTimeout(function(){
+			$("#location_input").val("{$address['address']}");
+		},10);
+	});
+</script>
+{/if}
 {template 'common/footer'}

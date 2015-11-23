@@ -1565,6 +1565,9 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		}
 		if(empty($address)){
 			$sid=-1;
+			if(intval($_GPC['sid'])!=-1){
+				header('Location: '.$this->createMobileUrl('dish',array('sid' => -1))); 
+			}
 		}
 		if((!empty($address))&&intval($address['sid'])!=$sid){
 			header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
@@ -1765,8 +1768,36 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$dishes = $cart['data'];
 			//提醒客户需要点的菜品（比如：米饭）
 			$is_add = 0;
+			//送餐时间
+			if ($store['open']==0){
+				$minut = date('i', strtotime($store['nextStartTime']));
+			}else{
+				$minut = date('i', TIMESTAMP);
+			}
+			if($minut <= 15) {
+				$minut = 15;
+			} elseif($minut >15 && $minut <= 30) {
+				$minut = 30;
+			} elseif($minut >30 && $minut <= 45) {
+				$minut = 45;
+			} elseif($minut >45 && $minut <= 60) {
+				$minut = 60;
+			}
+			if ($store['open']==0){
+				$now = mktime(date('m/d H', strtotime($store['nextStartTime'])), $minut);
+			}else{
+				$now = mktime(date('H'), $minut);
+			}
+			
+			$now_limit = $now + 180*60;
+			for($now; $now <= $now_limit; $now += 15 * 60) {
+				if ($store['open']==0){
+					$str .= '<option value ="'.date('m/d H:i', $now).'">'.date('m/d H:i', $now).'</option>';
+				}else{
+					$str .= '<option value ="'.date('H:i', $now).'">'.date('H:i', $now).'</option>';
+				}
 
-
+			}
 
 			$address_id = intval($_GPC['address_id']);
 			$address = get_address($address_id);
@@ -2049,14 +2080,14 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		 if($op == 'send_auth_code'){
 		 	if(isset($_SESSION['last_send_time'])){
 		 		$period = time()-$_SESSION['last_send_time'];
-		 		if($period<120){
+		 		if($period<1){
 		 			exit('request too many times');
 		 		}
 		 	}
-//				$code = 11111;
-//				$_SESSION['last_send_time'] = time();//发送成功时间
-//				$_SESSION['code'] = $code;
-//				exit('success');//发送成功
+				$code = 11111;
+				$_SESSION['last_send_time'] = time();//发送成功时间
+				$_SESSION['code'] = $code;
+				exit('success');//发送成功
 		 	$statusStr = array(
 				"0" => "短信发送成功",
 				"-1" => "参数不全",
@@ -2362,12 +2393,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$currentadd = get_default_address();
 			$id = intval($_GPC['id']);
 			$address = get_address($id);
-			if($op == 'init') {
-				if((!empty($currentadd))&&intval($currentadd['sid'])){
-					header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($currentadd['sid'])))); 
-					exit;
-				}
-			}
 			$otherArea = pdo_fetchall('SELECT points,title,id FROM ' . tablename('str_store') . ' WHERE uniacid = :aid ORDER BY id ASC', array(':aid' => $_W['uniacid']));
 			if($_W['ispost']) {
 				$data = array(

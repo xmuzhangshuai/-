@@ -52,10 +52,10 @@
 					<a class="comm_btn disabled hidden" id="phone_code_submit">验证手机</a>
 				</div>
 				<label class="left">送餐时间</label>
-				<div class="mid" id="showTime" name="time">
-					<select>
+				<div class="mid" >
+					<select id="showTime" name="delivery_time">
 					    <option value ="立即送出">立即送出</option>
-					    <option value ="开店时间">开店时间</option>
+					    {$str}
 					</select>
 				</div>
 				<br />
@@ -258,10 +258,11 @@
 					return false;
 				}else{
 					$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'tel_checkauth'))}', {'tel':mobile}, function(data){
-					if(data != 'authed') {
-						alert('手机号未验证');
-					}
-				});
+						if(data != 'authed') {
+							alert('手机号未验证');
+							return false;
+						}
+					});
 				}
 			}
 			var realname = $("#showName").val();
@@ -277,16 +278,8 @@
 				$(this).removeClass('disabled');
 				return false;
 			}
-			var param = {
-				'order_type' :2,
-				'address_id':address_id,
-				'note':note,
-				'delivery_time':time,
-				'realname':realname,
-				'mobile':mobile,
-				'room':room
-			}
-			$.post("{php echo $this->createMobileUrl('order', array('sid' => $sid));}", $('#cart_confirm_form').serialize(), function(e){
+			var param=$('#cart_confirm_form').serialize();
+			$.post("{php echo $this->createMobileUrl('order', array('sid' => $sid));}", param, function(e){
 				if(e.errno == 0) {
 					var order_no = e.id;
 					var amount = e.priceYuan*100;
@@ -298,7 +291,7 @@
 			        pingpp_one.init({
 						app_id:'app_mzXP8ODWj508qfHa',                     //该应用在ping++的应用ID
 						order_no:order_no,                     //订单在商户系统中的订单号
-						amount:10,                                   //订单价格，单位：人民币 分
+						amount:amount,                                   //订单价格，单位：人民币 分
 						// 壹收款页面上需要展示的渠道，数组，数组顺序即页面展示出的渠道的顺序
 						// upmp_wap 渠道在微信内部无法使用，若用户未安装银联手机支付控件，则无法调起支付
 						channel:['wx_pub','alipay_wap'],
