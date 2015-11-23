@@ -1,5 +1,5 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.1" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.17" />
 <style>
 	.menu_list li > div.menu_desc_wrap{
 		position: fixed;
@@ -92,7 +92,7 @@
 							</div>
 							<div class="price_wrap menu_desc">
 								<strong>￥<span class="unit_price">{$ds['price']}</span></strong>
-								<div class="fr buy_btn {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}buy_btn_out{/if}" max="{$ds['kucun']}">
+								<div class="fr buy_btn {if (!($ds['kucun'] == -1 || $ds['kucun'] > 0)||(!$address['address']))}buy_btn_out{/if}" max="{php echo $address['address']?$ds['kucun']:0}">
 									<a href="javascript:void(0);" class="btn_n add" data-num="{$cart['data'][$ds['id']]}"></a>
 									<input autocomplete="off" class="h_num" type="hidden" name="dish[{$ds['id']}]" value="{$cart['data'][$ds['id']]}">
 								</div>

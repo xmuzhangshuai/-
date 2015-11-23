@@ -1,11 +1,12 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.1" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.17" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/jquery.bxslider.css" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <!--<script src="../addons/str_takeout/template/resource/js/main.js"></script>-->
 <script src="../addons/str_takeout/template/resource/js/form.js"></script>
 <script src="../addons/str_takeout/template/resource/js/menu.js"></script>
 <script src="../addons/str_takeout/template/resource/js/common.js"></script>
-<script src="../addons/str_takeout/template/resource/js/resp_slide.js"></script>
+<script src="../addons/str_takeout/template/resource/js/jquery.bxslider.min.js"></script>
 <div class="container" onselectstart="return true;" ondragstart="return false;">
 	{template 'header'}
 	<!--
@@ -35,28 +36,39 @@
 						<div>
 							<div class="menu_type">{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></div>
 							{if $ds['thumb']} {php $ds['thumb'] = explode(';',$ds['thumb']); }
-							<div class="slider_wrap">
-								<ul class="rslides" id="slider{$ds['id']}">
-									{loop $ds['thumb'] $thu}
-									<li>
-										<img src="{php echo tomedia($thu);}" alt="" />
-									</li>
-									{/loop}
-								</ul>
-								<div class="mask">
-									<div>
-										<p>售完</p>
+							<a data-href="{php echo $this->createMobileUrl('dishdetail', array('sid' => $sid, 'dish_id' => $ds['id']));}" class="dish_detail" style="text-decoration: none!important;">
+								<div class="slider_wrap">
+									<ul id="slider{$ds['id']}">
+										{loop $ds['thumb'] $thu}
+										<li>
+											<img src="{php echo tomedia($thu);}" alt="" />
+										</li>
+										{/loop}
+									</ul>
+									<script type="text/javascript">
+											$(function() {
+												$("#slider{$ds['id']}").bxSlider({
+												  auto: true,
+												  pause: 2000,
+												  controls:false
+												});
+											});
+									</script>
+									<div class="mask">
+										<div>
+											<p>售完</p>
+										</div>
 									</div>
 								</div>
+								{else}
+								<div class="nopic"></div>
+								{/if}
 							</div>
-							{else}
-							<div class="nopic"></div>
-							{/if}
-						</div>
-						<div class="menu_desc">
-							<a data-href="{php echo $this->createMobileUrl('dishdetail', array('sid' => $sid, 'dish_id' => $ds['id']));}" class="dish_detail" style="text-decoration: none!important;"><h3>{$ds['title']}</h3></a>
-							<div class="info">{$ds['zuhe']}</div>
-						</div>
+							<div class="menu_desc">
+								<h3>{$ds['title']}</h3>
+								<div class="info">{$ds['zuhe']}</div>
+							</div>
+						</a>
 						<div class="price_wrap menu_desc">
 							<strong>￥<span class="unit_price">{$ds['price']}</span></strong>
 							<div class="fr buy_btn {if (!($ds['kucun'] == -1 || $ds['kucun'] > 0)||(!$address['address']))}buy_btn_out{/if}" max="{php echo $address['address']?$ds['kucun']:0}">
@@ -82,13 +94,6 @@
 
 <script type="text/javascript">
 	$(function() {
-		$(".rslides").responsiveSlides({
-			auto: true,
-			nav: true,
-			speed: 500,
-			namespace: "callbacks",
-			pager: true,
-		});
 		$("#settlement").click(function() {
 			if ($("#settlement").hasClass("init")){
 				location.href="{php echo $this->createMobileUrl('address', array('op' => 'init','r' => 2));}";
