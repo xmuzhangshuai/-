@@ -370,7 +370,6 @@
 	</div>
 </footer>
 <script type="text/javascript">
-	var user_iploc={php $ip=$_SERVER["REMOTE_ADDR"]=='127.0.0.1'?'117.30.118.137':$_SERVER["REMOTE_ADDR"];$url='http://api.map.baidu.com/location/ip?ak=6E7C75E41980283b39d3c61e81f16a39&ip='.$ip;  $html = file_get_contents($url);  echo $html;} ;
 	var user_loc="";
 	var user_point=null;
 	var ha_detail=null;
@@ -393,7 +392,6 @@
 		return_url3 = (return_url3.split('#'))[0];
 		var map = new BMap.Map("allmap");
 		var myGeo = new BMap.Geocoder();
-		map.centerAndZoom(user_iploc.content.address,12);
 		var ac = new BMap.Autocomplete(    //建立一个自动完成的对象
 			{"input" : "location_input"
 			,"location" : map

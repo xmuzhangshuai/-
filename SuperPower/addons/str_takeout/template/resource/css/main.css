@@ -780,7 +780,7 @@ i.cantype3,
 }
 .menu_list .price_wrap .num {
 font-size: 22px;
-border: 1px #ccc solid;
+border: 1px #f39801 solid;
 line-height: 26px;
 margin-top: -1px;
 min-width: 36px;
@@ -805,7 +805,8 @@ padding-left: 6px;
 	width: 40px;
 	padding-left: 15px;
 	font-family: sans-serif, arial;
-	background: #EEE;
+	color: #FFF;
+	background: #f39801;
 }
 .menu_list .btn_n.add:before {
 	content: "+";
@@ -819,7 +820,7 @@ padding-left: 6px;
 .menu_list .btn_n.del:hover,
 .menu_list .btn_n.del:active,
 .menu_list .btn_n.del:visited {
-	color: #f39801;
+	color: #FFF;
 	text-decoration: none;
 }
 .menu_desc {
@@ -896,7 +897,7 @@ font-size: 14px;
 vertical-align: middle;
 white-space: nowrap;
 margin-top: 10px;
-border: 1px #ccc solid;
+border: 1px #f39801 solid;
 }
 .buy_btn.buy_btn_out,
 .out .buy_btn {
