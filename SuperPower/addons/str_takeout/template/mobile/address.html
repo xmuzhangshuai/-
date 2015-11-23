@@ -130,18 +130,6 @@
 	</nav>
 </div>
 <script type="text/javascript">
-	var user_iploc={php $ip=$_SERVER["REMOTE_ADDR"]=='127.0.0.1'?'117.30.118.137':$_SERVER["REMOTE_ADDR"];$url='http://api.map.baidu.com/location/ip?ak=6E7C75E41980283b39d3c61e81f16a39&ip='.$ip;  $html = file_get_contents($url);  echo $html;} ;
-	var user_loc="";
-	var user_point=null;
-	var ha_detail=null;
-	var user_detail={'point':''};
-	{php $max=0;}
-	{loop $otherArea $one}
-		{php $max=intval($one['id'])>$max?intval($one['id']):$max;}
-	{/loop}
-	var storePoints=new Array({$max});
-	var storeNames=new Array({$max});
-	var storeCount={$max};
 	var sid=-1;
 	$(function(){
 		var r = "{$_GPC['r']}";
@@ -151,10 +139,6 @@
 		return_url1 = (return_url1.split('#'))[0];
 		return_url2 = (return_url2.split('#'))[0];
 		return_url3 = (return_url3.split('#'))[0];
-		var map = new BMap.Map("allmap");
-		var myGeo = new BMap.Geocoder();
-		map.centerAndZoom(user_iploc.content.address,12);
-		{if $_GPC['r']!=3}
 		$('.addressChecked').click(function(){
 			var address_id = $(this).attr('data-id');
 			var address_sid = $(this).attr('data-sid');
@@ -171,7 +155,6 @@
 			}
 			return false;
 		});
-		{/if}
 		$("#update_mobile").click(function(){
 			if((!$('#phone_vaild_submit').hasClass("disabled"))&&$('#phone_vaild_submit').hasClass("hidden")){
 				if($("#mobileipt").hasClass("hidden")){
@@ -218,9 +201,10 @@
 		});
 		$('#phone_vaild_submit').click(function(){
 			if(!$('#phone_vaild_submit').hasClass("disabled")){
-				$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
 				var newmobile=$.trim($("#mobileipt").val());
+				$('#phone_vaild_submit').addClass("disabled");
 				$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'send_auth_code'))}', {'tel':newmobile}, function(data){
+					$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
 					if(data == 'success') {
 						$("#phone_code_wrapper").removeClass("hidden");
 						$('#phone_code_submit').removeClass("hidden").removeClass("disabled");
@@ -274,7 +258,6 @@
 				});
 			}
 		});
-
 		$('.deladdress').click(function(){
 			var id = $(this).attr('data-id');
 			if(!id) {
@@ -285,22 +268,6 @@
 				var data = $.parseJSON(data);
 				if(!data.errorno) {
 					location.reload();
-				} else {
-					alert(data.message);
-					return false;
-				}
-			});
-		});
-		$('#deladdress').click(function(){
-			var id = '{$id}';
-			if(!id) {
-				return false;
-			}
-			if(!confirm('确定删除吗')) return false;
-			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(data){
-				var data = $.parseJSON(data);
-				if(!data.errorno) {
-					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid, 'r' => $_GPC['r']));}";
 				} else {
 					alert(data.message);
 					return false;
@@ -714,6 +681,7 @@
 		$('#phone_vaild_submit').click(function(){
 			if(!$('#phone_vaild_submit').hasClass("disabled")){
 				var newmobile=$.trim($("#mobileipt").val());
+				$('#phone_vaild_submit').addClass("disabled");
 				$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'send_auth_code'))}', {'tel':newmobile}, function(data){
 					$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
 					if(data == 'success') {
@@ -836,38 +804,6 @@
 					}
 				});
 			}
-		});
-		$('.deladdress').click(function(){
-			var id = $(this).attr('data-id');
-			if(!id) {
-				return false;
-			}
-			if(!confirm('确定删除吗')) return false;
-			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(data){
-				var data = $.parseJSON(data);
-				if(!data.errorno) {
-					location.reload();
-				} else {
-					alert(data.message);
-					return false;
-				}
-			});
-		});
-		$('#deladdress').click(function(){
-			var id = '{$id}';
-			if(!id) {
-				return false;
-			}
-			if(!confirm('确定删除吗')) return false;
-			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(data){
-				var data = $.parseJSON(data);
-				if(!data.errorno) {
-					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'sid' => $sid, 'r' => $_GPC['r']));}";
-				} else {
-					alert(data.message);
-					return false;
-				}
-			});
 		});
 		setTimeout(function(){
 			$("#location_input").val("{$address['address']}");
