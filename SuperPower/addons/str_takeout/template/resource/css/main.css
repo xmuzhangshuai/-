@@ -2687,13 +2687,13 @@ a.deladdress.adress_delete:before {
 	color: rgb(37, 127, 190);
 }
 .state1:before {
-	content: "准备中";
+	content: "未支付，点击支付";
 }
 .state2 {
 	color: rgb(37, 190, 10);
 }
 .state2:before {
-	content: "配送中";
+	content: "正在准备配送中";
 }
 .state3 {
 	color: rgb(243, 160, 20);

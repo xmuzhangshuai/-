@@ -1125,12 +1125,21 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$pager = pagination($total, $pindex, $psize);
 			include $this->template('print');
 		} elseif($op == 'ajaxprint') {
+			/**
+			 * 二次开发：后台点击打印订单
+			 */
 			$id = intval($_GPC['id']);
-			$status = print_order($id, true);
+			
+			$state = pdo_update('str_order', array('print'=>-1),array('id'=>$id,'uniacid' => $_W['uniacid'], 'sid' => $sid));
+			/*$status = print_order($id, true);
 			if(is_error($status)) {
 				exit($status['message']);
 			}
-			exit('success');
+			exit('success');*/
+			if($state !== false){
+				exit('success');
+			}
+			exit('error');
 		} elseif($op == 'zong_dish'){
 			/**
 			 * 二次开发：从总店菜品库中拉取菜品
@@ -1347,7 +1356,11 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			 * @author lwq
 			 */
 			//获取要打印但是未打印的已支付订单（处理中订单），一条订单
-			$order = pdo_fetch('SELECT * FROM ' . tablename('str_order') . ' WHERE uniacid = :aid AND sid = :sid AND print = 0 AND status = 2 ORDER BY addtime ASC', array(':aid' => $_W['uniacid'], ':sid' => $sid));
+			//查询是否有紧急打印订单（ergent_print=1）
+			$order = array();
+			$order = pdo_fetch('SELECT * FROM ' . tablename('str_order') . ' WHERE uniacid = :aid AND sid = :sid AND ergent_print = 1 AND status = 2 ORDER BY addtime ASC', array(':aid' => $_W['uniacid'], ':sid' => $sid));
+			if(empty($order))
+				$order = pdo_fetch('SELECT * FROM ' . tablename('str_order') . ' WHERE uniacid = :aid AND sid = :sid AND print = 0 AND status = 2 ORDER BY addtime ASC', array(':aid' => $_W['uniacid'], ':sid' => $sid));
 			if(empty($order)) {
 				message('订单不存在或已经删除', $this->createWebUrl('manage', array('op' => 'order')), 'error');
 			} else {
@@ -1378,6 +1391,30 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			/**
 			 * 二次开发：取消打印
 			 */
+		}elseif($op == 'pay_result'){
+			$event = json_decode(file_get_contents("php://input"));
+
+			// 对异步通知做处理
+			if (!isset($event->type)) {
+    			header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request');
+    			exit("fail");
+			}
+			switch ($event->type) {
+    			case "charge.succeeded":
+       			 // 开发者在此处加入对支付异步通知的处理代码
+        			//獲得訂單ID
+        			$order_no = $event->data->object->order_no;
+        			$channel = $event->data->object->channel;
+        			$order['status'] = 2;//已支付
+        			if($channel=='alipay_wap')
+        				$order['pay_type'] = '支付宝';
+        			elseif($channel=='wx_pub')
+        				$order['pay_type'] = '微信支付';
+        			pdo_update('str_order',$order,array('id'=>$order_no));
+        			header($_SERVER['SERVER_PROTOCOL'] . ' 200 OK');
+        			break;
+ 
+			}
 		}
 		if($op == 'clerk_post') {
 			$accounts = uni_accounts();
@@ -1922,6 +1959,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			exit(json_encode($out));
 		}
+		$openID = $_W['openid'];
 		include $this->template('order');
 	}
 	public function doMobileMyorder() {
@@ -2010,8 +2048,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		 */
 		 if($op == 'send_auth_code'){
 		 	if(isset($_SESSION['last_send_time'])){
-		 		$period = time() - $_SESSION['last_send_time'];
-		 		if($period<1){
+		 		$period = time()-$_SESSION['last_send_time'];
+		 		if($period<120){
 		 			exit('request too many times');
 		 		}
 		 	}
@@ -2042,7 +2080,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			
 			$status = $statusStr[$result];
 			
-			if($status == '0'){
+			if($status == '短信发送成功'){
 				$_SESSION['last_send_time'] = time();//发送成功时间
 				$_SESSION['code'] = $code;
 				exit('success');//发送成功
