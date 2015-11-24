@@ -6,7 +6,7 @@
  * 该代码仅供学习和研究 Ping++ SDK 使用，只是提供一个参考。
 */
 define('IN_SYS', true);
-require '../framework/bootstrap.inc.php';
+require '../../framework/bootstrap.inc.php';
 require IA_ROOT . '/web/common/bootstrap.sys.inc.php';
 load()->web('common');
 
@@ -24,12 +24,13 @@ $orderNo = $input_data['order_no'];
 
 $order = pdo_fetch('SELECT * FROM '.tablename('str_order').' WHERE id=:id',array(':id'=>$orderNo));
 if(!empty($order)){
-	$payAmount = $order['price']*100;
+	/*$payAmount = $order['price']*100;
 	if($payAmount!=$amount){
 		$out['status'] = 0;
 		$out['msg'] = '支付金额不正确';
 		exit(json_encode($out));
-	}
+	}*/
+	$amount = $order['price'];
 	
 }
 
