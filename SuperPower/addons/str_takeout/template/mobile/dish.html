@@ -1,5 +1,5 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.29" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=11242316" />
 <link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/jquery.bxslider.css" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <!--<script src="../addons/str_takeout/template/resource/js/main.js"></script>-->
@@ -15,7 +15,7 @@
     	描述：TODO:定位、选择
     -->
 	<div class="nav_address"><span>当前门店：</span><span class="nav_add_add">{$store['title']}</span></span>
-		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a>
+		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2,'op' => 'init'));}" class="nav_sp_location"></a>
 	</div>
 	<form name="cart_form" id="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
 		<input type="hidden" name="more" value="{$_GPC['more']}">
@@ -24,6 +24,9 @@
 			{if $store['open']==0}
 			<div class="tips">企鹅休息中，接受预定~下次配送时间：
 				<br /><span>{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></span></div>
+			{else}
+			<div class="tips lowtips">
+				<span>{php $time = strtotime($store['nextStartTime']); echo date("m-d",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></span></div>
 			{/if}
 			<div class="menu_container">
 				<ul class="menu_list">
@@ -34,9 +37,8 @@
 					{if $ds['selling'] == 1}
 					<li id="{$ds['id']}" class="auto_height {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}out{/if}">
 						<div>
-							<div class="menu_type">{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></div>
 							{if $ds['thumb']} {php $ds['thumb'] = explode(';',$ds['thumb']); }
-							<a data-href="{php echo $this->createMobileUrl('dishdetail', array('sid' => $sid, 'dish_id' => $ds['id']));}" class="dish_detail" style="text-decoration: none!important;">
+							<a data-href="{php echo $this->createMobileUrl('dishdetail', array('sid' => $sid, 'dish_id' => $ds['id']));}" class="dish_detail" style="text-decoration: none!important;color: inherit!important;">
 								<div class="slider_wrap">
 									<ul id="slider{$ds['id']}">
 										{loop $ds['thumb'] $thu}

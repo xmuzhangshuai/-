@@ -1,6 +1,6 @@
 {template 'common/header'}
 <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6E7C75E41980283b39d3c61e81f16a39"></script>
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.16" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=11242316" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="../addons/str_takeout/template/resource/js/intersectPolygon.js"></script>
 <div id="allmap"></div>
@@ -11,7 +11,7 @@
 	.buyrecord{border-bottom-color: rgba(243,152,1,0);}
 	.phone_number input{width: auto;font-size: 20px;max-width: 170px;}
 	.cont_box.order_list,.cont_box.person{width:96%;margin: 15px 2%;}
-	.adress_detailed{
+	.address_detailed{
 		text-overflow: ellipsis;
 		overflow: hidden;
 		white-space: nowrap;
@@ -51,11 +51,11 @@
 	</div>
 </div>
 {template 'header'}
-<div class="cont_box">
+<div class="cont_box container">
 	<div class="nav_wrapper">
 		<div class="nav_inner">
 			<a class="buyrecord" href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}">购买记录</a>
-			<a class="run_adress">地址管理</a>
+			<a class="run_address">地址管理</a>
 		</div>
 	</div>
 	<hr width="102%" class="division" />
@@ -81,47 +81,47 @@
 		</div>
 		{/if}
 	</div>
+	<div class="cont_box address_loc_wrapper"><a class="comm_btn" href="{php echo $this->createMobileUrl('address', array('op' => 'init' ,'r'=> $_GPC['r']))}" class="add">定位到我所在的门店</a></div>
 	<ul class="menu_list order_list cont_box">
 		{if $stores}
 			{loop $stores $store}
 		<li style="margin: 0;margin-top: 15px;width: 100%;" class="cont_box">
-			<span class="adress_name">
+			<span class="address_name">
 				{$store['title']}
 			</span>
 		</li>
 				{php $addinstore=pdo_fetchall('SELECT * FROM ' . tablename('str_address').' WHERE sid='.$store['sid'].' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));}
 				{loop $addinstore $address}
 			<li style="padding: 0;width: 100%;max-width:100%;display: inline-block;margin: 0;" class="cont_box">
-				<a class="adress_delete deladdress" data-id="{$address['id']}" data-sid="{$address['sid']}"></a>
-				<span class="adress_detailed addressChecked {if $_GPC['r']!=3}addressChecking{$address['is_default']}{/if}" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}<br />{$address['room']}</span>
+				<a class="address_delete deladdress" data-id="{$address['id']}" data-sid="{$address['sid']}"></a>
+				<span class="address_detailed addressChecked {if $_GPC['r']!=3}addressChecking{$address['is_default']}{/if}" data-id="{$address['id']}" data-sid="{$address['sid']}">{$address['address']}<br />{$address['room']}</span>
 				<a href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'id' => $address['id'],'sid' => $sid, 'r' => $_GPC['r']))}" class="edit_icon"><span></span></a>
 			</li>
 				{/loop}
-			<div class="cont_box adress_add_wrapper"><a class="adress_add" href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $store['sid'] ,'r'=> $_GPC['r']))}" class="add">新增地址</a></div>
+			<div class="cont_box address_add_wrapper"><a class="address_add" href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $store['sid'] ,'r'=> $_GPC['r']))}" class="add">新增地址</a></div>
 			{/loop}
 		{else}
 		<li class="on-info"><i class="fa fa-info-circle"></i> 请添加地址</li>
 		{/if}
-					<div class="cont_box adress_add_wrapper"><a class="comm_btn" href="{php echo $this->createMobileUrl('address', array('op' => 'init' ,'r'=> $_GPC['r']))}" class="add">定位到我所在的门店</a></div>
 	</ul>
 </div>
 <div class="fixed">
 	<nav class="nav_common">
 		<ul class="box_nav">
 			<li class="more ">
-				<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}">
+				<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid,'rand' => rand()));}">
 					 <span class="order">&nbsp;</span>
 				 <label>门店菜单</label>
 				</a>
 			</li>
 			<li class="more ">
-				<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}">
+				<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid,'rand' => rand()));}">
 					<span class="my">&nbsp;</span>
 				<label> 我的订单</label>
 			</a>
 			</li>
 			<li class="more on">
-				<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">
+				<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'rand' => rand()));}">
 					<span class="introx">&nbsp;</span>
 				<label> 地址管理</label>
 				</a>
@@ -135,7 +135,7 @@
 		var r = "{$_GPC['r']}";
 		var return_url1 = "{php echo $this->createMobileUrl('order', array('op' => 'get','sid' => $sid, 'r' => 1));}";
 		var return_url2 = "{php echo $this->createMobileUrl('dish');}";
-		var return_url3 = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
+		var return_url3 = "{php echo $this->createMobileUrl('dish');}";
 		return_url1 = (return_url1.split('#'))[0];
 		return_url2 = (return_url2.split('#'))[0];
 		return_url3 = (return_url3.split('#'))[0];
@@ -291,6 +291,22 @@
 		border-radius: 3px;
 		padding: 0px 20px;
 	}
+	.store_name {
+		margin-top: 30px;
+		display:block;
+		width: 100%;
+		height:52px!important;
+		line-height:52px;
+		font-size:23px;
+		background-color: #FFF;
+		color: #F7B74D;
+		padding: 0px 20px;
+	}
+	.store_name:active,.store_name:hover,.store_name:visited{
+		background-color: #FFF;
+		color: #F7B74D;
+		text-decoration: none;
+	}
 	.home-position:active,.home-position:hover,.home-position:visited{
 		background-color: #FFF;
 		color: #F7B74D;
@@ -325,7 +341,14 @@
 		input#location_input{
 			font-size: 16px;
 		}
+		input#location_input span{
+			font-size: 13px;
+		}
 		.home-position {
+			margin-top: 10px;
+			font-size: 16px;
+		}
+		.store_name {
 			margin-top: 10px;
 			font-size: 16px;
 		}
@@ -361,6 +384,7 @@
 	<div class="address addr1 hidden">
 		<input name="room" value="{$address['room']}" type="text" placeholder="楼层房号">
 	</div>
+	<div style="position: relative;"><a class="store_name"></a></div>
 </div>
 <footer class="shopping_cart">
 	<div class="fixed" id="fix_bar">
@@ -386,7 +410,7 @@
 		var r = "{$_GPC['r']}";
 		var return_url1 = "{php echo $this->createMobileUrl('order', array('op' => 'get','sid' => $sid, 'r' => 1));}";
 		var return_url2 = "{php echo $this->createMobileUrl('dish');}";
-		var return_url3 = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
+		var return_url3 = "{php echo $this->createMobileUrl('dish');}";
 		return_url1 = (return_url1.split('#'))[0];
 		return_url2 = (return_url2.split('#'))[0];
 		return_url3 = (return_url3.split('#'))[0];
@@ -495,14 +519,17 @@
 				}
 			}
 			if(sid>=0){
-				$(".home-position").text("定位成功，门店"+storeNames[sid]+"将为您服务");
+				$(".home-position").text("定位成功");
+				$(".store_name").text("门店"+storeNames[sid]+"为您服务");
+				
 			}else{
 				$(".home-position").text("很抱歉，您暂时不在我们的配送范围");
+				$(".store_name").text("");
 				hideInput();
 			}
 			if(!$(this).hasClass("hdisabled")){
 				$(".home-position").addClass("hdisabled");
-				setTimeout(function (){$(".home-position").text("定位到我所在的楼宇").removeClass("hdisabled");},10000);
+				setTimeout(function (){$(".home-position").text("定位到我所在的楼宇").removeClass("hdisabled");$(".store_name").text("");},10000);
 			}
 		}
 		function isIn(storePoints,point){
@@ -518,17 +545,17 @@
 	 	}
 		$('#submit').click(function(){
 			var id = '{$id}';
-			var room = $.trim($(':text[name="room"]').val());
+			var room = 'initinitinits';
 			var realname = $.trim($(':text[name="realname"]').val());
 			var mobile = $.trim($(':text[name="mobile"]').val());
 			var address = $.trim($(':text[name="address"]').val());
 			if(sid==-1){location.href=return_url2 +'&sid='+sid;return false;}
 			if(!address) {
-				alert('收件地址不能为空');
+				alert('地址不能为空');
 				return false;
 			}
 			if(!$(this).hasClass('disabled')){
-				$(this).addClass('disabled');	
+				$(this).addClass('disabled');
 				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post'))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid}, function(data){
 					var data = $.parseJSON(data);
 					if(!data.errorno) {
@@ -644,7 +671,7 @@
 		var r = "{$_GPC['r']}";
 		var return_url1 = "{php echo $this->createMobileUrl('order', array('op' => 'get','sid' => $sid, 'r' => 1));}";
 		var return_url2 = "{php echo $this->createMobileUrl('dish');}";
-		var return_url3 = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}"
+		var return_url3 = "{php echo $this->createMobileUrl('address', array('op' => 'list'));}";
 		return_url1 = (return_url1.split('#'))[0];
 		return_url2 = (return_url2.split('#'))[0];
 		return_url3 = (return_url3.split('#'))[0];
@@ -777,7 +804,7 @@
 					return false;
 				}
 				$(this).addClass('disabled');
-				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post'))}", {'id':id,'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid}, function(data){
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post'))}", {'id':id,'address':address, 'room':room , 'mobile':'', 'realname':realname,'sid':sid}, function(data){
 					var data = $.parseJSON(data);
 					if(!data.errorno) {
 						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default'))}", {'id':data.message,'sid':sid},function(){

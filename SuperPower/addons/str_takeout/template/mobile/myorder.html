@@ -1,5 +1,5 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=11242316" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="https://one.pingxx.com/lib/pingpp_one.js"></script>
 <script src="https://one.pingxx.com/lib/sea.js"></script>
@@ -17,7 +17,7 @@
 	body {
 		background-color: #E5E5E5;
 	}
-	.run_adress {
+	.run_address {
 		border-bottom-color: rgba(243, 152, 1, 0);
 	}
 	.cont_box.order_list .cont_box{width:96%;margin: 0px 2%;}
@@ -49,11 +49,11 @@
 	</div>
 </div>
 {template 'header'}
-<div class="cont_box">
+<div class="cont_box container">
 	<div class="nav_wrapper">
 		<div class="nav_inner">
 			<a class="buyrecord">购买记录</a>
-			<a class="run_adress" href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">地址管理</a>
+			<a class="run_address" href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">地址管理</a>
 		</div>
 	</div>
 
@@ -97,19 +97,19 @@
 	<nav class="nav_common">
 		<ul class="box_nav">
 			<li class="more ">
-				<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}">
+				<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid,'rand' => rand()));}">
 					 <span class="order">&nbsp;</span>
 				 <label>门店菜单</label>
 				</a>
 			</li>
 			<li class="more on">
-				<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}">
+				<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid,'rand' => rand()));}">
 					<span class="my">&nbsp;</span>
 				<label> 我的订单</label>
 			</a>
 			</li>
 			<li class="more">
-				<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">
+				<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'rand' => rand()));}">
 					<span class="introx">&nbsp;</span>
 				<label> 地址管理</label>
 				</a>

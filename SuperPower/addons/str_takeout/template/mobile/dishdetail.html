@@ -1,5 +1,5 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.17" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=11242316" />
 <style>
 	.menu_list li > div.menu_desc_wrap{
 		position: fixed;
@@ -27,6 +27,19 @@
 		body>div:first-child {
 			margin-top: 122px;
 		}
+	}
+	.menu_list li {
+		position: relative;
+	}
+	.mask {
+		position: absolute!important;
+		top: 0;
+		left: 0;
+		z-index: 97;
+		height: 100%;
+		width: 100%!important;
+		background-color: rgba(100, 100, 100, 0.5);
+		display: none;
 	}
 </style>
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
@@ -75,11 +88,6 @@
 									</li>
 									{/loop}
 								</ul>
-								<div class="mask">
-									<div>
-										<p>售完</p>
-									</div>
-								</div>
 							</div>
 							{else}
 							<div class="nopic"></div>
@@ -98,6 +106,11 @@
 								</div>
 							</div>
 						</div>
+						<div class="mask">
+							<div>
+								<p>售完</p>
+							</div>
+						</div>
 					</li>
 					
 				</ul>
@@ -112,19 +125,19 @@
 				<nav class="nav_common">
 					<ul class="box_nav">
 						<li class="more on">
-							<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}">
+							<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid,'rand' => rand()));}">
 								 <span class="order">&nbsp;</span>
 					  		 <label>门店菜单</label>
 							</a>
 						</li>
 						<li class="more ">
-							<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}">
+							<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid,'rand' => rand()));}">
 								<span class="my">&nbsp;</span>
 							<label> 我的订单</label>
 						</a>
 						</li>
 						<li class="more">
-							<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">
+							<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'rand' => rand()));}">
 								<span class="introx">&nbsp;</span>
 							<label> 地址管理</label>
 							</a>

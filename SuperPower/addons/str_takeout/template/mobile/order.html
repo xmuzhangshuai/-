@@ -1,5 +1,5 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=11242316" />
 <script src="../addons/str_takeout/template/resource/js/order.js"></script>
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="https://one.pingxx.com/lib/pingpp_one.js"></script>
@@ -54,7 +54,6 @@
 				<label class="left">送餐时间</label>
 				<div class="mid" >
 					<select id="showTime" name="delivery_time">
-					    <option value ="立即送出">立即送出</option>
 					    {$str}
 					</select>
 				</div>
@@ -112,19 +111,19 @@
 					<nav class="nav_common">
 						<ul class="box_nav">
 							<li class="more ">
-								<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}">
+								<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid,'rand' => rand()));}">
 									 <span class="order">&nbsp;</span>
 								 <label>门店菜单</label>
 								</a>
 							</li>
 							<li class="more on">
-								<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}">
+								<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid,'rand' => rand()));}">
 									<span class="my">&nbsp;</span>
 								<label> 我的订单</label>
 							</a>
 							</li>
 							<li class="more">
-								<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">
+								<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'rand' => rand()));}">
 									<span class="introx">&nbsp;</span>
 								<label> 地址管理</label>
 								</a>

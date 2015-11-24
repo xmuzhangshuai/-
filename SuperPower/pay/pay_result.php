@@ -27,7 +27,21 @@ switch ($event->type) {
         //獲得訂單ID
         $order_no = $event->data->object->order_no;
         $channel = $event->data->object->channel;
-		echo $channel;
+		$amount = $event->data->object->amount;
+		$order = pdo_fetch('SELECT * FROM '.tablename('str_order').' WHERE id=:id',array(':id'=>$orderNo));
+		if(!empty($order)){
+			$payAmount = $order['price']*100;
+			if($payAmount!=$amount){
+				$order['status'] = 5;
+		        if($channel=='alipay_wap')
+		        	$order['pay_type'] = '支付宝:已支付'.$amount;
+		        elseif($channel=='wx_pub')
+		        	$order['pay_type'] = '微信支付:已支付'.$amount;
+		        pdo_update('str_order',$order,array('id'=>$order_no));
+				header($_SERVER['SERVER_PROTOCOL'] . ' 200 OK');
+				break;
+			}
+		}
         $order['status'] = 2;//已支付
         if($channel=='alipay_wap')
         	$order['pay_type'] = '支付宝';

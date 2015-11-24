@@ -120,6 +120,9 @@ body>div:first-child {
 	min-height: 100%;
 	margin: 0 auto;
 }
+.cont_box.container{
+	margin-bottom: 30px;
+}
 .fixed {
 	position: fixed;
 	left: 0;
@@ -582,6 +585,14 @@ i.cantype3,
 	text-align: center;
 	font-size: 12px;
 	margin-bottom: 10px;
+	color:#d9534f;
+}
+.menu_wrap .tips.lowtips {
+	height: 30px;
+}
+.menu_wrap .tips.lowtips span {
+display: inline-block;
+margin-top: 6px;
 }
 .menu_wrap .tips a {
 	display: block;
@@ -590,6 +601,7 @@ i.cantype3,
 	border: 2px orange solid;
 	border-radius: 5px;
 	padding: 3px;
+	color:#000;
 }
 .mine-tips {
 	padding: 0 10px;
@@ -779,7 +791,7 @@ i.cantype3,
 	background: none;
 }
 .menu_list .price_wrap .num {
-font-size: 22px;
+font-size: 18px;
 border: 1px #f39801 solid;
 line-height: 26px;
 margin-top: -1px;
@@ -901,7 +913,7 @@ border: 1px #f39801 solid;
 }
 .buy_btn.buy_btn_out,
 .out .buy_btn {
-	background-color: #A6A6A6;
+	color: #888;
 }
 .shopping_cart .fixed > div {
 	vertical-align: middle;
@@ -951,14 +963,15 @@ a.comm_btn:visited {
 	content: ":";
 }
 .cont_box input, .cont_box select {
-	font-size: 16px;
-	width: 100%;
-	height: 25px!important;
-	line-height: 25px;
-	border: 1px solid #dbdbdb;
-	border-radius: 3px;
-	padding-left: 9px;
-	-webkit-appearance: none;
+font-size: 16px;
+width: 100%;
+height: 30px!important;
+line-height: 20px;
+border: 1px solid #dbdbdb;
+border-radius: 3px;
+padding-left: 9px;
+-webkit-appearance: none;
+margin-bottom: 5px;
 }
 .left,
 .mid {
@@ -988,7 +1001,7 @@ input.half[type=text]:last-child {
 }
 .shopping_info {
 	padding: 0;
-	padding-bottom: 5px;
+	padding-bottom: 15px;
 }
 .shopping_info time {
 	position: relative;
@@ -2416,7 +2429,7 @@ input[type='tel'] {
 	position: relative;
 	top: 5px;
 }
-.cont_adress {
+.cont_address {
 	padding: 10px;
 	width: 90%;
 	margin: 15px 5%;
@@ -2429,7 +2442,7 @@ input[type='tel'] {
 	margin-left: 50%;
 }
 .buyrecord,
-.run_adress {
+.run_address {
 	font-size: 21px;
 	float: left;
 	font-weight: bold;
@@ -2445,7 +2458,7 @@ input[type='tel'] {
 }
 @media (max-width: 720px) {
 	.buyrecord,
-	.run_adress {
+	.run_address {
 		font-size: 17px;
 		float: left;
 		font-weight: bold;
@@ -2463,7 +2476,7 @@ input[type='tel'] {
 		position: relative;
 		right:15px;
 	}
-	.run_adress{
+	.run_address{
 		position: relative;
 		left:15px;
 	}
@@ -2473,7 +2486,7 @@ input[type='tel'] {
 }
 .division {
 	margin-left: -1%;
-	border-top: 2px solid#000000;
+	border-top: 2px solid #f39801;
 }
 .phone {
 	float: left;
@@ -2496,7 +2509,7 @@ input[type='tel'] {
 	margin-top: -32px;
 	margin-right: 3px;
 }
-.adress_name {
+.address_name {
 	font-size: 120%;
 	font-weight: bold;
 	padding-top: 5px;
@@ -2504,7 +2517,7 @@ input[type='tel'] {
 	top: 10px;
 	line-height: 2.4;
 }
-.adress_detailed {
+.address_detailed {
 	font-size: 100%;
 	position: relative;
 	top: 20px;
@@ -2514,18 +2527,18 @@ input[type='tel'] {
 	line-height: 120%;
 	margin: 0;
 }
-.adress_delete {
+.address_delete {
 	float: left;
 position: relative;
 top: 22px;
 left: 15px;
 color: #AAA;
 }
-a.deladdress.adress_delete {
+a.deladdress.address_delete {
 	text-decoration: none!important;
 	color: #AAA!important;
 }
-a.deladdress.adress_delete:before {
+a.deladdress.address_delete:before {
 	content: "X";
 }
 .addressChecking0{
@@ -2538,12 +2551,25 @@ a.deladdress.adress_delete:before {
 	border-left-style: solid;
 	padding-left: 10px;
 }
-.adress_add_wrapper {
+.address_add_wrapper {
 	text-align: center;
 	clear: both;
 	float: none;
 }
-.adress_add {
+.address_loc_wrapper {
+text-align: center;
+clear: both;
+float: none;
+margin: 15px 2%;
+margin-top: -10px;
+padding: 0 10px;
+margin-bottom: -10px;
+width: 96%;
+}
+.address_loc_wrapper a.comm_btn{
+	width: 100%;
+}
+.address_add {
 	color: #FFF!important;
 	text-decoration: none!important;
 	padding: 10px;
