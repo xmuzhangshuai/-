@@ -2010,7 +2010,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		global $_W, $_GPC;
 		//二次开发用于获取用户微信昵称头像等的函数
 		load()->model('mc');
-		checkauth();
+		checkauth(true);
 		$sid = intval($_GPC['sid']);
 		check_trash($sid);
 
@@ -2055,6 +2055,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$user = mc_fetch($fan['uid'], array('nickname', 'gender', 'residecity', 'resideprovince', 'nationality', 'avatar'));
 			}
 		 }
+		 $openID = $_W['openid'];
 		include $this->template('myorder');
 	}
 	public function doMobileOrderDetail() {
@@ -2367,7 +2368,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		//二次开发用于获取用户微信昵称头像等的函数
 		load()->model('mc');
 		
-		checkauth();
+		checkauth(true);
 		$id = intval($_GPC['id']);
 		$sid = intval($_GPC['sid']);
 		$uid = $_W['member']['uid'];

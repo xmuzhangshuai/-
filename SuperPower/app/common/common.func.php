@@ -46,13 +46,14 @@ function message($msg, $redirect = '', $type = '') {
 }
 
 
-function checkauth() {
+function checkauth($updateUserInfo=false) {
 	global $_W, $engine;
 	load()->model('mc');
 	
 	/**
 	二次开发：更新用户头像信息等
 	*/
+	if($updateUserInfo){
 	if(!empty($_W['openid'])) {
 		$sql = 'SELECT `fanid`,`openid`,`uid` FROM ' . tablename('mc_mapping_fans') . ' WHERE `uniacid`=:uniacid AND `openid`=:openid';
 		$pars = array();
@@ -102,7 +103,7 @@ function checkauth() {
 		}
 	}
 	
-	
+}
 	/*更新结束*/
 	
 	if(!empty($_W['member']) && (!empty($_W['member']['mobile']) || !empty($_W['member']['email']))) {

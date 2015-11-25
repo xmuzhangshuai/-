@@ -2631,7 +2631,7 @@ width: 96%;
 	color: rgb(242, 150, 0);
 }
 .state1 {
-	color: rgb(37, 127, 190);
+	color: #d9534f;;
 }
 .state1:before {
 	content: "未支付，点击支付";

@@ -120,7 +120,7 @@
 <script type="text/javascript">
 	$(".state1").click(function (){
 		var order_no = $(this).attr("data-id");
-		var amount = $(this).attr("data-price");
+		var amount = $(this).attr("data-price")*100;
 		pingpp_one.init({
 			app_id:'app_mzXP8ODWj508qfHa',                     //该应用在ping++的应用ID
 			order_no:order_no,                     //订单在商户系统中的订单号
@@ -133,8 +133,15 @@
 			open_id:'{$openID}'                             //(可选，使用微信公众号支付时必须传入)
 		},function(res){
             if(!res.status){
-                //处理错误
-                alert("错误消息:"+res.msg);
+            	 if(!res.status){
+		                //处理错误
+		                if(res.chargeUrlOutput=="0"){
+		                	alert("订单金额不正确");
+		                }else if(res.chargeUrlOutput=="1"){
+		                	alert("获取不到该订单");
+		                }else
+		                	alert("错误消息:"+res.msg);
+		            }
             }
             else{
                 //若微信公众号渠道需要使用壹收款的支付成功页面，则在这里进行成功回调，调用 pingpp_one.success 方法，你也可以自己定义回调函数

@@ -30,6 +30,7 @@
 			{/if}
 			<div class="menu_container">
 				<ul class="menu_list">
+				{if !empty($dish)}
 					{loop $dish $ds}
 					{if $ds['kucun']==''}
 						{php $ds['kucun'] = 0;}
@@ -81,6 +82,9 @@
 					</li>
 					{/if}
 					{/loop}
+					{else}
+	<li class="on-info"><i class="fa fa-info-circle"></i> 暂无菜单</li>
+	{/if}
 				</ul>
 			</div>
 		</section>
