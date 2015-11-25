@@ -1559,17 +1559,25 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		global $_W, $_GPC;
 		$sid = intval($_GPC['sid']);
 		checkauth();
-		$address_id = intval($_GPC['address_id']);
-		$address = get_address($address_id);
-		if(empty($address)) {
-			$address = get_default_address();
-		}
-		if(empty($address)){
-			$sid=-1;
-		}
-		if((!empty($address))&&intval($address['sid'])!=$sid){
-			header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
-			exit;
+		if($sid==-1){
+			$address = null;
+			$address_id = -1;
+		}else{
+			$address_id = intval($_GPC['address_id']);
+			$address = get_address($address_id);
+			if(empty($address)) {
+				$address = get_default_address();
+			}
+			if(empty($address)){
+				$sid=-1;
+				if(intval($_GPC['sid'])!=-1){
+					header('Location: '.$this->createMobileUrl('dish',array('sid' => -1))); 
+				}
+			}
+			if((!empty($address))&&intval($address['sid'])!=$sid){
+				header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($address['sid'])))); 
+				exit;
+			}
 		}
 		$str_store_dish = tablename('str_store_dish');
 		$str_dish = tablename('str_dish');
@@ -1766,8 +1774,43 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$dishes = $cart['data'];
 			//提醒客户需要点的菜品（比如：米饭）
 			$is_add = 0;
+			//送餐时间
+			if ($store['open']==0){
+				$minut = date('i', strtotime($store['nextStartTime']));
+			}else{
+				$minut = date('i', TIMESTAMP);
+			}
+			if ($store['open']==0){
+				$now = mktime(date('H', strtotime($store['nextStartTime'])), $minut,0,date('m', strtotime($store['nextStartTime'])),date('d', strtotime($store['nextStartTime'])));
+				$str .= '<option value ="'.date('m/d H:i', $now).'">开店时间：'.date('m/d H:i', $now).'</option>';
+			}else{
+				$str .= '<option value ="立即送出">立即送出</option>';
+			}
+			$off=180*60;
+			if($minut==15||$minut==30||$minut==45||$minut==0){$minut+=1;$off-=15*60;}
+			if($minut <= 15) {
+				$minut = 15;
+			} elseif($minut >15 && $minut <= 30) {
+				$minut = 30;
+			} elseif($minut >30 && $minut <= 45) {
+				$minut = 45;
+			} elseif($minut >45 && $minut <= 60) {
+				$minut = 60;
+			}
+			if ($store['open']==0){
+				$now = mktime(date('H', strtotime($store['nextStartTime'])), $minut,0,date('m', strtotime($store['nextStartTime'])),date('d', strtotime($store['nextStartTime'])));
+			}else{
+				$now = mktime(date('H'), $minut);
+			}
+			$now_limit = $now + $off;
+			for($now; $now <= $now_limit; $now += 15 * 60) {
+				if ($store['open']==0){
+					$str .= '<option value ="'.date('m/d H:i', $now).'">'.date('m/d H:i', $now).'</option>';
+				}else{
+					$str .= '<option value ="'.date('H:i', $now).'">'.date('H:i', $now).'</option>';
+				}
 
-
+			}
 
 			$address_id = intval($_GPC['address_id']);
 			$address = get_address($address_id);
@@ -2050,14 +2093,14 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		 if($op == 'send_auth_code'){
 		 	if(isset($_SESSION['last_send_time'])){
 		 		$period = time()-$_SESSION['last_send_time'];
-		 		if($period<120){
+		 		if($period<1){
 		 			exit('request too many times');
 		 		}
 		 	}
-//				$code = 11111;
-//				$_SESSION['last_send_time'] = time();//发送成功时间
-//				$_SESSION['code'] = $code;
-//				exit('success');//发送成功
+				$code = 11111;
+				$_SESSION['last_send_time'] = time();//发送成功时间
+				$_SESSION['code'] = $code;
+				exit('success');//发送成功
 		 	$statusStr = array(
 				"0" => "短信发送成功",
 				"-1" => "参数不全",
@@ -2363,13 +2406,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$currentadd = get_default_address();
 			$id = intval($_GPC['id']);
 			$address = get_address($id);
-			if($op == 'init') {
-				if((!empty($currentadd))&&intval($currentadd['sid'])){
-					header('Location: '.$this->createMobileUrl('dish',array('sid' => intval($currentadd['sid'])))); 
-					exit;
-				}
-			}
-			$otherArea = pdo_fetchall('SELECT points,title,id FROM ' . tablename('str_store') . ' WHERE uniacid = :aid ORDER BY id ASC', array(':aid' => $_W['uniacid']));
 			if($_W['ispost']) {
 				$data = array(
 					'uniacid' => $_W['uniacid'],
@@ -2386,6 +2422,17 @@ class Str_takeoutModuleSite extends WeModuleSite {
 						exit(json_encode(array('errorno' => 1, 'message' => '手机号未验证')));
 					}
 				}
+				if($data['room']='initinitinits'){
+					$data['room']='';
+					$record = pdo_fetch('SELECT * FROM ' . tablename('str_address') . ' WHERE sid = :sid AND uniacid = :uniacid AND uid = :uid', array(':uniacid' => $_W['uniacid'], ':uid' => $_W['member']['uid'],':sid' => $data['sid']));
+					if(empty($record)){
+						pdo_insert('str_address', $data);
+						$id = pdo_insertid();
+					}else{
+						$id = $record['id'];
+					}
+					exit(json_encode(array('errorno' => 0, 'message' => $id)));
+				}
 				if(!empty($address)) {
 					pdo_update('str_address', $data, array('uniacid' => $_W['uniacid'], 'id' => $id));
 				} else {
@@ -2394,6 +2441,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				}
 				exit(json_encode(array('errorno' => 0, 'message' => $id)));
 			}
+			$otherArea = pdo_fetchall('SELECT points,title,id FROM ' . tablename('str_store') . ' WHERE uniacid = :aid ORDER BY id ASC', array(':aid' => $_W['uniacid']));	
 			if(empty($address)) {
 				$address['realname'] = $currentadd['realname'];
 				$address['mobile'] = $currentadd['mobile'];

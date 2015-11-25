@@ -1,6 +1,8 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=11242316" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
+<script src="https://one.pingxx.com/lib/pingpp_one.js"></script>
+<script src="https://one.pingxx.com/lib/sea.js"></script>
 <style type="text/css">
 	.nav div {
 		width: 80%;
@@ -15,10 +17,10 @@
 	body {
 		background-color: #E5E5E5;
 	}
-	.run_adress {
+	.run_address {
 		border-bottom-color: rgba(243, 152, 1, 0);
 	}
-	.cont_box.order_list .cont_box{width:96%;margin: 15px 2%;}
+	.cont_box.order_list .cont_box{width:96%;margin: 0px 2%;}
 	.menu_list.order_list.cont_box .cont_box.order_item {
 		padding-right: 6%;
 	}
@@ -47,11 +49,11 @@
 	</div>
 </div>
 {template 'header'}
-<div class="cont_box">
+<div class="cont_box container">
 	<div class="nav_wrapper">
 		<div class="nav_inner">
 			<a class="buyrecord">购买记录</a>
-			<a class="run_adress" href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">地址管理</a>
+			<a class="run_address" href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">地址管理</a>
 		</div>
 	</div>
 
@@ -81,7 +83,7 @@
 		{/loop}
 		<li class="cont_box order_item" style="margin-top: 2px;padding-bottom: 10px;">
 			<div>
-				<span class="state state{$row['status']}">
+				<span class="state state{$row['status']}" data-price="{$row['price']}" data-id="{$row['id']}">
 					<strong>￥<span class="unit_price" id="totalPrice2">{$row['price']}</span></strong>
 				</span>
 			</div>
@@ -91,8 +93,64 @@
 	<li class="on-info"><i class="fa fa-info-circle"></i> 暂无订单</li>
 	{/if}
 </div>
+<div class="fixed">
+	<nav class="nav_common">
+		<ul class="box_nav">
+			<li class="more ">
+				<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid,'rand' => rand()));}">
+					 <span class="order">&nbsp;</span>
+				 <label>门店菜单</label>
+				</a>
+			</li>
+			<li class="more on">
+				<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid,'rand' => rand()));}">
+					<span class="my">&nbsp;</span>
+				<label> 我的订单</label>
+			</a>
+			</li>
+			<li class="more">
+				<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'rand' => rand()));}">
+					<span class="introx">&nbsp;</span>
+				<label> 地址管理</label>
+				</a>
+			</li>
+		</ul>
+	</nav>
 </div>
 <script type="text/javascript">
+	$(".state1").click(function (){
+		var order_no = $(this).attr("data-id");
+		var amount = $(this).attr("data-price");
+		pingpp_one.init({
+			app_id:'app_mzXP8ODWj508qfHa',                     //该应用在ping++的应用ID
+			order_no:order_no,                     //订单在商户系统中的订单号
+			amount:amount,                                   //订单价格，单位：人民币 分
+			// 壹收款页面上需要展示的渠道，数组，数组顺序即页面展示出的渠道的顺序
+			// upmp_wap 渠道在微信内部无法使用，若用户未安装银联手机支付控件，则无法调起支付
+			channel:['wx_pub','alipay_wap'],
+			charge_url:'../pay/example/pay.php',  //商户服务端创建订单的url
+			//charge_param:{a:1,b:2},                      //(可选，用户自定义参数，若存在自定义参数则壹收款会通过 POST 方法透传给 charge_url)
+			open_id:'{$openID}'                             //(可选，使用微信公众号支付时必须传入)
+		},function(res){
+            if(!res.status){
+                //处理错误
+                alert("错误消息:"+res.msg);
+            }
+            else{
+                //若微信公众号渠道需要使用壹收款的支付成功页面，则在这里进行成功回调，调用 pingpp_one.success 方法，你也可以自己定义回调函数
+                //其他渠道的处理方法请见第 2 节
+                pingpp_one.success(function(res){
+                    if(!res.status){
+                        alert(res.msg);
+                    }
+                },function(){
+                    //这里处理支付成功页面点击“继续购物”按钮触发的方法，例如：若你需要点击“继续购物”按钮跳转到你的购买页，则在该方法内写入 window.location.href = "你的购买页面 url"
+                    location.href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}";
+                });
+            }
+        });
+	});
+
 	document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
 		WeixinJSBridge.call('hideOptionMenu');
 	});

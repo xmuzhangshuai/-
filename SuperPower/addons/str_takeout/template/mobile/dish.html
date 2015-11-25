@@ -1,11 +1,12 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.1" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=11242316" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/jquery.bxslider.css" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <!--<script src="../addons/str_takeout/template/resource/js/main.js"></script>-->
 <script src="../addons/str_takeout/template/resource/js/form.js"></script>
 <script src="../addons/str_takeout/template/resource/js/menu.js"></script>
 <script src="../addons/str_takeout/template/resource/js/common.js"></script>
-<script src="../addons/str_takeout/template/resource/js/resp_slide.js"></script>
+<script src="../addons/str_takeout/template/resource/js/jquery.bxslider.min.js"></script>
 <div class="container" onselectstart="return true;" ondragstart="return false;">
 	{template 'header'}
 	<!--
@@ -13,15 +14,9 @@
     	时间：2015-10-14
     	描述：TODO:定位、选择
     -->
-	{if ($address['address']||$store['id']==-1)}
-	<div class="nav_address"><span>送货到：</span><span class="nav_add_add">{$address['address']}</span>{if $address['room']} - {/if}<span  class="nav_add_room">{$address['room']}</span>
-		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a>
+	<div class="nav_address"><span>当前门店：</span><span class="nav_add_add">{$store['title']}</span></span>
+		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2,'op' => 'init'));}" class="nav_sp_location"></a>
 	</div>
-	{else}
-	<div class="nav_address"><span>添加送餐地址才能点餐哟--></span>
-		<a href="{php echo $this->createMobileUrl('address', array('op' => 'init','r' => 2));}" class="nav_sp_location"></a>
-	</div>
-	{/if}
 	<form name="cart_form" id="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
 		<input type="hidden" name="more" value="{$_GPC['more']}">
 		<input type="hidden" name="dish_str" value="{$dish_str}">
@@ -29,6 +24,9 @@
 			{if $store['open']==0}
 			<div class="tips">企鹅休息中，接受预定~下次配送时间：
 				<br /><span>{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></span></div>
+			{else}
+			<div class="tips lowtips">
+				<span>{php $time = strtotime($store['nextStartTime']); echo date("m-d",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></span></div>
 			{/if}
 			<div class="menu_container">
 				<ul class="menu_list">
@@ -39,36 +37,44 @@
 					{if $ds['selling'] == 1}
 					<li id="{$ds['id']}" class="auto_height {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}out{/if}">
 						<div>
-							<div class="menu_type">{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></div>
 							{if $ds['thumb']} {php $ds['thumb'] = explode(';',$ds['thumb']); }
-							<div class="slider_wrap">
-								<ul class="rslides" id="slider{$ds['id']}">
-									{loop $ds['thumb'] $thu}
-									<li>
-										<img src="{php echo tomedia($thu);}" alt="" />
-									</li>
-									{/loop}
-								</ul>
-								<div class="mask">
-									<div>
-										<p>售完</p>
+							<a data-href="{php echo $this->createMobileUrl('dishdetail', array('sid' => $sid, 'dish_id' => $ds['id']));}" class="dish_detail" style="text-decoration: none!important;color: inherit!important;">
+								<div class="slider_wrap">
+									<ul id="slider{$ds['id']}">
+										{loop $ds['thumb'] $thu}
+										<li>
+											<img src="{php echo tomedia($thu);}" alt="" />
+										</li>
+										{/loop}
+									</ul>
+									<script type="text/javascript">
+											$(function() {
+												$("#slider{$ds['id']}").bxSlider({
+												  auto: true,
+												  pause: 2000,
+												  controls:false
+												});
+											});
+									</script>
+									<div class="mask">
+										<div>
+											<p>售完</p>
+										</div>
 									</div>
 								</div>
+								{else}
+								<div class="nopic"></div>
+								{/if}
 							</div>
-							{else}
-							<div class="nopic"></div>
-							{/if}
-						</div>
-						<div class="menu_desc">
-							<a data-href="{php echo $this->createMobileUrl('dishdetail', array('sid' => $sid, 'dish_id' => $ds['id']));}" class="dish_detail" style="text-decoration: none!important;"><h3>{$ds['title']}</h3></a>
-							<div class="info">{$ds['zuhe']}</div>
-						</div>
+							<div class="menu_desc">
+								<h3>{$ds['title']}</h3>
+								<div class="info">{$ds['zuhe']}</div>
+							</div>
+						</a>
 						<div class="price_wrap menu_desc">
 							<strong>￥<span class="unit_price">{$ds['price']}</span></strong>
 							<div class="fr buy_btn {if (!($ds['kucun'] == -1 || $ds['kucun'] > 0)||(!$address['address']))}buy_btn_out{/if}" max="{php echo $address['address']?$ds['kucun']:0}">
 								<a href="javascript:void(0);" class="btn_n add" data-num="{$cart['data'][$ds['id']]}"></a>
-								{if $store['open']}
-								<a href="javascript:void(0);" class="btn_fork"></a>{else}预订{/if}
 								<input autocomplete="off" class="h_num" type="hidden" name="dish[{$ds['id']}]" value="{$cart['data'][$ds['id']]}">
 							</div>
 						</div>
@@ -79,10 +85,32 @@
 			</div>
 		</section>
 		<footer class="shopping_cart">
-			<div class="fixed {php if($address['address'])echo "hidden";}" id="fix_bar">
-				<div>
+			<div class="fixed">
+				<div id="fix_bar" {if $address['address']}class="hidden"{/if}">
 					<a id="settlement" class="comm_btn {if !$address['address']}disabled init{/if}">{if $address['address']}￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 立即下单{else}请添加地址{/if}</a>
 				</div>
+<nav class="nav_common">
+		<ul class="box_nav">
+			<li class="more on">
+				<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}">
+					 <span class="order">&nbsp;</span>
+		  		 <label>门店菜单</label>
+				</a>
+			</li>
+			<li class="more ">
+				<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}">
+					<span class="my">&nbsp;</span>
+				<label> 我的订单</label>
+			</a>
+			</li>
+			<li class="more">
+				<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">
+					<span class="introx">&nbsp;</span>
+				<label> 地址管理</label>
+				</a>
+			</li>
+		</ul>
+	</nav>
 			</div>
 		</footer>
 	</form>
@@ -90,13 +118,6 @@
 
 <script type="text/javascript">
 	$(function() {
-		$(".rslides").responsiveSlides({
-			auto: true,
-			nav: true,
-			speed: 500,
-			namespace: "callbacks",
-			pager: true,
-		});
 		$("#settlement").click(function() {
 			if ($("#settlement").hasClass("init")){
 				location.href="{php echo $this->createMobileUrl('address', array('op' => 'init','r' => 2));}";

@@ -120,6 +120,9 @@ body>div:first-child {
 	min-height: 100%;
 	margin: 0 auto;
 }
+.cont_box.container{
+	margin-bottom: 30px;
+}
 .fixed {
 	position: fixed;
 	left: 0;
@@ -372,7 +375,7 @@ body>div:first-child {
 	height: 40px;
 	width: 160px;
 	background-size: 160px 40px;
-	margin-left: -100px;
+	margin-left: -80px;
 	margin-top: 2px;
 }
 .nav_sp_home {
@@ -582,6 +585,14 @@ i.cantype3,
 	text-align: center;
 	font-size: 12px;
 	margin-bottom: 10px;
+	color:#d9534f;
+}
+.menu_wrap .tips.lowtips {
+	height: 30px;
+}
+.menu_wrap .tips.lowtips span {
+display: inline-block;
+margin-top: 6px;
 }
 .menu_wrap .tips a {
 	display: block;
@@ -590,6 +601,7 @@ i.cantype3,
 	border: 2px orange solid;
 	border-radius: 5px;
 	padding: 3px;
+	color:#000;
 }
 .mine-tips {
 	padding: 0 10px;
@@ -697,7 +709,7 @@ i.cantype3,
 .cont_box .menu_list li.cont_box {
 	background-color: #F1F1F1;
 }
-.menu_list>li:last-child {
+.menu_list>li.auto_height:last-child {
 	margin-bottom: 60px;
 }
 @media (min-width: 7200px) {
@@ -778,9 +790,14 @@ i.cantype3,
 	float: left;
 	background: none;
 }
-.menu_list .num {
-	padding-right: 12px;
-	font-size: 22px;
+.menu_list .price_wrap .num {
+font-size: 18px;
+border: 1px #f39801 solid;
+line-height: 26px;
+margin-top: -1px;
+min-width: 36px;
+text-align: center;
+padding-left: 6px;
 }
 .menu_list .btn_fork {
 	width: 20px;
@@ -796,10 +813,12 @@ i.cantype3,
 .menu_list .btn_n.del {
 	background: none;
 	font-size: 22px;
-	width: 25px;
 	height: 100%;
-	color: #FFF;
+	width: 40px;
+	padding-left: 15px;
 	font-family: sans-serif, arial;
+	color: #FFF;
+	background: #f39801;
 }
 .menu_list .btn_n.add:before {
 	content: "+";
@@ -883,21 +902,18 @@ i.cantype3,
 	background: none;
 }
 .buy_btn {
-	display: inline-block;
-	height: 28px;
-	line-height: 28px;
-	font-size: 14px;
-	padding: 0 5%;
-	vertical-align: middle;
-	color: #fff;
-	background-color: rgb(244, 155, 2);
-	border-radius: 3px;
-	white-space: nowrap;
-	margin-top: 10px;
+display: inline-block;
+height: 28px;
+line-height: 28px;
+font-size: 14px;
+vertical-align: middle;
+white-space: nowrap;
+margin-top: 10px;
+border: 1px #f39801 solid;
 }
 .buy_btn.buy_btn_out,
 .out .buy_btn {
-	background-color: #A6A6A6;
+	color: #888;
 }
 .shopping_cart .fixed > div {
 	vertical-align: middle;
@@ -947,14 +963,15 @@ a.comm_btn:visited {
 	content: ":";
 }
 .cont_box input, .cont_box select {
-	font-size: 16px;
-	width: 100%;
-	height: 25px!important;
-	line-height: 25px;
-	border: 1px solid #dbdbdb;
-	border-radius: 3px;
-	padding-left: 9px;
-	-webkit-appearance: none;
+font-size: 16px;
+width: 100%;
+height: 30px!important;
+line-height: 20px;
+border: 1px solid #dbdbdb;
+border-radius: 3px;
+padding-left: 9px;
+-webkit-appearance: none;
+margin-bottom: 5px;
 }
 .left,
 .mid {
@@ -984,7 +1001,7 @@ input.half[type=text]:last-child {
 }
 .shopping_info {
 	padding: 0;
-	padding-bottom: 5px;
+	padding-bottom: 15px;
 }
 .shopping_info time {
 	position: relative;
@@ -1088,6 +1105,7 @@ ul.menu_list > li.order_item {
 	}
 }
 .menu_list li > div.order_item_count .num {
+	padding-right: 12px;
 	font-size: 16px;
 }
 .menu_list li > div.order_item_count .num:before {
@@ -1236,89 +1254,6 @@ ul.menu_list > li.order_item {
 .menu_wrap.skin1 h2.menu_fixed {
 	left: 0;
 	padding-left: 99px;
-}
-/*--- slider-css --*/
-
-.slider {
-	position: relative;
-}
-.rslides {
-	position: relative;
-	list-style: none;
-	overflow: hidden;
-	width: 100%;
-	padding: 0;
-	margin: 0;
-}
-.rslides li {
-	-webkit-backface-visibility: hidden;
-	position: absolute;
-	display: none;
-	width: 100%;
-	left: 0;
-	top: 0;
-	margin: 0;
-}
-.rslides li:first-child {
-	position: relative;
-	display: block;
-	float: left;
-}
-.rslides img {
-	display: block;
-	height: auto;
-	float: left;
-	width: 100%;
-	border: 0;
-}
-.callbacks_tabs a:after {
-	content: "\f111";
-	font-size: 0;
-	font-family: FontAwesome;
-	visibility: visible;
-	display: block;
-	height: 15px;
-	width: 15px;
-	display: inline-block;
-	background: rgba(246, 247, 247, 0.75);
-	border-radius: 100px;
-}
-.callbacks_here a:after {
-	background: #74C7D5;
-}
-.callbacks_tabs a {
-	visibility: hidden;
-	padding-right: 1em;
-}
-.callbacks_tabs li {
-	display: inline-block;
-	width: auto;
-}
-ul.callbacks_tabs {
-	position: absolute;
-	bottom: 14px;
-	z-index: 9;
-	right: 50%;
-	margin-right: -55px;
-}
-.callbacks_nav {
-	position: absolute;
-	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-	top: 50%;
-	left: 0;
-	opacity: 0.7;
-	z-index: 3;
-	text-indent: -9999px;
-	overflow: hidden;
-	text-decoration: none;
-	height: 61px;
-	width: 38px;
-	background: url("../images/left.png") no-repeat 0px 0px;
-}
-.callbacks_nav.next {
-	left: auto;
-	background-position: -51px 0px;
-	right: 0;
 }
 /* order */
 
@@ -2494,7 +2429,7 @@ input[type='tel'] {
 	position: relative;
 	top: 5px;
 }
-.cont_adress {
+.cont_address {
 	padding: 10px;
 	width: 90%;
 	margin: 15px 5%;
@@ -2507,7 +2442,7 @@ input[type='tel'] {
 	margin-left: 50%;
 }
 .buyrecord,
-.run_adress {
+.run_address {
 	font-size: 21px;
 	float: left;
 	font-weight: bold;
@@ -2523,7 +2458,7 @@ input[type='tel'] {
 }
 @media (max-width: 720px) {
 	.buyrecord,
-	.run_adress {
+	.run_address {
 		font-size: 17px;
 		float: left;
 		font-weight: bold;
@@ -2541,7 +2476,7 @@ input[type='tel'] {
 		position: relative;
 		right:15px;
 	}
-	.run_adress{
+	.run_address{
 		position: relative;
 		left:15px;
 	}
@@ -2551,7 +2486,7 @@ input[type='tel'] {
 }
 .division {
 	margin-left: -1%;
-	border-top: 2px solid#000000;
+	border-top: 2px solid #f39801;
 }
 .phone {
 	float: left;
@@ -2574,7 +2509,7 @@ input[type='tel'] {
 	margin-top: -32px;
 	margin-right: 3px;
 }
-.adress_name {
+.address_name {
 	font-size: 120%;
 	font-weight: bold;
 	padding-top: 5px;
@@ -2582,7 +2517,7 @@ input[type='tel'] {
 	top: 10px;
 	line-height: 2.4;
 }
-.adress_detailed {
+.address_detailed {
 	font-size: 100%;
 	position: relative;
 	top: 20px;
@@ -2592,18 +2527,18 @@ input[type='tel'] {
 	line-height: 120%;
 	margin: 0;
 }
-.adress_delete {
-	float: right;
-	width: 28px;
-	margin-right: 16px;
-	padding-bottom: 15px;
-	margin-top: 5px;
+.address_delete {
+	float: left;
+position: relative;
+top: 22px;
+left: 15px;
+color: #AAA;
 }
-a.deladdress.adress_delete {
+a.deladdress.address_delete {
 	text-decoration: none!important;
-	color: #000000!important;
+	color: #AAA!important;
 }
-a.deladdress.adress_delete:before {
+a.deladdress.address_delete:before {
 	content: "X";
 }
 .addressChecking0{
@@ -2616,19 +2551,31 @@ a.deladdress.adress_delete:before {
 	border-left-style: solid;
 	padding-left: 10px;
 }
-.adress_add_wrapper {
+.address_add_wrapper {
 	text-align: center;
 	clear: both;
 	float: none;
-	padding-top: 30px;
 }
-.adress_add {
+.address_loc_wrapper {
+text-align: center;
+clear: both;
+float: none;
+margin: 15px 2%;
+margin-top: -10px;
+padding: 0 10px;
+margin-bottom: -10px;
+width: 96%;
+}
+.address_loc_wrapper a.comm_btn{
+	width: 100%;
+}
+.address_add {
 	color: #FFF!important;
 	text-decoration: none!important;
-	padding: 10px 30px;
+	padding: 10px;
 	border-radius: 5px;
 	background-color: rgb(243, 152, 1);
-	font-size: 16px;
+	font-size: 14px;
 	color: #FFF;
 }
 .person_info {

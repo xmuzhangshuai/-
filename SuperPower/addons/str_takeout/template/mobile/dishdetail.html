@@ -1,5 +1,5 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=1.1" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=11242316" />
 <style>
 	.menu_list li > div.menu_desc_wrap{
 		position: fixed;
@@ -28,6 +28,19 @@
 			margin-top: 122px;
 		}
 	}
+	.menu_list li {
+		position: relative;
+	}
+	.mask {
+		position: absolute!important;
+		top: 0;
+		left: 0;
+		z-index: 97;
+		height: 100%;
+		width: 100%!important;
+		background-color: rgba(100, 100, 100, 0.5);
+		display: none;
+	}
 </style>
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="../addons/str_takeout/template/resource/js/main_d.js"></script>
@@ -41,15 +54,9 @@
     	时间：2015-10-14
     	描述：TODO:定位、选择
     -->
-	{if $address['address']}
-	<div class="nav_address"><span>送货到：</span><span class="nav_add_add">{$address['address']}</span>{if $address['room']} - {/if}<span  class="nav_add_room">{$address['room']}</span>
+	<div class="nav_address"><span>当前门店：</span><span class="nav_add_add">{$store['title']}</span></span>
 		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 2));}" class="nav_sp_location"></a>
 	</div>
-	{else}
-	<div class="nav_address"><span>添加送餐地址才能点餐哟</span>
-		<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'op' =>'post', 'r' => 2));}" class="nav_sp_location"></a>
-	</div>
-	{/if}
 	
 	{loop $dish $ds}
 	{if $ds['dish_type']=='TAOCAN'}
@@ -81,11 +88,6 @@
 									</li>
 									{/loop}
 								</ul>
-								<div class="mask">
-									<div>
-										<p>售完</p>
-									</div>
-								</div>
 							</div>
 							{else}
 							<div class="nopic"></div>
@@ -98,12 +100,15 @@
 							</div>
 							<div class="price_wrap menu_desc">
 								<strong>￥<span class="unit_price">{$ds['price']}</span></strong>
-								<div class="fr buy_btn {if !($ds['kucun'] == -1 || $ds['kucun'] > 0)}buy_btn_out{/if}" max="{$ds['kucun']}">
+								<div class="fr buy_btn {if (!($ds['kucun'] == -1 || $ds['kucun'] > 0)||(!$address['address']))}buy_btn_out{/if}" max="{php echo $address['address']?$ds['kucun']:0}">
 									<a href="javascript:void(0);" class="btn_n add" data-num="{$cart['data'][$ds['id']]}"></a>
-									{if $store['open']}
-									<a href="javascript:void(0);" class="btn_fork"></a>{else}预订{/if}
 									<input autocomplete="off" class="h_num" type="hidden" name="dish[{$ds['id']}]" value="{$cart['data'][$ds['id']]}">
 								</div>
+							</div>
+						</div>
+						<div class="mask">
+							<div>
+								<p>售完</p>
 							</div>
 						</div>
 					</li>
@@ -112,11 +117,33 @@
 			</div>
 		</section>
 		<footer class="shopping_cart">
-			<div class="fixed hidden" id="fix_bar">
-				<div>
+			<div class="fixed">
+				<div id="fix_bar">
 					<span class="comm_btn disabled"><span id="sendCondition" class="hide">0元</span>点餐</span>
 					<a id="settlement" data-href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}" class="comm_btn {if !$address['address']}disabled{/if}" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份{$ds['title']} {if $address['address']}继续点单{else}请添加地址{/if}</a>
 				</div>
+				<nav class="nav_common">
+					<ul class="box_nav">
+						<li class="more on">
+							<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid,'rand' => rand()));}">
+								 <span class="order">&nbsp;</span>
+					  		 <label>门店菜单</label>
+							</a>
+						</li>
+						<li class="more ">
+							<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid,'rand' => rand()));}">
+								<span class="my">&nbsp;</span>
+							<label> 我的订单</label>
+						</a>
+						</li>
+						<li class="more">
+							<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid,'rand' => rand()));}">
+								<span class="introx">&nbsp;</span>
+							<label> 地址管理</label>
+							</a>
+						</li>
+					</ul>
+				</nav>
 			</div>
 		</footer>
 	</form>

@@ -24,14 +24,17 @@ $orderNo = $input_data['order_no'];
 
 $order = pdo_fetch('SELECT * FROM '.tablename('str_order').' WHERE id=:id',array(':id'=>$orderNo));
 if(!empty($order)){
-	/*$payAmount = $order['price']*100;
+	$payAmount = $order['price']*100;
 	if($payAmount!=$amount){
 		$out['status'] = 0;
 		$out['msg'] = '支付金额不正确';
 		exit(json_encode($out));
-	}*/
-	$amount = $order['price'];
-	
+	}
+	$amount = $order['price']*100;
+}else{
+	$out['status'] = 0;
+	$out['msg'] = '获取订单失败';
+	exit(json_encode($out));
 }
 
 //$extra 在使用某些渠道的时候，需要填入相应的参数，其它渠道则是 array() .具体见以下代码或者官网中的文档。其他渠道时可以传空值也可以不传。
