@@ -300,7 +300,12 @@
 					},function(res){
 			            if(!res.status){
 			                //处理错误
-			                alert("错误消息:"+res.msg);
+			                if(res.chargeUrlOutput=="0"){
+			                	alert("订单金额不正确");
+			                }else if(res.chargeUrlOutput=="1"){
+			                	alert("获取不到该订单");
+			                }else
+			                	alert("错误消息:"+res.msg);
 			            }
 			            else{
 			                //若微信公众号渠道需要使用壹收款的支付成功页面，则在这里进行成功回调，调用 pingpp_one.success 方法，你也可以自己定义回调函数
