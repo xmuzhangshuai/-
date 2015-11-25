@@ -2423,7 +2423,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 						exit(json_encode(array('errorno' => 1, 'message' => '手机号未验证')));
 					}
 				}
-				if($data['room']='initinitinits'){
+				if($data['room']=='initinitinits'){
 					$data['room']='';
 					$record = pdo_fetch('SELECT * FROM ' . tablename('str_address') . ' WHERE sid = :sid AND uniacid = :uniacid AND uid = :uid', array(':uniacid' => $_W['uniacid'], ':uid' => $_W['member']['uid'],':sid' => $data['sid']));
 					if(empty($record)){
