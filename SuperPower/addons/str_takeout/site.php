@@ -201,7 +201,8 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 			$keyword = trim($_GPC['keyword']);
 			
-			$condition .= (" AND " . tablename('str_order'). '.sid=' . tablename('str_store'). '.id');
+			$condition .= (" AND " . tablename('str_order'). '.sid=' . tablename('str_store'). '.id AND ' .
+			 tablename('str_store').'.status>1 AND '.tablename('str_store').'.status<4');
 			if(!empty($keyword)) {
 				//二次开发 需要订单共和店铺相联系
 				
@@ -803,7 +804,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			 * 二次开发：用户历史订单，根据消费额度，消费次数排名
 			 */
 			load()->func('tpl');
-			$condition = ' WHERE uniacid = :aid AND sid = :sid GROUP BY uid';
+			$condition = ' WHERE uniacid = :aid AND sid = :sid AND status>1 AND status<4 GROUP BY uid';
 			$type = intval($_GPC['type']);
 			if($type == 0){
 				$condition.= ' ORDER BY SUM(price) DESC';

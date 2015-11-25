@@ -101,9 +101,9 @@
 								</td>
 								<td>
 									{if $dca['status'] == 1}
-										<span class="label label-danger">待确认</span>
+										<span class="label label-danger">未支付</span>
 									{elseif $dca['status'] == 2}
-										<span class="label label-warning">处理中</span>
+										<span class="label label-warning">已支付</span>
 									{elseif $dca['status'] == 3}
 										<span class="label label-success">已完成</span>
 									{elseif $dca['status'] == 4}
@@ -290,7 +290,7 @@
 								{if empty($order['pay_type'])}
 								<label class="label label-danger">未支付</label>
 								{else}
-								<label class="label label-success">{$pay_types[$order['pay_type']]}</label>
+								<label class="label label-success">{$order['pay_type']}</label>
 								{/if}
 							</p>
 						</div>	
@@ -300,10 +300,10 @@
 						<div class="col-sm-9 col-xs-9 col-md-9">
 							<p class="form-control-static">
 								{if $order['status'] == 1}
-									<span class="label label-danger">待确认</span>
+									<span class="label label-danger">未支付</span>
 									<!-- 已支付 -->
 								{elseif $order['status'] == 2}
-									<span class="label label-warning">处理中</span>
+									<span class="label label-warning">已支付</span>
 								{elseif $order['status'] == 3}
 									<span class="label label-success">已完成</span>
 								{elseif $order['status'] == 4}

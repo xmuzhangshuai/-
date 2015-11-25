@@ -422,7 +422,11 @@ function hint(slector,str){$(slector).html(str);}
 			</div>-->
 			<!-- 二次开发：范围管理 -->
 			<div class="panel panel-default">
-				<div class="panel-heading">配送范围设置（<span style="color:red">红色</span>为当前门店配送区域，<span style="color:blue">蓝色</span>为其他门店配送区域）</div>
+				<div class="panel-heading">
+				配送范围设置（
+				<span style="color:red">红色</span>为当前门店配送区域，<span style="color:blue">蓝色</span>为其他门店配送区域）
+				<span class="btn btn-danger">配送范围不要和其他门店重合，否则用户定位易出错</span>
+				</div>
 				<div class="panel-body">
 						<div id="allmap" style="overflow:hidden;zoom:1;position:relative;">	
 							<div id="map" style="height:100%;-webkit-transition: all 0.5s ease-in-out;transition: all 0.5s ease-in-out;"></div>
