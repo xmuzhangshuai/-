@@ -2098,10 +2098,10 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		 			exit('request too many times');
 		 		}
 		 	}
-				$code = 11111;
-				$_SESSION['last_send_time'] = time();//发送成功时间
-				$_SESSION['code'] = $code;
-				exit('success');//发送成功
+//				$code = 11111;
+//				$_SESSION['last_send_time'] = time();//发送成功时间
+//				$_SESSION['code'] = $code;
+//				exit('success');//发送成功
 		 	$statusStr = array(
 				"0" => "短信发送成功",
 				"-1" => "参数不全",
@@ -2397,11 +2397,11 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$currentadd = get_default_address();
 			}
 			$addressesgroup = get_addressesgroup();
-			if($r=='1'){
-				$stores=pdo_fetchall('SELECT distinct(sid),title FROM ' . tablename('str_address').',' .tablename('str_store').' WHERE '.tablename('str_address').'.sid='.$sid.' AND '.tablename('str_store').'.id='.$sid.' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));
-			}else{
+			//if($r=='1'){
+			//	$stores=pdo_fetchall('SELECT distinct(sid),title FROM ' . tablename('str_address').',' .tablename('str_store').' WHERE '.tablename('str_address').'.sid='.$sid.' AND '.tablename('str_store').'.id='.$sid.' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));
+			//}else{
 				$stores=pdo_fetchall('SELECT distinct(sid),title FROM ' . tablename('str_address').',' .tablename('str_store').' WHERE '.tablename('str_address').'.sid='.tablename('str_store').'.id'.' AND '.tablename('str_address').'.uniacid = :aid AND '.tablename('str_address').'.uid = :uid', array(':aid' => $_W['uniacid'], ':uid' => $uid));
-			}
+			//}
 		}
 		if($op == 'post'||$op == 'init') {
 			$currentadd = get_default_address();

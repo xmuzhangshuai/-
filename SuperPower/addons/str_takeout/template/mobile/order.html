@@ -154,6 +154,9 @@
 			$('#phone_code_submit').addClass("disabled").addClass("hidden");
 			$('#phone_vaild_submit').removeClass("disabled").addClass("hidden");
 			var newmobile=$.trim($("#showTel").val());
+			if(!newmobile) {
+				return false;
+			}
 			var valid = !!newmobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
 			if(!valid){
 				$("#showTel").val($("#showTel").attr("data-mobile"));
@@ -173,9 +176,10 @@
 		}).blur();
 		$('#phone_vaild_submit').click(function(){
 			if(!$('#phone_vaild_submit').hasClass("disabled")){
-				$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
+				$('#phone_vaild_submit').addClass("disabled");
 				var newmobile=$.trim($("#showTel").val());
 				$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'send_auth_code'))}', {'tel':newmobile}, function(data){
+					$('#phone_vaild_submit').addClass("disabled").addClass("hidden");
 					if(data == 'success') {
 						$("#phone_code_wrapper").removeClass("hidden");
 						$('#phone_code_submit').removeClass("hidden").removeClass("disabled");
