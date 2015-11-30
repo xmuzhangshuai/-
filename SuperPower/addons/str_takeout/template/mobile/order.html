@@ -22,6 +22,28 @@
 		width: 100%;
 		padding: 0 0 15px 0;
 	}
+	.menu_list li > div.order_item_count .num:before {
+		content: "";
+	}
+	.menu_list li > div.order_item_count .num {
+		font-size: 18px;
+		border: 1px #BBB solid;
+		line-height: 26px;
+		margin-top: -1px;
+		min-width: 36px;
+		text-align: center;
+		padding-left: 6px;
+	}
+	.buy_btn {
+		display: inline-block;
+		height: 28px;
+		line-height: 28px;
+		font-size: 14px;
+		vertical-align: middle;
+		white-space: nowrap;
+		margin-top: 10px;
+		border: 1px #CCC solid;
+	}
 </style>
 {template 'header'}
 <div class="container">
@@ -77,6 +99,7 @@
 					{if $li['kucun']==''}
 						{php $li['kucun'] = 0;}
 					{/if}
+					{if $li['kucun']}
 					<li id="{$li['id']}" class="cont_box">
 						<div class="order_item">
 							<h3>{$li['title']}</h3>
@@ -84,7 +107,7 @@
 							<div class="info">{$li['zuhe']}</div>
 						</div>
 						<div class="order_item_count">
-							<div class="fr" max="{$li['kucun']}">
+							<div class="fr buy_btn" max="{$li['kucun']}">
 								<a href="javascript:void(0);" class="btn_n add active"></a>
 							</div>
 							<input autocomplete="off" class="number" type="hidden" name="dish{$li['id']}" value="{$dishes[$li['id']]}">
@@ -92,6 +115,7 @@
 						</div>
 
 					</li>
+					{/if}
 					{/loop}
 					<li id="totalprice_wrap" class="cont_box">
 						<div class="order_item">

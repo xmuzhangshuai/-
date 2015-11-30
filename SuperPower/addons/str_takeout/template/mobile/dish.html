@@ -24,9 +24,6 @@
 			{if $store['open']==0}
 			<div class="tips">企鹅休息中，接受预定~下次配送时间：
 				<br /><span>{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></span></div>
-			{else}
-			<div class="tips lowtips">
-				<span>{php $time = strtotime($store['nextStartTime']); echo date("m-d",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></span></div>
 			{/if}
 			<div class="menu_container">
 				<ul class="menu_list">
