@@ -55,16 +55,6 @@
 				<div class="mid"><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 1));}" style="display: block"><span id="showAddres">{$address['address']}</span><i class="ico_forward"></i></a></div>
 			</div>
 			<div class="cont_box delivery_info" style="margin-top: 0;padding-top: 0;">
-				<div class="cont_box vaild hidden" id="phone_vaild">
-					<a class="comm_btn hidden" id="phone_vaild_submit">发送短信，验证手机号</a>
-					<div id="phone_code_wrapper" class="cont_box hidden">
-						<label class="left">验证码</label>
-						<div class="mid">
-							<input type="text" id="code" name="code" value=""></input>
-						</div>
-					</div>
-					<a class="comm_btn disabled hidden" id="phone_code_submit">验证手机</a>
-				</div>
 				<label class="left">送达时间</label>
 				<div class="mid" >
 					<select id="showTime" name="delivery_time">
