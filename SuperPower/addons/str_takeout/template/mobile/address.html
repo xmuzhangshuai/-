@@ -3,10 +3,32 @@
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 {if $op == 'list'}
 <style>
-body>div:first-child {
-	margin-top: 12px;
+input[type='radio'] {
+height: 18px!important;
+}
+body {
+background-color: #E5E5E5;
 }
 </style>
+<div class="cont_box">
+	<div class="cont_box">
+		{if $user!=null}
+		<img class="cont_userimg" src="{$user['avatar']}" />
+		<!--src="../resource/images/penguin.png"-->
+		<span class="cont_userdec">{$user['nickname']}</span>
+	{else}
+		<img class="cont_userimg" src="../addons/str_takeout/template/resource/images/penguin.png" />
+		<!--src="../resource/images/penguin.png"-->
+
+		<span class="cont_userdec">非微信用户</span>
+	{/if}
+		<br>
+		<br>
+		<span class="cont_userdec1">共{$total}个订单</span>
+	</div>
+</div>
+	{template 'header'}
+<div class="cont_box">
 <div data-role="container" class="container addresslist">
 	<section data-role="body">
 			{loop $stores $store}
@@ -36,6 +58,7 @@ body>div:first-child {
 		<div class="btn_div"><a href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid, 'r' => $_GPC['r']))}" class="add"><span><i></i>新增收件地址</span></a></div>
 	</section>
 </div>
+</div>
 <div class="fixed">
 	<nav class="nav_common">
 		<ul class="box_nav">
@@ -60,6 +83,7 @@ body>div:first-child {
 		</ul>
 	</nav>
 </div>
+
 <script type="text/javascript">
 	var sid=-1;
 	$(function(){
