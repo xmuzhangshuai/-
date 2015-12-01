@@ -2425,12 +2425,17 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				}
 				if($data['room']=='initinitinits'){
 					$data['room']='';
-					$record = pdo_fetch('SELECT * FROM ' . tablename('str_address') . ' WHERE sid = :sid AND uniacid = :uniacid AND uid = :uid', array(':uniacid' => $_W['uniacid'], ':uid' => $_W['member']['uid'],':sid' => $data['sid']));
-					if(empty($record)){
+					if($r=='3'){
 						pdo_insert('str_address', $data);
 						$id = pdo_insertid();
 					}else{
-						$id = $record['id'];
+						$record = pdo_fetch('SELECT * FROM ' . tablename('str_address') . ' WHERE sid = :sid AND uniacid = :uniacid AND uid = :uid', array(':uniacid' => $_W['uniacid'], ':uid' => $_W['member']['uid'],':sid' => $data['sid']));
+						if(empty($record)){
+							pdo_insert('str_address', $data);
+							$id = pdo_insertid();
+						}else{
+							$id = $record['id'];
+						}
 					}
 					exit(json_encode(array('errorno' => 0, 'message' => $id)));
 				}
