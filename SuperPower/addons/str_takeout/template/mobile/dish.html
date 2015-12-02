@@ -1,5 +1,5 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=11242316" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=112423163" />
 <link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/jquery.bxslider.css" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <!--<script src="../addons/str_takeout/template/resource/js/main.js"></script>-->
@@ -141,6 +141,21 @@
 				url:action
 			};
 			$('#cart_form').ajaxSubmit(ajax_option);
+		});
+		if($('#swipeNum').length){
+			new Swipe($('#imgSwipe')[0], {
+				speed: 500, 
+				auto: 5000, 
+				callback: function(index){
+					$('#swipeNum li').eq(index).addClass("on").siblings().removeClass("on");
+				}
+			});
+		}
+
+		$('#storeList li').click(function(e){
+			if(e.target.tagName != 'A'){
+				location.href = $(this).attr('href');
+			}
 		});
 	});
 	var menu = {
@@ -381,23 +396,5 @@
 			return false;
 		}
 	}
-
-	$(function(){
-		if($('#swipeNum').length){
-			new Swipe($('#imgSwipe')[0], {
-				speed: 500, 
-				auto: 5000, 
-				callback: function(index){
-					$('#swipeNum li').eq(index).addClass("on").siblings().removeClass("on");
-				}
-			});
-		}
-
-		$('#storeList li').click(function(e){
-			if(e.target.tagName != 'A'){
-				location.href = $(this).attr('href');
-			}
-		});
-	});
 </script>
 {template 'common'} {template 'common/footer'}

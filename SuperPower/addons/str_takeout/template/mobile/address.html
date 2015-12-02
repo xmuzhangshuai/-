@@ -1,6 +1,6 @@
 {template 'common/header'}
 <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6E7C75E41980283b39d3c61e81f16a39"></script>
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=11242316" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=112423161" />
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="../addons/str_takeout/template/resource/js/intersectPolygon.js"></script>
 <div id="allmap"></div>
@@ -48,9 +48,9 @@ background-color: #E5E5E5;
 							<td class="td_radio"><input class="addressChecked" {if $address['is_default'] == 1}checked{/if} type="radio" data-id="{$address['id']}"></td>
 							<td>
 							<div class="text"><span>{$address['realname']}</span><label>{$address['mobile']}</label></div>
-							<div class="text">{$address['address']} - {$address['room']}</div>
+							<div class="text">{$address['address']} {$address['room']}</div>
 							</td>
-							<td class="td_edit"><a href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'id' => $address['id'],'sid' => $sid, 'r' => $_GPC['r']));}" class="edit_icon"><span></span></a></td>
+							<td class="td_edit"><a href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'id' => $address['id'],'sid' => $sid, 'r' => $_GPC['r']));}" class="edit_icon"><span></span></a><a class="address_delete deladdress" data-id="{$address['id']}" data-sid="{$address['sid']}"></a></td>
 						</tr>
 					</tbody>
 				</table>
@@ -147,16 +147,16 @@ background-color: #E5E5E5;
 			});
 		});
 
-		$('#deladdress').click(function(){
-			var id = '{$id}';
+		$('.deladdress').click(function(){
+			var id = $(this).attr('data-id');
 			if(!id) {
 				return false;
 			}
 			if(!confirm('确定删除吗')) return false;
-			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(){
+			$.post("{php echo $this->createMobileUrl('address', array('op' => 'del', 'sid' => $sid))}", {'id':id}, function(data){
 				var data = $.parseJSON(data);
 				if(!data.errorno) {
-					location.href = "{php echo $this->createMobileUrl('address', array('op' => 'list', 'r' => $_GPC['r']));}"
+					location.reload();
 				} else {
 					alert(data.message);
 					return false;
@@ -273,7 +273,7 @@ background-color: #E5E5E5;
 	<div class="address addr1 hidden">
 		<input name="room" value="{$address['room']}" type="text" placeholder="楼层房号">
 	</div>
-	<div style="position: relative;"><a class="store_name">{if intval($r)==3}当前门店:{$store['title']}{/if}</a></div>
+	<div style="position: relative;"><a class="store_name">{if (intval($r)==3&&$store['title']!='')}当前门店:{$store['title']}{/if}</a></div>
 </div>
 <footer class="shopping_cart">
 	<div class="fixed" id="fix_bar">
@@ -412,7 +412,7 @@ background-color: #E5E5E5;
 				$(".store_name").text("门店"+storeNames[sid]+"为您服务");
 			}else{
 				$(".home-position").text("很抱歉，您暂时不在我们的配送范围");
-				$(".store_name").text("{if intval($r)==3}当前门店:{$store['title']}{/if}");
+				$(".store_name").text("{if (intval($r)==3&&$store['title']!='')}当前门店:{$store['title']}{/if}");
 				hideInput();
 			}
 			if(!$(this).hasClass("hdisabled")){
@@ -444,7 +444,7 @@ background-color: #E5E5E5;
 			}
 			if(!$(this).hasClass('disabled')){
 				$(this).addClass('disabled');
-				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post',))}", {'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid,'r':r}, function(data){
+				$.post("{php echo $this->createMobileUrl('address', array('op' => 'post'))}", {'address':address, 'room':room , 'mobile':mobile, 'realname':realname,'sid':sid,'r':r}, function(data){
 					var data = $.parseJSON(data);
 					if(!data.errorno) {
 						$.post("{php echo $this->createMobileUrl('address', array('op' => 'default'))}", {'id':data.message,'sid':sid},function(){
@@ -565,7 +565,6 @@ background-color: #E5E5E5;
 		var vaild_times_rem=3;
 		$("#mobileipt").blur(function(){
 			if((!$('#phone_vaild_submit').hasClass("disabled"))&&$('#phone_vaild_submit').hasClass("hidden")){
-				var id = $(this).attr('data-id');
 				if($("#mobile span").hasClass("hidden")){
 					$("#mobileipt").addClass("hidden");
 					$("#mobile span").removeClass("hidden");
@@ -582,7 +581,6 @@ background-color: #E5E5E5;
 					$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'tel_checkauth'))}', {'tel':newmobile}, function(data){
 						if(data == 'authed') {
 							$("#mobile span").html(newmobile);
-							$.post("{php echo $this->createMobileUrl('address', array('op' => 'post', 'sid' => $sid))}", {'id':id,'mobile': newmobile, 'address':'{$currentadd['address']}', 'room':'{$currentadd['room']}' , 'realname':'{$currentadd['realname']}'}, function(data){});
 						} else {
 							vaild_times_rem=3;
 							$("#mobile span").html(newmobile);
@@ -619,6 +617,7 @@ background-color: #E5E5E5;
 				var code=$.trim($("#code").val());
 				$("#code").val("");
 				var id = $("mobileipt").attr('data-id');
+				alert(id);
 				$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'authtel'))}', {'tel':newmobile,'code':code}, function(data){
 					vaild_times_rem--;
 					if(data == 'success') {
@@ -706,7 +705,7 @@ background-color: #E5E5E5;
 								}else{
 									location.href=return_url1 + '&address_id='+address_id;
 								}
-							} else if(r==2) {
+							} else if(r==2||r==4) {
 								location.href = return_url2 + '&address_id='+address_id+'&sid='+sid;
 							} else {
 								location.href = return_url3 + '&address_id='+address_id+'&sid='+sid;

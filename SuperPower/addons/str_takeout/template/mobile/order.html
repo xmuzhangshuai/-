@@ -1,5 +1,5 @@
 {template 'common/header'}
-<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=11242316" />
+<link rel="stylesheet" type="text/css" href="../addons/str_takeout/template/resource/css/main.css?ver=112423162" />
 <script src="../addons/str_takeout/template/resource/js/order.js"></script>
 <script src="../addons/str_takeout/template/resource/js/dialog.js"></script>
 <script src="https://one.pingxx.com/lib/pingpp_one.js"></script>
@@ -34,6 +34,59 @@
 		text-align: center;
 		padding-left: 6px;
 	}
+	.order_item_count .btn_n.add {
+		background: url(../addons/str_takeout/template/resource/images/add_g.png);
+	}
+	.order_item_count .btn_n.del {
+		background: url(../addons/str_takeout/template/resource/images/del_g.png);
+	}
+	@media (max-width: 820px) {
+		.order_item_count .btn_n.add,
+		.order_item_count .btn_n.del {
+			background: none;
+			font-size: 17px;
+			height: 20px;
+			width: 20px;
+			padding-left: 5px;
+			font-family: sans-serif, arial;
+			color: #888;
+			background: #E0E0E0;
+		}
+		.order_item_count .btn_n.add {
+			background: url(../addons/str_takeout/template/resource/images/add_g_s.png);
+		}
+		.order_item_count .btn_n.del {
+			background: url(../addons/str_takeout/template/resource/images/del_g_s.png);
+		}
+		.fr.buy_btn {
+			display: inline-block;
+			height: 22px;
+			line-height: 22px;
+			font-size: 14px;
+			vertical-align: middle;
+			white-space: nowrap;
+			border: 1px #CCC solid;
+		}
+		.menu_list li > div.order_item_count .num {
+			font-size: 14px;
+			border: 1px #BBB solid;
+			line-height: 20px;
+			margin-top: -1px;
+			min-width: 28px;
+			text-align: center;
+			padding-left: 3px;
+		}
+		.menu_list li > div.order_item_count {
+			width: 80px;
+			float: right;
+		}
+		.menu_list li > div.order_item {
+			width: calc(100% - 90px);
+			width: -webkit-calc(100% - 90px);
+			float: left;
+			padding-top: 10px;
+		}
+	}
 	.buy_btn {
 		display: inline-block;
 		height: 28px;
@@ -51,10 +104,38 @@
 		<section class="menu_wrap">
 			<div class="cont_box delivery_info" style="margin-bottom: 0;">
 				<input type="hidden" name="address_id" value="{$address['id']}" id="address_id">
-				<label class="left">送餐地址</label>
-				<div class="mid"><a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 1));}" style="display: block"><span id="showAddres">{$address['address']}</span><i class="ico_forward"></i></a></div>
+				<div id="address_check">
+					<label class="left" style="position: relative;top: 10px;">送餐地址</label>
+					<div class="mid">
+						<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 1));}" style="display: block">
+							<span id="showAddres">{$address['address']} {$address['room']}</span>
+							<br /><span style="display: inline-block;margin-top: 10px;">{$address['realname']}</span>
+							<span>{$address['mobile']}</span>
+							<i class="ico_forward"></i>
+						</a>
+					</div>
+				</div>
+				<div class="hidden" id="address_form">
+					<label class="left" id="showRoom">楼名房号</label>
+					<div class="mid">
+						<input type="text" id="showNumber" name="room" value="{$address['room']}"></input>
+					</div>
+					<br />
+					<input type="text" id="showName" name="realname" value="{$address['realname']}" class="half"  placeholder="姓名"></input>
+					<input type="tel" id="showTel" name="mobile" value="{$address['mobile']}" data-mobile="{$address['mobile']}" class="half" placeholder="手机号"></input>
+				</div>
 			</div>
-			<div class="cont_box delivery_info" style="margin-top: 0;padding-top: 0;">
+			<div class="cont_box delivery_info" style="margin-top: 0;padding-top: 8px;">
+				<div class="cont_box vaild hidden" id="phone_vaild">
+					<a class="comm_btn hidden" id="phone_vaild_submit">发送短信，验证手机号</a>
+					<div id="phone_code_wrapper" class="cont_box hidden">
+						<label class="left">验证码</label>
+						<div class="mid">
+							<input type="text" id="code" name="code" value=""></input>
+						</div>
+					</div>
+					<a class="comm_btn disabled hidden" id="phone_code_submit">验证手机</a>
+				</div>
 				<label class="left">送达时间</label>
 				<div class="mid" >
 					<select id="showTime" name="delivery_time">
@@ -245,18 +326,24 @@
 			var address_id = $("#address_id").val();
 			if(!address_id) {
 				alert('请选择送餐地址');
+				$("#address_check").addClass("hidden");
+				$("#address_form").removeClass("hidden");
 				$(this).removeClass('disabled');
 				return false;
 			}
 			var room = $("#showNumber").val();
 			if(!room) {
-				alert('请输入楼层房号');
+				alert('请完善楼层房号');
+				$("#address_check").addClass("hidden");
+				$("#address_form").removeClass("hidden");
 				$(this).removeClass('disabled');
 				return false;
 			}
 			var mobile = $("#showTel").val();
 			if(!mobile) {
-				alert('请输入手机号');
+				alert('请完善手机号');
+				$("#address_check").addClass("hidden");
+				$("#address_form").removeClass("hidden");
 				$(this).removeClass('disabled');
 				return false;
 			}else{
@@ -264,11 +351,16 @@
 				if(!valid){
 					alert('手机号格式不正确');
 					$(this).removeClass('disabled');
+					$("#address_check").addClass("hidden");
+					$("#address_form").removeClass("hidden");
+
 					return false;
 				}else{
 					$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'tel_checkauth'))}', {'tel':mobile}, function(data){
 						if(data != 'authed') {
 							alert('手机号未验证');
+							$("#address_check").addClass("hidden");
+							$("#address_form").removeClass("hidden");
 							return false;
 						}
 					});

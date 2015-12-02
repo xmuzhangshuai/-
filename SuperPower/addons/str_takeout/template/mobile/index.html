@@ -2,8 +2,10 @@
 <script>
 {if $address['address']}
 location.href = "{php echo $this->createMobileUrl('dish', array('sid' => $address['sid']));}";
+{else if !$address_count}
+location.href = "{php echo $this->createMobileUrl('address', array('op' => 'init','r' => '4'));}";
 {else}
-location.href = "{php echo $this->createMobileUrl('address', array('op' => 'init'));}";
+location.href = "{php echo $this->createMobileUrl('address', array('op' => 'init','r' => '2'));}";
 {/if}
 </script>
 {template 'common'}
