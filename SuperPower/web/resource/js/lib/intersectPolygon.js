@@ -1,4 +1,86 @@
+// LinearRing : array[pt]
+    // point : {x:1,y:2}
+    function containsPointByLinearRing (point, LinearRing) {
+		console.log("containsPointByLinearRing");
+		console.log(point);
+		console.log(LinearRing);
+		console.log("!!containsPointByLinearRing");
+        //limitSigDigs
+        function approx(num, sig) {
+            var fig = 0;
+            if (sig > 0) {
+                fig = parseFloat(num.toPrecision(sig));
+            }
+            return fig;
+        } 
 
+        var digs = 14;
+
+        var px = approx(parseFloat(point.x), digs);
+        var py = approx(parseFloat(point.y), digs);
+        function getX(y, x1, y1, x2, y2) {
+            return (y - y2) * ((x2 - x1) / (y2 - y1)) + x2;
+        }
+
+        var numSeg = LinearRing.length - 1;
+        var start, end, x1, y1, x2, y2, cx, cy;
+        var crosses = 0;
+
+        for(var i=0; i<numSeg; ++i) {
+            start = LinearRing[i];
+            x1 = approx(start.x, digs);
+            y1 = approx(start.y, digs);
+            end = LinearRing[i + 1];
+            x2 = approx(end.x, digs);
+            y2 = approx(end.y, digs);
+            
+            if(y1 == y2) {
+                // horizontal edge
+                if(py == y1) {
+                    // point on horizontal line
+                    if(x1 <= x2 && (px >= x1 && px <= x2) || // right or vert
+                       x1 >= x2 && (px <= x1 && px >= x2)) { // left or vert
+                        // point on edge
+                        crosses = -1;
+                        break;
+                    }
+                }
+                // ignore other horizontal edges
+                continue;
+            }
+            cx = approx(getX(py, x1, y1, x2, y2), digs);
+            if(cx == px) {
+                // point on line
+                if(y1 < y2 && (py >= y1 && py <= y2) || // upward
+                   y1 > y2 && (py <= y1 && py >= y2)) { // downward
+                    // point on edge
+                    crosses = -1;
+                    break;
+                }
+            }
+            if(cx <= px) {
+                // no crossing to the right
+                continue;
+            }
+            if(x1 != x2 && (cx < Math.min(x1, x2) || cx > Math.max(x1, x2))) {
+                // no crossing
+                continue;
+            }
+            if(y1 < y2 && (py >= y1 && py < y2) || // upward
+               y1 > y2 && (py < y1 && py >= y2)) { // downward
+                ++crosses;
+            }
+        }
+
+        var contained = (crosses == -1) ?
+            // on edge
+            1 :
+            // even (out) or odd (in)
+            !!(crosses & 1);
+
+        return contained;
+    }
+// LinearRings
 //#region 验证两个面是否相交的算法
 function intersectsPolygonAndPolygon (polygon1LinearRings, polygon2LinearRings) {
      

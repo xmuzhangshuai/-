@@ -286,7 +286,7 @@
 				if(e.errno == 0) {
 					var order_no = e.id;
 					var amount = e.priceYuan*100;
-					$(".submit_order").html('已提交，等待支付');
+					$(".submit_order").html('已提交，请在购买记录中支付');
 					$(".submit_order").addClass('disabled');
 //					setTimeout(function(){
 //						location.href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}";

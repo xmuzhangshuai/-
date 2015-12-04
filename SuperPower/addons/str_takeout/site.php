@@ -14,6 +14,7 @@ defined('IN_IA') or exit('Access Denied');
 include('model.php');
 include 'wprint.class.php';
 include 'PHPExcel/PHPExcel.php';
+include 'eleme/funcs.php';
 class Str_takeoutModuleSite extends WeModuleSite {
 	public function doWebConfig() {
 		global $_W, $_GPC;
@@ -364,6 +365,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 	public function doWebAjax() {
 		global $_W, $_GPC;
 		$op = trim($_GPC['op']);
+		$sid = $_W['__sid'];
 		if($op == 'status_store') {
 			$id = intval($_GPC['id']);
 			$value = intval($_GPC['value']);
@@ -435,6 +437,83 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				exit('success');
 			}
 			exit('error');
+		}
+		if($op == 'eleme_order_detail'){
+			/**
+			 * 二次开发：获取饿了么订单详情
+			 */
+			 $path = "http://v2.openapi.ele.me/order/";
+			 $sid = intval($_GPC['sid']);
+			 $order_id = trim($_GPC['order_id']);
+			 $eleme_restaurant = pdo_fetch('SELECT * FROM '.tablename('str_eleme_store'). ' WHERE uniacid = :id AND related_sid= :sid',array(':id' => $_W['uniacid'], ':sid' => $sid));
+			 if(!empty($eleme_restaurant)){
+			 	$path .= ($order_id."/");
+			 	$time = time();
+			 	$params = array('consumer_key'=>$eleme_restaurant['consumer_key'],'timestamp'=>$time);
+			 	$sig = genSig($path,$params,$eleme_restaurant['consumer_secret']);
+			 	$requestUrl = ($path."?consumer_key=".$eleme_restaurant['consumer_key']."&sig=".$sig."&timestamp=".$time);
+			 	$order_detail = file_get_contents($requestUrl);
+			 	$order_detail = json_decode($order_detail,true);			 	
+			 	$order_detail['data']['order_id'] = $order_id;
+			 	exit(json_encode($order_detail));
+			 }else{
+			 	exit('fail');
+			 }
+		}
+		if($op == 'insert_eleme_order'){
+			$sid = intval($_GPC['sid']);
+			$order = json_decode(str_replace('&quot;','"',trim($_GPC['eleme_order'])),true);
+			$order_id = $_GPC['eleme_order_id'];
+			$orderInfo = $order['data'];
+			$data['eleme_id'] = $order_id;
+			$data['address'] = $orderInfo['address'];
+			$data['consignee'] = $orderInfo['consignee'];
+			$data['created_time'] = $orderInfo['created_at'];
+			$data['tp_restaurant_id'] = $orderInfo['tp_restaurant_id'];
+			$data['restaurant_id'] = $orderInfo['restaurant_id'];
+			$data['total_price'] = $orderInfo['total_price'];
+			$data['user_name'] = $orderInfo['user_name'];
+			$data['phone_list'] = $orderInfo['phone_list'][0];
+			$data['sid'] = $sid;
+			$data['uniacid'] = $_W['uniacid'];
+			
+			$state = pdo_insert('str_elemeorder',$data);
+			if($state!==false)
+				exit('success');
+			exit('fail');
+		}
+		if($op == 'print_eleme_order'){
+			$sid = trim($_GPC['sid']);
+			$order = pdo_fetch('SELECT * FROM '.tablename('str_elemeorder').' WHERE sid=:sid AND uniacid=:uniacid AND print=0 ORDER BY id ASC', array(':sid'=>$sid,':uniacid'=>$_W['uniacid']));
+			if(!empty($order)){
+				$path = "http://v2.openapi.ele.me/order/";
+			 	$sid = $order['sid'];
+			 	$order_id = $order['eleme_id'];
+			 	$eleme_restaurant = pdo_fetch('SELECT * FROM '.tablename('str_eleme_store'). ' WHERE uniacid = :id AND related_sid= :sid',array(':id' => $_W['uniacid'], ':sid' => $sid));
+			 	if(!empty($eleme_restaurant)){
+			 		$path .= ($order_id."/");
+			 		$time = time();
+			 		$params = array('consumer_key'=>$eleme_restaurant['consumer_key'],'timestamp'=>$time);
+			 		$sig = genSig($path,$params,$eleme_restaurant['consumer_secret']);
+			 		
+			 		$requestUrl = ($path."?consumer_key=".$eleme_restaurant['consumer_key']."&sig=".$sig."&timestamp=".$time);
+			 		$order_detail = file_get_contents($requestUrl);
+			 		exit($order_detail);
+			 	}
+			 	else
+			 		exit('fail');
+			}
+			else
+				exit("fail");
+		}
+		if($op == 'update_eleme_print'){
+			$id = $_GPC['order_id'];
+			$sid = $_GPC['sid'];
+			$state = pdo_update('str_elemeorder', array('print' => 1), array('uniacid' => $_W['uniacid'], 'eleme_id' => $id,'sid'=>$sid));
+			if($state !== false) {
+				exit('success');
+			}
+			exit('fail');
 		}
 	}
 
@@ -784,6 +863,10 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				}
 			}
 			$pager = pagination($total, $pindex, $psize);
+			/**
+			 * 二次开发：获得门店范围
+			 */
+			 $otherArea = pdo_fetchall('SELECT points,title,id FROM ' . tablename('str_store') . ' WHERE uniacid = :aid ORDER BY id ASC', array(':aid' => $_W['uniacid']));	
 			include $this->template('order');
 		} elseif($op == 'orderdetail') {
 			$pay_types = pay_types();
@@ -2020,7 +2103,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			message('门店不存在', referer(), 'error');
 		}
 		$title = $store['title'];
-		$where = ' WHERE uniacid = :aid AND uid = :uid';
+		$where = ' WHERE uniacid = :aid AND uid = :uid AND status<>4';
 		$params = array(
 			':aid' => $_W['uniacid'],
 			':uid' => $_W['member']['uid']
@@ -2028,7 +2111,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		$status = intval($_GPC['status']);
 
 		if($status > 0 && $status != 5) {
-			$where .= ' AND status = :status';
+			$where .= ' AND status=:status';
 			$params[':status'] = $status;
 		} 
 		if($status == 5) {
@@ -2154,6 +2237,16 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		  		exit('fail');//验证失败
 		  	}
 		}
+		
+		/*二次开发：用户取消订单*/
+		if($op == 'deleteOrder'){
+			$oid = intval($_GPC['id']);
+			$order['status']=4;
+			$state = pdo_update('str_order',$order,array("id"=>$oid));
+			if($state!==false)
+				exit('success');
+			exit('fail');
+		}
 	}
 	public function doMobilePay() {
 		global $_W, $_GPC;
@@ -2277,6 +2370,22 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			exit(json_encode($result));
 		} elseif($op == 'auto_print'){
 			
+		}else if($op == 'get_eleme_neworder'){
+			/**
+			 * 二次开发，获取eleme新订单
+			 */
+			 $path = "http://v2.openapi.ele.me/order/new/";
+			 $sid = intval($_GPC['sid']);
+			 $eleme_restaurant = pdo_fetch('SELECT * FROM '.tablename('str_eleme_store'). ' WHERE uniacid = :id AND related_sid= :sid',array(':id' => $_W['uniacid'], ':sid' => $sid));
+			 if(!empty($eleme_restaurant)){
+			 	$time = time();
+			 	$params = array('consumer_key'=>$eleme_restaurant['consumer_key'],'timestamp'=>$time,'restaurant_id'=>$eleme_restaurant['restaurant_id']);
+			 	$sig = genSig($path,$params,$eleme_restaurant['consumer_secret']);
+			 	$requestUrl = ($path."?consumer_key=".$eleme_restaurant['consumer_key']."&sig=".$sig."&timestamp=".$time."&restaurant_id=".$eleme_restaurant['restaurant_id']);
+			 	$neworders = file_get_contents($requestUrl);
+			 	exit($neworders);
+			 }
+			 exit("");
 		}
 	}
 	public function doWebSystem() {

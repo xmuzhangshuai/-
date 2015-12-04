@@ -12,6 +12,8 @@
 	.order-nav-tabs >li >a:hover {background-color: #FFF;}
 	.order-nav-tabs > li.active > a, .order-nav-tabs > li.active > a:hover, .order-nav-tabs > li.active > a:focus {color: #576373;border-color: #c5d0dc;border-top: 2px solid #4c8fbd;border-bottom-color: transparent;background-color: #FFF;z-index: 12;margin-top: -1px;box-shadow: 0 -2px 3px 0 rgba(0, 0, 0, 0.15);}	
 </style>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6E7C75E41980283b39d3c61e81f16a39"></script>
+<script type="text/javascript" src="./resource/js/lib/intersectPolygon.js" ></script>
 <div class="alert alert-info info">
 	<i class="fa fa-info-circle"></i>
 	当前门店名称: {$store['title']}
@@ -483,6 +485,7 @@ if(i == count)
 	alert('没有匹配打印机，请安装小票打印机，并在打印机管理中设置打印机！');
 else{
 	print_order();
+	print_eleme_order();
 }
 function getPrinterCount() {	//获取打印机个数	
 	try{
@@ -511,10 +514,11 @@ function setContent(data) {	//打印内容设置
 	//根据订单长度，以及备注，地址长度，计算订单纸张高度
 	var dishes = data.dish;
 	var dishLength = dishes.length;
+	/*
 	var otherHeight = (data.note.length/20+1+data.address.length/20+1)*25;
 	var realHeight = dishLength * 20 + 500 + otherHeight;
-	var height = realHeight>500?realHeight:500;
-	LODOP.SET_PRINT_PAGESIZE(1,500,height,"A4");
+	var height = realHeight>500?realHeight:500; */
+	LODOP.SET_PRINT_PAGESIZE(3,500,45,"A4");
 	LODOP.ADD_PRINT_TEXT(10, 40, 450, 20, '企鹅造饭');
 	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
 	
@@ -529,9 +533,9 @@ function setContent(data) {	//打印内容设置
 	if(data.note!=""){
 		var note = "备注："+data.note;
 		var length = note.length;
-		var rows = length/20 + 1;
+		var rows = length/16 + 1;
 		for(var i = 0; i < rows; i++){
-			var content = note.substr(i*20,20);
+			var content = note.substr(i*16,16);
 			beginX += 25;
 			LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, content);
 		}
@@ -546,9 +550,9 @@ function setContent(data) {	//打印内容设置
 	
 	var address = "地址："+data.address;
 	var adlength = address.length;
-	var adrows = adlength/20 + 1;
+	var adrows = adlength/16 + 1;
 	for(var j = 0; j < adrows; j++){
-		var content = address.substr(j*20,20);
+		var content = address.substr(j*16,16);
 		beginX += 25;
 		LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, content);
 	}
@@ -556,6 +560,91 @@ function setContent(data) {	//打印内容设置
 	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '总价：' + data.price + '元');
 	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);	
 };	
+
+function setElemeContent(order){
+	LODOP=getLodop();  	
+	LODOP.PRINT_INIT("企鹅造饭-eleme订单打印");
+	//根据订单长度，以及备注，地址长度，计算订单纸张高度
+	LODOP.SET_PRINT_PAGESIZE(3,500,45,"A4");
+	LODOP.ADD_PRINT_TEXT(10, 0, 450, 20, '企鹅造饭-eleme订单');
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",14);
+	
+	var beginX = 10;
+	var beginY = 0;
+	var contentWidth = 480;
+	var contentHeight = 20;
+	var buckets = order.data.detail.group;//菜篮子
+	//下单时间
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '下单时间：'+order.data.created_at);//下单时间
+	for(var i = 0 ; i < buckets.length; i++){		
+		var dishes = buckets[i];
+		for(var j=0; j<dishes.length; j++){
+			beginX += 25;
+			LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, dishes[j].name + " x " + dishes[j].quantity + '份 ' + (dishes[j].quantity*dishes[j].price) + '元');//菜名  数量  小计
+			//备注，如大份，辣等。
+			if(dishes[j].specs.length>0){
+				var specs = dishes[j].specs;
+				var beizhu = specs.join(',');
+				beginX += 25;
+				LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '--------'+beizhu);//specs
+			}			
+			//garnish浇头
+			if(dishes[j].garnish.length>0){
+				beginX += 25;
+				LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '浇头：');//浇头开始
+				var garnish = dishes[j].garnish;
+				for(var k=0; k< garnish.length; k++){
+					LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, garnish[k].name + " x " + garnish[k].quantity + '份 ' + (garnish[k].quantity*garnish[k].price) + '元');//浇头菜名  数量  小计
+					beginX += 25;
+				}
+			}					
+		}
+		
+	}
+	var extra = order.data.detail.extra;
+	for(var n = 0; n<extra.length; n++){
+		beginX += 25;
+		LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, extra[n].name + " x " + extra[n].quantity + '份 ' + (extra[n].quantity*extra[n].price) + '元');//额外数量
+	}
+	//备注：
+	var notes = "备注："+order.data.description;
+	var ntlength = notes.length;
+	var ntrows = ntlength/15 + 1;
+	for(var j = 0; j < ntrows; j++){
+		var content = notes.substr(j*15,15);
+		beginX += 25;
+		LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, content);
+	}
+	
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '顾客：' + order.data.consignee);
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",15);
+	beginX += 25;
+	
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '电话：' + order.data.phone_list[0]);
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",15);
+	beginX += 25;
+	
+	var address = "地址："+order.data.delivery_poi_address;
+	var adlength = address.length;
+	var adrows = adlength/15 + 1;
+	for(var j = 0; j < adrows; j++){
+		var content = address.substr(j*15,15);
+		beginX += 25;
+		LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, content);
+	}
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '实付总价：' + order.data.total_price + '元');
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+	var payway = "在线支付订单";
+	if(!order.data.is_online_paid){
+		payway = '货到付款';
+	}
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, payway);
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+}
 
 function log_update() {
 	$.post("{php echo $this->createWebUrl('cron', array('op' => 'print'));}", function(){
@@ -575,9 +664,28 @@ function print_order(){
 			});
 		}		
 	});
-	setTimeout(print_order, 5000);
-	
+	setTimeout(print_order, 5000);	
 }
+
+function print_eleme_order(){
+	var sid = {$store['id']};
+	$.post("{php echo $this->createWebUrl('ajax', array('op' => 'print_eleme_order'));}",{'sid':sid}, function(data){
+		var order = JSON.parse(data);
+		if(order != '' && order.message == 'ok'){			
+			setElemeContent(order);
+			PrintByPrinterIndex(index);	
+			//打印成功后需要更新订单已打印
+			alert(order.data.order_id);
+			$.post("{php echo $this->createWebUrl('ajax', array('op' => 'update_eleme_print'));}", {'order_id':order.data.order_id,'sid':sid}, function(result){
+				alert(result);
+				if(result != 'success')
+					alert('订单更新失败，将会重新打印');
+			});
+		}		
+	});
+	setTimeout(print_eleme_order, 5000);
+}
+
 function order_notice() {
 	$.post("{php echo $this->createWebUrl('cron', array('op' => 'order'));}", function(data){
 		var data = JSON.parse(data);
@@ -590,10 +698,77 @@ function order_notice() {
 	});
 }
 
+function get_eleme_order(){
+	//获取门店ID
+	var sid = {$store['id']};
+	$.post("{php echo $this->createWebUrl('cron', array('op' => 'get_eleme_neworder'));}", {'sid':sid}, function(data){
+		var data = JSON.parse(data);
+		if(data.message=="ok"){
+			var eleme_order_ids = data.data.order_ids;
+			eleme_order_ids = new Array("100196508600829257");
+			for(var i = 0; i < eleme_order_ids.length; i++){
+				//获取订单详情:送货地点的经纬度
+				var order_id = eleme_order_ids[i];
+				$.post("{php echo $this->createWebUrl('ajax', array('op' => 'eleme_order_detail'));}", {'sid':sid,'order_id':eleme_order_ids[i]}, function(data){
+					var order = JSON.parse(data);
+					if(order.message=="ok"){
+						var point = order.data.delivery_geo.split(",");
+						var deleveryPoint = {x:point[1],y:point[0]};
+						//判断该经纬度属于哪个门店
+						var sid = checkStore(deleveryPoint);
+						if(sid>0){
+							//将订单数据入库
+							//alert("訂單id="+order_id);
+							$.post("{php echo $this->createWebUrl('ajax', array('op' => 'insert_eleme_order'));}", {'sid':sid,'eleme_order_id':order_id,'eleme_order':data}, function(result){
+								if(result != 'success')
+									;
+							});
+						}
+						
+					}
+						
+				});
+			}
+		}
+			
+	});
+	//ajax获取新订单id列表
+	setTimeout(get_eleme_order,5000);
+}
+
+ function checkStore(Point){
+	var storePoint="";
+	var sid = -1;
+	{loop $otherArea $one}
+	storePoint= '{$one['points']}';
+	storePointsJSON  = eval(storePoint.replace(/&quot;/g,"\""));
+	if((storePointsJSON)&&(isIn(storePointsJSON,Point))){
+		sid={$one['id']};
+		//todo:跳出循環
+	}
+
+	{/loop}
+	return sid;
+}
+ 
+function isIn(storePoints,point){
+	var p1 = [];
+	for(var i = 0; i < storePoints.length; i++){
+	     p1.push({x:storePoints[i].lng,y:storePoints[i].lat});
+	}
+	if(containsPointByLinearRing(point,p1)){
+	     return true;
+	}else{
+	     return false;
+	}
+} 
+
 $(function(){
 	//log_update();
 	//print_order();
-	order_notice();
+	//order_notice();
+	//get_eleme_order();
+	print_eleme_order();
 });
 </script>
 {/if}
