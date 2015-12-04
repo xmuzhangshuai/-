@@ -1590,6 +1590,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 	public function doMobileIndex() {
 		global $_W, $_GPC;
 		$config = get_config();
+		$uid = $_W['member']['uid'];
 		if($config['version'] == 2) {
 			$sid = pdo_fetchcolumn('SELECT id FROM ' . tablename('str_store') . ' WHERE uniacid = :uniacid AND status = 1 ORDER BY displayorder DESC', array(':uniacid' => $_W['uniacid']));
 			if(!$sid) {
@@ -1630,10 +1631,23 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			}
 		}			
 		$pager = pagination($total, $pindex, $psize, '', array('before' => 0, 'after' => 0));
+		$where = ' WHERE uniacid = :aid AND uid = :uid';
+		$params = array(
+			':aid' => $_W['uniacid'],
+			':uid' => $_W['member']['uid']
+		);
+		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM '. tablename('str_address') . $where, $params);
 		$address_id = intval($_GPC['address_id']);
 		$address = get_address($address_id);
 		if(empty($address)) {
 			$address = get_default_address();
+		}
+		if($address['address']){
+			header('Location: '.$this->createMobileUrl('dish', array('sid' => $address['sid']))); 
+		}else if(!$address_count){
+			header('Location: '.$this->createMobileUrl('address', array('op' => 'init','r' => '4'))); 
+		}else{
+			header('Location: '.$this->createMobileUrl('address', array('op' => 'init','r' => '2'))); 
 		}
 		include $this->template('index');
 	}
@@ -2534,12 +2548,17 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				}
 				if($data['room']=='initinitinits'){
 					$data['room']='';
-					$record = pdo_fetch('SELECT * FROM ' . tablename('str_address') . ' WHERE sid = :sid AND uniacid = :uniacid AND uid = :uid', array(':uniacid' => $_W['uniacid'], ':uid' => $_W['member']['uid'],':sid' => $data['sid']));
-					if(empty($record)){
+					if($r=='3'||$r=='4'){
 						pdo_insert('str_address', $data);
 						$id = pdo_insertid();
 					}else{
-						$id = $record['id'];
+						$record = pdo_fetch('SELECT * FROM ' . tablename('str_address') . ' WHERE sid = :sid AND uniacid = :uniacid AND uid = :uid', array(':uniacid' => $_W['uniacid'], ':uid' => $_W['member']['uid'],':sid' => $data['sid']));
+						if(empty($record)){
+							pdo_insert('str_address', $data);
+							$id = pdo_insertid();
+						}else{
+							$id = $record['id'];
+						}
 					}
 					exit(json_encode(array('errorno' => 0, 'message' => $id)));
 				}

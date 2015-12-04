@@ -50,14 +50,6 @@
 </div>
 {template 'header'}
 <div class="cont_box container">
-	<div class="nav_wrapper">
-		<div class="nav_inner">
-			<a class="buyrecord">购买记录</a>
-			<a class="run_address" href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">地址管理</a>
-		</div>
-	</div>
-
-	<hr width="102%" class="division" />
 	{if !empty($data)} {loop $data $row}
 	<ul class="menu_list order_list cont_box" style="margin-top: 15px;margin-bottom: 4px;width: 100%;margin: 0;">
 		<div class="shopping_info cont_box">

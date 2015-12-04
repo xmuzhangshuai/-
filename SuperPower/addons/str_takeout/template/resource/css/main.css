@@ -811,29 +811,18 @@ padding-left: 6px;
 }
 .menu_list .btn_n.add,
 .menu_list .btn_n.del {
-	background: none;
 	font-size: 22px;
 	height: 100%;
 	width: 40px;
 	padding-left: 15px;
 	font-family: sans-serif, arial;
 	color: #FFF;
-	background: #f39801;
 }
-.menu_list .btn_n.add:before {
-	content: "+";
+.menu_list .btn_n.add {
+	background: url(../images/add_o.png);
 }
-.menu_list .btn_n.del:before {
-	content: "-";
-}
-.menu_list .btn_n.add:hover,
-.menu_list .btn_n.add:active,
-.menu_list .btn_n.add:visited,
-.menu_list .btn_n.del:hover,
-.menu_list .btn_n.del:active,
-.menu_list .btn_n.del:visited {
-	color: #FFF;
-	text-decoration: none;
+.menu_list .btn_n.del {
+	background: url(../images/del_o.png);
 }
 .menu_desc {
 	padding: 0 10px;
@@ -1046,6 +1035,21 @@ ul.menu_list > li.order_item {
 	float: right;
 	padding-top: 22px;
 }
+.order_item_count .btn_n.add,.order_item_count .btn_n.del {
+	color: #FFF;
+	text-decoration: none;
+}
+.order_item_count .btn_n.add,
+.order_item_count .btn_n.del {
+	background: none;
+	font-size: 22px;
+	height: 26px;
+	width: 40px;
+	padding-left: 15px;
+	font-family: sans-serif, arial;
+	color: #888;
+	background: #E0E0E0;
+}
 #totalprice_wrap {
 	margin-top: 2px;
 }
@@ -1105,7 +1109,7 @@ ul.menu_list > li.order_item {
 	}
 }
 .menu_list li > div.order_item_count .num {
-	padding-right: 12px;
+	padding-right: 0;
 	font-size: 16px;
 }
 .menu_list li > div.order_item_count .num:before {
@@ -1136,27 +1140,6 @@ ul.menu_list > li.order_item {
 	font-size: 30px;
 	width: 60px;
 	color: #FFF;
-}
-.order_item_count .btn_n.add {
-	top: 30px;
-	right: 0px;
-	background: url(../images/cyc_add.png);
-}
-.order_item_count .btn_n.del {
-	top: 30px;
-	right: 26px;
-	background: url(../images/cyc_del.png);
-}
-.order_item_count .btn_n.add,
-.order_item_count .btn_n.del {
-	position: absolute;
-	background-size: 16px;
-	width: 16px;
-	height: 16px;
-}
-.order_item_count .btn_n.add:before,
-.order_item_count .btn_n.del:before {
-	content: "";
 }
 .disabled {
 	background-color: #b6b6b6 !important;
@@ -2515,6 +2498,7 @@ input[type='tel'] {
 	padding-top: 5px;
 	position: relative;
 	top: 10px;
+	left:10px;
 	line-height: 2.4;
 }
 .address_detailed {
@@ -2528,10 +2512,10 @@ input[type='tel'] {
 	margin: 0;
 }
 .address_delete {
-	float: left;
+float: right;
 position: relative;
-top: 22px;
-left: 15px;
+top:3px;
+right: 15px;
 color: #AAA;
 }
 a.deladdress.address_delete {
