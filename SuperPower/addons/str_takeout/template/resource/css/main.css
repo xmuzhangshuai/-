@@ -819,7 +819,7 @@ padding-left: 6px;
 	color: #FFF;
 }
 .menu_list .btn_n.add {
-	background: url(../images/add_o.png);
+	background: url(../images/add_o.png?ver=2);
 }
 .menu_list .btn_n.del {
 	background: url(../images/del_o.png);

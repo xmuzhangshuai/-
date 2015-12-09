@@ -47,7 +47,7 @@ background-color: #E5E5E5;
 						<tr>
 							<td class="td_radio"><input class="addressChecked" {if $address['is_default'] == 1}checked{/if} type="radio" data-id="{$address['id']}"></td>
 							<td>
-							<div class="text"><span>{if $address['realname']}{$address['realname']}{else}姓名{/if}</span><label>{if $address['mobile']}{$address['mobile']}{else}电话{/if}</label></div>
+							<div class="text"><span>{if $address['realname']}{$address['realname']}{else}姓名{/if}</span><label>{if $address['mobile']}{$address['mobile']}{else}手机号{/if}</label></div>
 							<div class="text">{$address['address']} {$address['room']}</div>
 							</td>
 							<td class="td_edit"><a href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'id' => $address['id'],'sid' => $sid, 'r' => $_GPC['r']));}" class="edit_icon"><span></span></a><a class="address_delete deladdress" data-id="{$address['id']}" data-sid="{$address['sid']}"></a></td>

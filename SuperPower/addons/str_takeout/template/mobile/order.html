@@ -109,8 +109,8 @@
 					<div class="mid">
 						<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid, 'r' => 1));}" style="display: block">
 							<span id="showAddres">{$address['address']} {$address['room']}</span>
-							<br /><span style="display: inline-block;margin-top: 10px;">{$address['realname']}</span>
-							<span>{$address['mobile']}</span>
+							<br /><span style="display: inline-block;margin-top: 10px;">{if $address['realname']}{$address['realname']}{else}姓名{/if}</span>
+							<span>{if $address['mobile']}{$address['mobile']}{else}手机号{/if}</span>
 							<i class="ico_forward"></i>
 						</a>
 					</div>
