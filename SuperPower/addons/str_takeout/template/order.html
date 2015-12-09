@@ -675,7 +675,6 @@ function print_eleme_order(){
 			setElemeContent(order);
 			PrintByPrinterIndex(index);	
 			//打印成功后需要更新订单已打印
-			alert(order.data.order_id);
 			$.post("{php echo $this->createWebUrl('ajax', array('op' => 'update_eleme_print'));}", {'order_id':order.data.order_id,'sid':sid}, function(result){
 				alert(result);
 				if(result != 'success')
@@ -701,44 +700,47 @@ function order_notice() {
 function get_eleme_order(){
 	//获取门店ID
 	var sid = {$store['id']};
-	$.post("{php echo $this->createWebUrl('cron', array('op' => 'get_eleme_neworder'));}", {'sid':sid}, function(data){
-		var data = JSON.parse(data);
-		if(data.message=="ok"){
-			var eleme_order_ids = data.data.order_ids;
-			eleme_order_ids = new Array("100196508600829257");
-			for(var i = 0; i < eleme_order_ids.length; i++){
-				//获取订单详情:送货地点的经纬度
-				var order_id = eleme_order_ids[i];
-				$.post("{php echo $this->createWebUrl('ajax', array('op' => 'eleme_order_detail'));}", {'sid':sid,'order_id':eleme_order_ids[i]}, function(data){
-					var order = JSON.parse(data);
-					if(order.message=="ok"){
-						var point = order.data.delivery_geo.split(",");
-						var deleveryPoint = {x:point[1],y:point[0]};
-						//判断该经纬度属于哪个门店
-						var sid = checkStore(deleveryPoint);
-						if(sid>0){
-							//将订单数据入库
-							//alert("訂單id="+order_id);
-							$.post("{php echo $this->createWebUrl('ajax', array('op' => 'insert_eleme_order'));}", {'sid':sid,'eleme_order_id':order_id,'eleme_order':data}, function(result){
-								if(result != 'success')
-									;
-							});
+	if(sid==60){
+		$.post("{php echo $this->createWebUrl('cron', array('op' => 'get_eleme_neworder'));}", {'sid':sid}, function(data){
+			var data = JSON.parse(data);
+			if(data.message=="ok"){
+				var eleme_order_ids = data.data.order_ids;
+				
+				for(var i = 0; i < eleme_order_ids.length; i++){
+					//获取订单详情:送货地点的经纬度
+					var order_id = eleme_order_ids[i];
+					$.post("{php echo $this->createWebUrl('ajax', array('op' => 'eleme_order_detail'));}", {'sid':sid,'order_id':eleme_order_ids[i]}, function(data){
+						var order = JSON.parse(data);
+						if(order.message=="ok"){
+							var point = order.data.delivery_geo.split(",");
+							var deleveryPoint = {x:point[1],y:point[0]};
+							//判断该经纬度属于哪个门店
+							var sid = checkStore(deleveryPoint);
+							if(sid>0){
+								//将订单数据入库
+								//alert("訂單id="+order_id);
+								$.post("{php echo $this->createWebUrl('ajax', array('op' => 'insert_eleme_order'));}", {'sid':sid,'eleme_order_id':order_id,'eleme_order':data}, function(result){
+									if(result != 'success')
+										;
+								});
+							}
+							
 						}
-						
-					}
-						
-				});
+							
+					});
+				}
 			}
-		}
-			
-	});
-	//ajax获取新订单id列表
-	setTimeout(get_eleme_order,5000);
+				
+		});
+		//ajax获取新订单id列表
+		setTimeout(get_eleme_order,5000);
+	}
+	
 }
 
  function checkStore(Point){
 	var storePoint="";
-	var sid = -1;
+	var sid = 60;//上海总店
 	{loop $otherArea $one}
 	storePoint= '{$one['points']}';
 	storePointsJSON  = eval(storePoint.replace(/&quot;/g,"\""));
@@ -766,9 +768,8 @@ function isIn(storePoints,point){
 $(function(){
 	//log_update();
 	//print_order();
-	//order_notice();
-	//get_eleme_order();
-	print_eleme_order();
+	order_notice();
+	get_eleme_order();
 });
 </script>
 {/if}

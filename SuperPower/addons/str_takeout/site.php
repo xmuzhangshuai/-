@@ -465,17 +465,27 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$order = json_decode(str_replace('&quot;','"',trim($_GPC['eleme_order'])),true);
 			$order_id = $_GPC['eleme_order_id'];
 			$orderInfo = $order['data'];
-			$data['eleme_id'] = $order_id;
-			$data['address'] = $orderInfo['address'];
-			$data['consignee'] = $orderInfo['consignee'];
-			$data['created_time'] = $orderInfo['created_at'];
-			$data['tp_restaurant_id'] = $orderInfo['tp_restaurant_id'];
-			$data['restaurant_id'] = $orderInfo['restaurant_id'];
-			$data['total_price'] = $orderInfo['total_price'];
-			$data['user_name'] = $orderInfo['user_name'];
-			$data['phone_list'] = $orderInfo['phone_list'][0];
-			$data['sid'] = $sid;
-			$data['uniacid'] = $_W['uniacid'];
+			$status = array("-5"=>"等待支付","-4"=>"支付失败","-1"=>"订单已取消","0"=>"未处理","1"=>"等待确认","2"=>"已处理","11"=>"用户已收到");
+			if($orderInfo['status_code']>=0){
+				$data['eleme_id'] = $order_id;
+				$data['address'] = $orderInfo['address'];
+				$data['consignee'] = $orderInfo['consignee'];
+				$data['created_time'] = $orderInfo['created_at'];
+				$data['tp_restaurant_id'] = $orderInfo['tp_restaurant_id'];
+				$data['restaurant_id'] = $orderInfo['restaurant_id'];
+				$data['total_price'] = $orderInfo['total_price'];
+				$data['user_name'] = $orderInfo['user_name'];
+				$data['phone_list'] = $orderInfo['phone_list'][0];
+				$data['sid'] = $sid;
+				$data['uniacid'] = $_W['uniacid'];
+				$data['status'] = $status[$orderInfo['status_code']];
+				$data['eleme_order'] = trim($_GPC['eleme_order']);
+				if($orderInfo['is_online_paid'])
+					$data['pay_way'] = '线上支付';
+				else
+					$data['pay_way'] = '货到付款';
+			}
+			
 			
 			$state = pdo_insert('str_elemeorder',$data);
 			if($state!==false)
@@ -484,7 +494,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 		}
 		if($op == 'print_eleme_order'){
 			$sid = trim($_GPC['sid']);
-			$order = pdo_fetch('SELECT * FROM '.tablename('str_elemeorder').' WHERE sid=:sid AND uniacid=:uniacid AND print=0 ORDER BY id ASC', array(':sid'=>$sid,':uniacid'=>$_W['uniacid']));
+			$order = pdo_fetch('SELECT * FROM '.tablename('str_elemeorder')." WHERE sid=:sid AND uniacid=:uniacid AND print=0 AND status='已处理' ORDER BY id ASC", array(':sid'=>$sid,':uniacid'=>$_W['uniacid']));
 			if(!empty($order)){
 				$path = "http://v2.openapi.ele.me/order/";
 			 	$sid = $order['sid'];
@@ -510,6 +520,46 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$id = $_GPC['order_id'];
 			$sid = $_GPC['sid'];
 			$state = pdo_update('str_elemeorder', array('print' => 1), array('uniacid' => $_W['uniacid'], 'eleme_id' => $id,'sid'=>$sid));
+			if($state !== false) {
+				exit('success');
+			}
+			exit('fail');
+		}
+		if($op == 'update_eleme_status'){
+			$status = array("0"=>"未处理","1"=>"等待确认","2"=>"已处理","11"=>"用户已收到");
+			$code = $_GPC['status'];
+			$order_id = $_GPC['eleme_id'];
+			$sid = $_GPC['sid'];
+			$status = $status[$code];
+			
+			$path = "http://v2.openapi.ele.me/order/";
+			
+			$eleme_restaurant = pdo_fetch('SELECT * FROM '.tablename('str_eleme_store'). ' WHERE uniacid = :id AND related_sid= :sid',array(':id' => $_W['uniacid'], ':sid' => $sid));
+			if(!empty($eleme_restaurant)){
+			 	$path .= ($order_id."/status/");
+			 	$time = time();
+			 	$params = array('consumer_key'=>$eleme_restaurant['consumer_key'],'timestamp'=>$time,'status'=>2);
+			 	$sig = genSig($path,$params,$eleme_restaurant['consumer_secret']);
+	
+			 	$requestUrl = ($path."?consumer_key=".$eleme_restaurant['consumer_key']."&sig=".$sig."&timestamp=".$time."&status=2");
+			 	//exit($requestUrl);
+			 	$result = curlrequest($requestUrl,"status=2",'PUT');
+
+			 	$result = json_decode($result,true);
+			 	if($result['code']==200 && $result['message']=='ok'){
+			 		$state = pdo_update('str_elemeorder',array('status'=>$status), array('uniacid' => $_W['uniacid'], 'eleme_id' => $order_id,'sid'=>$sid));
+					if($state !== false) {
+						exit('success');
+					}
+					exit('fail');
+			 	}
+			 	exit('fail');
+			 }
+			exit('fail');
+		}
+		if($op == 'eleme_print'){
+			$id = $_GPC['id'];
+			$state = pdo_update('str_elemeorder', array('print' => 0), array('eleme_id' => $id));
 			if($state !== false) {
 				exit('success');
 			}
@@ -868,6 +918,34 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			 */
 			 $otherArea = pdo_fetchall('SELECT points,title,id FROM ' . tablename('str_store') . ' WHERE uniacid = :aid ORDER BY id ASC', array(':aid' => $_W['uniacid']));	
 			include $this->template('order');
+		}elseif($op == 'eleme_order') {
+			load()->func('tpl');
+			$condition = ' WHERE uniacid = :aid AND sid = :sid';
+			$params[':aid'] = $_W['uniacid'];
+			$params[':sid'] = $sid;
+
+			$status = intval($_GPC['status']);
+			if($status) {
+				$condition .= ' AND status = :stu';
+				$params[':stu'] = $status;
+			}
+			$keyword = trim($_GPC['keyword']);
+			if(!empty($keyword)) {
+				$condition .= " AND (consignee LIKE '%{$keyword}%' OR phone_list LIKE '%{$keyword}%')";
+			}
+
+			$pindex = max(1, intval($_GPC['page']));
+			$psize = 20;
+
+			$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_elemeorder') .  $condition, $params);
+			$data = pdo_fetchall('SELECT * FROM ' . tablename('str_elemeorder') . $condition . ' ORDER BY created_time DESC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
+			
+			$pager = pagination($total, $pindex, $psize);
+			/**
+			 * 二次开发：获得门店范围
+			 */
+			 $otherArea = pdo_fetchall('SELECT points,title,id FROM ' . tablename('str_store') . ' WHERE uniacid = :aid ORDER BY id ASC', array(':aid' => $_W['uniacid']));	
+			include $this->template('eleme_order');
 		} elseif($op == 'orderdetail') {
 			$pay_types = pay_types();
 			$id = intval($_GPC['id']);
@@ -2382,7 +2460,10 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			$result['result'] = 'error';
 			$result['neworder'] = $neworders;
 			exit(json_encode($result));
-		} elseif($op == 'auto_print'){
+		} elseif($op == 'eleme_order_notice') {
+			//订单提醒功能
+			
+		}elseif($op == 'auto_print'){
 			
 		}else if($op == 'get_eleme_neworder'){
 			/**
@@ -2507,6 +2588,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			':aid' => $_W['uniacid'],
 			':uid' => $_W['member']['uid']
 		);
+		$where = ' WHERE uniacid = :aid AND uid = :uid AND status<>4';
 		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order') . $where, $params);
 		$title = $store['title'];
 		$return_url = '';

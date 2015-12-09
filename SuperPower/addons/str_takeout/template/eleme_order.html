@@ -1,0 +1,214 @@
+{php session_start();}
+{template 'common/header'}
+<style type="text/css">
+	.require{color:red;}
+	.info{padding:6px;width:400px;margin:-20px auto 3px auto;text-align:center;}
+	.order-nav {margin: 0;width: 100%;min-width: 800px;}
+	.order-nav > li > a {display: block;}
+	.order-nav-tabs {background: #EEE;}
+	.order-nav-tabs > li {line-height: 40px;float: left;list-style: none;display: block;text-align: -webkit-match-parent;}
+	.order-nav-tabs > li > a {font-size: 14px;color: #666;height: 40px;line-height: 40px;padding: 0 10px;margin: 0;border: 1px solid transparent;border-bottom-width: 0px;-webkit-border-radius: 0;-moz-border-radius: 0;border-radius: 0;}
+	.order-nav-tabs > li > a, .order-nav-tabs > li > a:focus {border-radius: 0 !important;background-color: #f9f9f9;color: #999;margin-right: -1px;position: relative;z-index: 11;border-color: #c5d0dc;text-decoration: none;}
+	.order-nav-tabs >li >a:hover {background-color: #FFF;}
+	.order-nav-tabs > li.active > a, .order-nav-tabs > li.active > a:hover, .order-nav-tabs > li.active > a:focus {color: #576373;border-color: #c5d0dc;border-top: 2px solid #4c8fbd;border-bottom-color: transparent;background-color: #FFF;z-index: 12;margin-top: -1px;box-shadow: 0 -2px 3px 0 rgba(0, 0, 0, 0.15);}	
+</style>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6E7C75E41980283b39d3c61e81f16a39"></script>
+<script type="text/javascript" src="./resource/js/lib/intersectPolygon.js" ></script>
+<div class="alert alert-info info">
+	<i class="fa fa-info-circle"></i>
+	当前门店名称: {$store['title']}
+</div>
+{template 'nav'}
+{if $op == 'eleme_order'}
+	<div class="main">
+	<h3><a href="javascript:void" onclick="location.reload();"><span class="label label-danger" id="neworders">0</span>条新订单</a></h3>
+		<div class="panel panel-info">
+			<div class="panel-heading">筛选</div>
+			<div class="panel-body">
+				<form action="./index.php" method="get" class="form-horizontal" role="form">
+					<input type="hidden" name="c" value="site">
+					<input type="hidden" name="a" value="entry">
+					<input type="hidden" name="m" value="str_takeout">
+					<input type="hidden" name="do" value="manage"/>
+					<input type="hidden" name="op" value="eleme_order"/>
+					<input type="hidden" name="status" value="{$_GPC['status']}"/>
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-3 col-md-2 control-label">用户信息</label>
+						<div class="col-sm-9 col-xs-9 col-md-9">
+							<input class="form-control" name="keyword" placeholder="输入用户名或手机号" type="text" value="{$_GPC['keyword']}">
+						</div>	
+					</div>
+					<div class="form-group clearfix">
+						<div class="col-xs-12 col-sm-3 col-md-2 col-lg-1">
+							<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<form class="form-horizontal" action="" method="post">
+			<div class="panel panel-default">
+				<div class="panel-body table-responsive" style="overflow:inherit">
+					<table class="table table-hover">
+						<thead class="navbar-inner">
+							<tr>
+								<th>订单id</th>
+								<th style="width:250px">预定人/电话</th>
+								<th>总价</th>
+								<!-- <th>类型</th>  -->
+								<th>支付方式</th>
+								<th>订单状态</th>
+								<th>打印</th>
+								<th>下单时间</th>	
+								<th>详情</th>						
+								<th style="width:150px; text-align:right;">处理</th>
+							</tr>
+						</thead>
+						<tbody>
+							{loop $data $dca}
+							<tr>
+								<td><b>{$dca['eleme_id']}</b></td>
+								<td>{$dca['consignee']}/{$dca['phone_list']}</td>
+								<td>{$dca['total_price']}元</td>
+								<!-- 
+								<td>
+									{if $dca['order_type'] == 1}
+										<span class="label label-success">店内</span>
+									{elseif $dca['order_type'] == 2}
+										<span class="label label-danger">外卖</span>
+									{/if}
+								</td>
+								 -->
+								<td>
+									<span class="label label-default">{$dca['pay_way']}</span>
+										
+								</td>
+								<td>
+									<span class="label label-default">{$dca['status']}</span>
+								</td>
+								<td><a href="javascript:;" class="btn btn-default btn-sm print" data-id="{$dca['eleme_id']}">
+									<i class="fa fa-print"></i> 
+								</a>
+								</td>
+								<td>{$dca['created_time']}</td>
+								<td><a onclick="viewdetail('{$dca['eleme_id']}','{$dca['sid']}');" href="javascript:void" class="btn btn-success btn-sm" title="查看详情" data-toggle="tooltip" data-placement="top">详情</a></td>
+								<td style="text-align:right;">
+									{if $dca['status']=="未处理"}
+									<a onclick="jiedan('{$dca['eleme_id']}','{$dca['sid']}')" href="javascript:void" class="btn btn-success btn-sm" title="查看详情" data-toggle="tooltip" data-placement="top">接单</a>
+									{elseif $dca['status']=="等待确认"}
+									<a onclick="jiedan('{$dca['eleme_id']}','{$dca['sid']}')" href="javascript:void" class="btn btn-success btn-sm" title="查看详情" data-toggle="tooltip" data-placement="top">接单</a>
+									{else}
+									已处理
+									{/if}
+								</td>
+							</tr>
+							{/loop}
+						</tbody>
+					</table>
+					
+				</div>
+			</div>
+			{$pager}
+		</form>
+	</div>
+	<script type="text/javascript">
+		require(['util'], function(u){
+			$('.print').click(function(){
+				if(!confirm('确定打印该订单吗？')) {
+					return false;
+				}
+				var id = $(this).attr('data-id');
+				$.post("{php echo $this->createWebUrl('ajax', array('op' => 'eleme_print'))}", {'id' : id}, function(data) {
+					if(data != 'success') {
+						u.message(data, '', 'error');
+					} else {
+						u.message('已经申请打印，请确认是否设置并开启打印机！');
+					}
+				});
+				return false;
+			});
+
+		});
+		function jiedan(id,sid){
+			$.post("{php echo $this->createWebUrl('ajax', array('op' => 'update_eleme_status'))}", {'eleme_id' : id,'sid':sid, 'status':2}, function(data) {
+				if(data != 'success') {
+					alert('更新失败');
+				} else {
+					window.location.reload();
+				}
+			});
+		}
+		function viewdetail(id,sid){
+			$.post("{php echo $this->createWebUrl('ajax', array('op' => 'eleme_order_detail'));}", {'sid':sid,'order_id':id}, function(data){
+				var order = JSON.parse(data);
+				if(order.message=="ok"){
+					var detail = "";
+					var buckets = order.data.detail.group;//菜篮子
+					//下单时间
+					detail +=('下单时间：'+order.data.created_at+"\r");
+					for(var i = 0 ; i < buckets.length; i++){		
+						var dishes = buckets[i];
+						for(var j=0; j<dishes.length; j++){
+							detail += (dishes[j].name + " x " + dishes[j].quantity + '份 ' + (dishes[j].quantity*dishes[j].price) + '元'+"\r");//菜名  数量  小计
+							//备注，如大份，辣等。
+							if(dishes[j].specs.length>0){
+								var specs = dishes[j].specs;
+								var beizhu = specs.join(',');
+								detail += ('--------'+beizhu+"\r");//specs
+							}			
+							//garnish浇头
+							if(dishes[j].garnish.length>0){
+								detail += ('浇头：');//浇头开始
+								var garnish = dishes[j].garnish;
+								for(var k=0; k< garnish.length; k++){
+									detail += (garnish[k].name + " x " + garnish[k].quantity + '份 ' + (garnish[k].quantity*garnish[k].price) + '元' + "\r");//浇头菜名  数量  小计
+								}
+							}					
+						}
+						
+					}
+					var extra = order.data.detail.extra;
+					for(var n = 0; n<extra.length; n++){
+						detail += (extra[n].name + " x " + extra[n].quantity + '份 ' + (extra[n].quantity*extra[n].price) + '元' + "\r");//额外数量
+					}
+					//备注：
+					var notes = "备注："+order.data.description;
+					detail += (notes + "\r")
+					
+					var phonelist = order.data.phone_list.join(",");
+					detail +=('顾客：' + order.data.consignee + "\r");
+					detail +=('电话：' + phonelist+ "\r");
+					
+					
+					var address = "地址："+order.data.delivery_poi_address;
+					detail += (address+"\r");
+					detail += ('实付总价：' + order.data.total_price + '元' + "\r");
+
+					var payway = "在线支付订单";
+					if(!order.data.is_online_paid){
+						payway = '货到付款';
+					}
+					detail += payway;
+					alert(detail);
+				}
+					
+			});
+			return false;
+		}
+		function reloadpage(){
+			setTimeout(pagereload, 10000);
+		}
+		function pagereload(){
+			//window.location.reload();
+		};
+		$(function(){
+			//log_update();
+			//print_order();
+			reloadpage();
+			
+		});
+	</script>
+{/if}
+{if $_SESSION['role'] != 'manager'}
+{template 'common'}
+{/if}

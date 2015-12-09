@@ -105,7 +105,8 @@ class upload
         	echo '{"code":403,"msg":"文件大小超出限制！[最大'.$this->file_size.'KB]"}';
             return;
         }
-        @move_uploaded_file($file["tmp_name"], iconv("UTF-8", "gbk", $path));
+        $newPath = iconv("UTF-8", "gbk", $path);
+        @move_uploaded_file($file["tmp_name"], $newPath);
         if($file["error"]===0){
         echo $this->successEcho;
         }else{

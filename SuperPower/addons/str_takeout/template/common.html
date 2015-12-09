@@ -20,137 +20,166 @@ if(i == count)
 	alert('没有匹配打印机，请安装小票打印机，并在打印机管理中设置打印机！');
 else{
 	print_order();
+	print_eleme_order();
 }
 function getPrinterCount() {	//获取打印机个数	
-	LODOP=getLodop();  
-	return LODOP.GET_PRINTER_COUNT();	
+	try{
+		LODOP=getLodop();  
+		return LODOP.GET_PRINTER_COUNT();
+	}catch(e){
+		return 0;
+	}
+		
 };
 function getPrinterName(iPrinterNO) {	//获取打印机名称	
 	LODOP=getLodop();  
 	return LODOP.GET_PRINTER_NAME(iPrinterNO);	
-};
-function PreviewByPrinterIndex(intPrinterIndex) { //通过ID预览打印内容		
-	CreatePrintPage();
-	if (LODOP.SET_PRINTER_INDEX(intPrinterIndex))
-	LODOP.PREVIEW();		
 };
 function PrintByPrinterIndex(intPrinterIndex) {	//通过ID命令某台打印机打印内容
 	//CreatePrintPage();
 	if (LODOP.SET_PRINTER_INDEX(intPrinterIndex)) 
 	LODOP.PRINT();		
 };
-function PreviewByPrinterName(strPrinterName) {	//通过打印机名字预览打印内容			
-	CreateHTMPrintPage();
-	if (LODOP.SET_PRINTER_INDEXA(strPrinterName)) 
-	LODOP.PREVIEW();		
-};
-function PrintByPrinterName(strPrinterName) {	//通过名称命令打印机打印内容	
-	CreateHTMPrintPage();
-	if (LODOP.SET_PRINTER_INDEXA(strPrinterName)) 
-	LODOP.PRINT();		
-};	
-function SelectAsDefaultPrinter() {
-	LODOP=getLodop();  
-    	if (LODOP.SELECT_PRINTER()>=0) 
-    	alert("选择成功!"); else alert("选择失败！");
-};
-function PrintByDefaultPrinter() {
-	CreatePrintPage();
-	LODOP.PRINT();	
-};	
-function PrintMoreCopies(intCopies) {
-	CreatePrintPage();		
-	        if (LODOP.SET_PRINT_COPIES(intCopies)) LODOP.PRINT();
-	else  alert("设置打印份数失败！");
-};		
-function CreatePrintPage() {	//打印内容设置
-	LODOP=getLodop();  	
-	LODOP.PRINT_INIT("打印控件功能演示_Lodop功能_测试页一");
-	LODOP.SET_PRINT_PAGESIZE(1,500,500,"A4");
-	LODOP.ADD_PRINT_TEXT(10,10,90,11,"测试页标题");
-	LODOP.ADD_PRINT_TEXT(30,10,90,11,"测试页内容");
-	//LODOP.ADD_PRINT_TEXT(129,131,345,31,"测试内容一:9号宋体字是默认字体");
-	//LODOP.ADD_PRINT_TEXT(161,131,345,31,"测试内容二:11号普通宋体字正体");
-	//LODOP.SET_PRINT_STYLEA(0,"FontSize",11);
-	//LODOP.ADD_PRINT_TEXT(193,131,345,31,"测试内容三:13.5 号宋体字的粗体");
-	//LODOP.SET_PRINT_STYLEA(0,"FontSize",13.5);
-	//LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-	//LODOP.ADD_PRINT_TEXT(225,131,345,31,"测试内容四:15号宋体字的斜体");
-	//LODOP.SET_PRINT_STYLEA(0,"FontSize",15);
-	//LODOP.SET_PRINT_STYLEA(0,"Italic",1);
-	//LODOP.ADD_PRINT_TEXT(260,131,345,31,"测试内容五:16号斜体字带下划线");
-	//LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
-	//LODOP.SET_PRINT_STYLEA(0,"Italic",1);
-	//LODOP.SET_PRINT_STYLEA(0,"Underline",1);
-	//LODOP.ADD_PRINT_TEXT(308,144,318,29,"测试内容六:黑体字居中");
-	//LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-	//LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
-	//LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
-	//LODOP.ADD_PRINT_TEXT(350,300,170,66,"测试内容七:单行文字右靠齐超出区域宽度时则折行显示");
-	//LODOP.SET_PRINT_STYLEA(0,"FontSize",11);
-	//LODOP.SET_PRINT_STYLEA(0,"Alignment",3);
-	//LODOP.ADD_PRINT_TEXT(428,79,400,23,"以上演示了位置、区域、字体、图形、线型等打印布局和风格。");
-		
-};	
 function setContent(data) {	//打印内容设置
 	if(data.type == 'error'){
 		return false;
 	}
 	LODOP=getLodop();  	
 	LODOP.PRINT_INIT("企鹅造饭-订单打印");
-	//根据订单长度计算订单
+	//根据订单长度，以及备注，地址长度，计算订单纸张高度
 	var dishes = data.dish;
 	var dishLength = dishes.length;
-	var realHeight = dishLength * 20 + 500;
-	var height = realHeight>500?realHeight:500;
-	LODOP.SET_PRINT_PAGESIZE(1,500,height,"A4");
-	LODOP.ADD_PRINT_TEXT(10, 50, 450, 20, '企鹅造饭');
-	var beginX = 30;
-	var beginY = 20;
+	/*
+	var otherHeight = (data.note.length/20+1+data.address.length/20+1)*25;
+	var realHeight = dishLength * 20 + 500 + otherHeight;
+	var height = realHeight>500?realHeight:500; */
+	LODOP.SET_PRINT_PAGESIZE(3,500,45,"A4");
+	LODOP.ADD_PRINT_TEXT(10, 40, 450, 20, '企鹅造饭');
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+	
+	var beginX = 10;
+	var beginY = 0;
 	var contentWidth = 480;
 	var contentHeight = 20;
 	for(var i = 0 ; i < dishLength; i++){
 		beginX += 25;
-		LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, dishes[i]['dish_title'] + " x " + dishes[i]['dish_num'] + '份    ' + dishes[i]['dish_price'] + '元');
+		LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, dishes[i]['dish_title'] + " x " + dishes[i]['dish_num'] + '份 ' + dishes[i]['dish_price'] + '元');
+	}
+	if(data.note!=""){
+		var note = "备注："+data.note;
+		var length = note.length;
+		var rows = length/16 + 1;
+		for(var i = 0; i < rows; i++){
+			var content = note.substr(i*16,16);
+			beginX += 25;
+			LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, content);
+		}
 	}
 	beginX += 25;
 	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '顾客：' + data.username);
 	beginX += 25;
+	
 	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '电话：' + data.mobile);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",15);
 	beginX += 25;
-	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '地址：' + data.address);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+	
+	var address = "地址："+data.address;
+	var adlength = address.length;
+	var adrows = adlength/16 + 1;
+	for(var j = 0; j < adrows; j++){
+		var content = address.substr(j*16,16);
+		beginX += 25;
+		LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, content);
+	}
 	beginX += 25;
-	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '总价：' + data.price + '元');			
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '总价：' + data.price + '元');
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);	
 };	
-function CreateHTMPrintPage() {	
+
+function setElemeContent(order){
 	LODOP=getLodop();  	
-	LODOP.PRINT_INIT("打印控件功能演示_Lodop功能_测试页二");
-	var strHTML="<!doctype><body><font style='font-size:16px;'>字体大小:16px</font><br>";
-	strHTML=strHTML+"<font style='font-size:16pt;'>字体大小:16pt</font><br>";
-	strHTML=strHTML+"<font style='font-size:x-small'>字体大小:x-small</font><br>";
-	strHTML=strHTML+"<font style='font-size:small'>字体大小:small</font><br>";
-	strHTML=strHTML+"<font style='font-size:medium'>字体大小:medium</font><br>";
-	strHTML=strHTML+"<font style='font-size:large'>字体大小:large</font><br>";
-	strHTML=strHTML+"<font style='font-size:x-large'>字体大小:x-large</font><br>";
-	strHTML=strHTML+"<font style='font-size:XX-large'>字体大小:XX-large</font><br>";
-	strHTML=strHTML+"<font size='1'>字体大小:1</font><br>";
-	strHTML=strHTML+"<font size='2'>字体大小:2</font><br>";
-	strHTML=strHTML+"<font size='3'>字体大小:3</font><br>";
-	strHTML=strHTML+"<font size='4'>字体大小:4</font><br>";
-	strHTML=strHTML+"<font size='5'>字体大小:5</font><br>";
-	strHTML=strHTML+"<font size='6'>字体大小:6</font><br>";
-	strHTML=strHTML+"<font size='7'>字体大小:7</font><br>";
-	strHTML=strHTML+"<font size='-1'>字体大小:-1</font><br>";
-	strHTML=strHTML+"<font size='-2'>字体大小:-2</font><br></body>";
-	LODOP.ADD_PRINT_HTM(5,5,"100%","100%",strHTML);
-	LODOP.SET_PRINT_STYLEA(0,"Horient",3);
-	LODOP.SET_PRINT_STYLEA(0,"Vorient",3);			
-};
-
-
-
+	LODOP.PRINT_INIT("企鹅造饭-eleme订单打印");
+	//根据订单长度，以及备注，地址长度，计算订单纸张高度
+	LODOP.SET_PRINT_PAGESIZE(3,500,45,"A4");
+	LODOP.ADD_PRINT_TEXT(10, 0, 450, 20, '企鹅造饭-eleme订单');
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",14);
+	
+	var beginX = 10;
+	var beginY = 0;
+	var contentWidth = 480;
+	var contentHeight = 20;
+	var buckets = order.data.detail.group;//菜篮子
+	//下单时间
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '下单时间：'+order.data.created_at);//下单时间
+	for(var i = 0 ; i < buckets.length; i++){		
+		var dishes = buckets[i];
+		for(var j=0; j<dishes.length; j++){
+			beginX += 25;
+			LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, dishes[j].name + " x " + dishes[j].quantity + '份 ' + (dishes[j].quantity*dishes[j].price) + '元');//菜名  数量  小计
+			//备注，如大份，辣等。
+			if(dishes[j].specs.length>0){
+				var specs = dishes[j].specs;
+				var beizhu = specs.join(',');
+				beginX += 25;
+				LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '--------'+beizhu);//specs
+			}			
+			//garnish浇头
+			if(dishes[j].garnish.length>0){
+				beginX += 25;
+				LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '浇头：');//浇头开始
+				var garnish = dishes[j].garnish;
+				for(var k=0; k< garnish.length; k++){
+					LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, garnish[k].name + " x " + garnish[k].quantity + '份 ' + (garnish[k].quantity*garnish[k].price) + '元');//浇头菜名  数量  小计
+					beginX += 25;
+				}
+			}					
+		}
+		
+	}
+	var extra = order.data.detail.extra;
+	for(var n = 0; n<extra.length; n++){
+		beginX += 25;
+		LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, extra[n].name + " x " + extra[n].quantity + '份 ' + (extra[n].quantity*extra[n].price) + '元');//额外数量
+	}
+	//备注：
+	var notes = "备注："+order.data.description;
+	var ntlength = notes.length;
+	var ntrows = ntlength/15 + 1;
+	for(var j = 0; j < ntrows; j++){
+		var content = notes.substr(j*15,15);
+		beginX += 25;
+		LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, content);
+	}
+	
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '顾客：' + order.data.consignee);
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",15);
+	beginX += 25;
+	
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '电话：' + order.data.phone_list[0]);
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",15);
+	beginX += 25;
+	
+	var address = "地址："+order.data.delivery_poi_address;
+	var adlength = address.length;
+	var adrows = adlength/15 + 1;
+	for(var j = 0; j < adrows; j++){
+		var content = address.substr(j*15,15);
+		beginX += 25;
+		LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, content);
+	}
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, '实付总价：' + order.data.total_price + '元');
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+	var payway = "在线支付订单";
+	if(!order.data.is_online_paid){
+		payway = '货到付款';
+	}
+	beginX += 25;
+	LODOP.ADD_PRINT_TEXT(beginX, beginY, contentWidth, contentHeight, payway);
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+}
 
 function log_update() {
 	$.post("{php echo $this->createWebUrl('cron', array('op' => 'print'));}", function(){
@@ -170,21 +199,108 @@ function print_order(){
 			});
 		}		
 	});
-	setTimeout(print_order, 5000);
-	
+	setTimeout(print_order, 5000);	
 }
+
+function print_eleme_order(){
+	var sid = {$store['id']};
+	$.post("{php echo $this->createWebUrl('ajax', array('op' => 'print_eleme_order'));}",{'sid':sid}, function(data){
+		var order = JSON.parse(data);
+		if(order != '' && order.message == 'ok'){			
+			setElemeContent(order);
+			PrintByPrinterIndex(index);	
+			//打印成功后需要更新订单已打印
+			$.post("{php echo $this->createWebUrl('ajax', array('op' => 'update_eleme_print'));}", {'order_id':order.data.order_id,'sid':sid}, function(result){
+				if(result != 'success')
+					alert('订单更新失败，将会重新打印');
+			});
+		}		
+	});
+	setTimeout(print_eleme_order, 5000);
+}
+
 function order_notice() {
 	$.post("{php echo $this->createWebUrl('cron', array('op' => 'order'));}", function(data){
 		var data = JSON.parse(data);
-		if(data.resutl == 'success') {
+		//alert(data.result);
+		if(data.result == 'success') {
 			$("#musicClick")[0].play();			
 		}
+		$('#neworders').html(data.neworder);
 		setTimeout(order_notice, 5000);
 	});
 }
+
+function get_eleme_order(){
+	//获取门店ID
+	var sid = {$store['id']};
+	if(sid==60){
+		$.post("{php echo $this->createWebUrl('cron', array('op' => 'get_eleme_neworder'));}", {'sid':sid}, function(data){
+			var data = JSON.parse(data);
+			if(data.message=="ok"){
+				var eleme_order_ids = data.data.order_ids;
+				for(var i = 0; i < eleme_order_ids.length; i++){
+					//获取订单详情:送货地点的经纬度
+					var order_id = eleme_order_ids[i];
+					$.post("{php echo $this->createWebUrl('ajax', array('op' => 'eleme_order_detail'));}", {'sid':sid,'order_id':eleme_order_ids[i]}, function(data){
+						var order = JSON.parse(data);
+						if(order.message=="ok"){
+							var point = order.data.delivery_geo.split(",");
+							var deleveryPoint = {x:point[1],y:point[0]};
+							//判断该经纬度属于哪个门店
+							var sid = checkStore(deleveryPoint);
+							if(sid>0){
+								//将订单数据入库
+								//alert("訂單id="+order_id);
+								$.post("{php echo $this->createWebUrl('ajax', array('op' => 'insert_eleme_order'));}", {'sid':sid,'eleme_order_id':order_id,'eleme_order':data}, function(result){
+									if(result != 'success')
+										;
+								});
+							}
+							
+						}
+							
+					});
+				}
+			}
+				
+		});
+		//ajax获取新订单id列表
+		setTimeout(get_eleme_order,5000);
+	}
+}
+
+ function checkStore(Point){
+	var storePoint="";
+	var sid = 60;//上海总店;
+	{loop $otherArea $one}
+	storePoint= '{$one['points']}';
+	storePointsJSON  = eval(storePoint.replace(/&quot;/g,"\""));
+	if((storePointsJSON)&&(isIn(storePointsJSON,Point))){
+		sid={$one['id']};
+		//todo:跳出循環
+	}
+
+	{/loop}
+	return sid;
+}
+ 
+function isIn(storePoints,point){
+	var p1 = [];
+	for(var i = 0; i < storePoints.length; i++){
+	     p1.push({x:storePoints[i].lng,y:storePoints[i].lat});
+	}
+	if(containsPointByLinearRing(point,p1)){
+	     return true;
+	}else{
+	     return false;
+	}
+} 
+
 $(function(){
 	//log_update();
 	//print_order();
 	order_notice();
+	get_eleme_order();
 });
 </script>

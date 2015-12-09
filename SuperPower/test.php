@@ -1,7 +1,7 @@
 <?php
 header("Content-type:text/html;charset=utf-8");
  $now = "1448973400";
- $params = array("consumer_key"=>"3445350222","timestamp"=>$now,'restaurant_id'=>987738767,'tp_restaurant_id'=>234543);
+ $params = array("consumer_key"=>"3445350222","timestamp"=>$now,"restaurant_id"=>63949185,"tp_restaurant_id"=>"358495");
  $join = concatParams($params);
  
  $path = "http://v2.openapi.ele.me/restaurant/binding/";
@@ -12,7 +12,8 @@ header("Content-type:text/html;charset=utf-8");
  echo $signature;
  
 $orderID = "100196508600829257";
-$path2 = "http://v2.openapi.ele.me/order/100196508600829257/";
+$path2 = "http://v2.openapi.ele.me/order/100196508600829257/status/";
+$params = array("consumer_key"=>"0170804777","timestamp"=>$now,'status'=>2);
 $signature2 = genSig($path2,$params,"87217cb263701f90316236c4df00d9352fb1da76");
 echo "<br/>".$signature2."";
  

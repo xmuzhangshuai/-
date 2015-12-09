@@ -9,8 +9,9 @@
 	<li {if $op == 'store_dish'}class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'store_dish'));}">门店菜单</a></li>
 
 	{if $op == 'dish_post' && $id} <li><a href="{php echo $this->createWebUrl('manage', array('op' => 'dish_post', array('id' => $id)));}">编辑菜品</a></li>{/if}
-	<li {if $op == 'order' || $op == 'orderdetail'}class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', array('id' => $id)));}">订单管理</a></li>
+	<li {if $op == 'order' || $op == 'orderdetail'}class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'order', array('id' => $id)));}">企鹅订单管理</a></li>
 	<li {if $op == 'history_order' || $op == 'his_orderdetail'}class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'history_order', array('id' => $id)));}">用户历史订单</a></li>
+	<li {if $op == 'eleme_order'} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'eleme_order'));}">饿了么订单管理</a></li>
 	<!-- <li {if $op == 'stat_detail' || $op == 'stat_day'}class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'stat_detail'));}">订单统计</a></li> -->
 	<li {if $op == 'print_list' || $op == 'print_post'} class="active"{/if}><a href="{php echo $this->createWebUrl('manage', array('op' => 'print_list'));}">打印机管理</a></li>
 	<!-- 

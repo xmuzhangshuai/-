@@ -74,7 +74,7 @@ class upload
     public $file; //通过$_FILES["upload"]获得的文件对象
     public $file_size = 1024; //上传最大值，单位KB，默认是：1024KB（1M）最大不能超过php.ini中的限制（默认是2M）
     public $upfilePath = "../attachment/dish/"; //上传文件路径，如果文件夹不存在自动创建
-    private $ext = array(".gif",".jpg",".png",".bmp"); //文件类型限制，默认是：".gif",".jpg",".png",".bmp"
+    private $ext = array(".jpg",".png"); //文件类型限制，默认是：".gif",".jpg",".png",".bmp"
     public $saveName,$filename,$isRnd=true;
     public function __construct($files)
     {   @session_start();
@@ -107,9 +107,11 @@ class upload
         	echo '{"code":403,"msg":"文件大小超出限制！[最大'.$this->file_size.'KB]"}';
             return;
         }
-        @move_uploaded_file($file["tmp_name"], iconv("UTF-8", "gbk", $path));
+        $newPath = iconv("UTF-8", "gbk", $path);
+
+        @move_uploaded_file($file["tmp_name"], $newPath);
         if($file["error"]===0){
-        	//二次开发入库操作
+        	$this->ImageToJPG($newPath,$newPath,500,300);
         echo $this->successEcho;
         }else{
         echo '{"code":500,"msg":"上传失败！错误代码:'.$file["error"].'"}';
@@ -162,5 +164,64 @@ class upload
             return false;
         return true;
     }
+    
+    
+    function ImageToJPG($srcFile,$dstFile,$towidth,$toheight)   
+{   
+    $quality=50;   
+    $data = @GetImageSize($srcFile);   
+    switch ($data['2'])   
+    {   
+    case 1:   
+        $im = imagecreatefromgif($srcFile);   
+        break;   
+    case 2:   
+        $im = imagecreatefromjpeg($srcFile);   
+        break;   
+    case 3:   
+        $im = imagecreatefrompng($srcFile);   
+        break;   
+    case 6:   
+    $im = ImageCreateFromBMP( $srcFile );   
+    break;   
+    }  
+    // $dstX=$srcW=@ImageSX($im);   
+    // $dstY=$srcH=@ImageSY($im);   
+    $srcW=@ImageSX($im);   
+    $srcH=@ImageSY($im);   
+    //$towidth,$toheight  
+    if($toheight/$srcW > $towidth/$srcH){  
+        $b = $toheight/$srcH;  
+    }else{  
+        $b = $towidth/$srcW;  
+    }     
+    //计算出图片缩放后的宽高  
+    // floor 舍去小数点部分，取整  
+    $new_w = floor($srcW*$b);  
+    $new_h = floor($srcH*$b);  
+    $dstX=$new_w;   
+    $dstY=$new_h;   
+    $ni=@imageCreateTrueColor($dstX,$dstY);   
+  
+    @ImageCopyResampled($ni,$im,0,0,0,0,$dstX,$dstY,$srcW,$srcH);   
+  	switch ($data['2'])   
+    {     
+    case 2:   
+        @ImageJpeg($ni,$dstFile,$quality);
+        break;   
+    case 3:   
+        @ImagePng($ni,$dstFile,$quality);
+        break;     
+    }   
+    @imagedestroy($im);   
+    @imagedestroy($ni);   
+    //www.veryhuo.com/a/view/36032.html  
+}   
+    
+    
+    
+    
+    
+    
 }//end class
 ?>
