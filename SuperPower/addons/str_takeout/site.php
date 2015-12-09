@@ -1849,8 +1849,14 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			if(!($op=='detail'&&$r==1)){
 				if($op=='get'){
 					$cart = get_order_cart($sid);
+					if(empty($cart['data'])){
+						header('Location: ' . $this->createMobileUrl('myorder', array('sid' => $sid)));
+						exit;
+					}
 				}else{
 					$cart = set_order_cart($sid);
+					header('Location: ' . $this->createMobileUrl('order', array('sid' => $sid,'op' =>'get'), true));
+					exit;
 				}
 			}else{
 				$cart = get_order_cart($sid);
