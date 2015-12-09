@@ -47,7 +47,7 @@ background-color: #E5E5E5;
 						<tr>
 							<td class="td_radio"><input class="addressChecked" {if $address['is_default'] == 1}checked{/if} type="radio" data-id="{$address['id']}"></td>
 							<td>
-							<div class="text"><span>{$address['realname']}</span><label>{$address['mobile']}</label></div>
+							<div class="text"><span>{if $address['realname']}{$address['realname']}{else}姓名{/if}</span><label>{if $address['mobile']}{$address['mobile']}{else}电话{/if}</label></div>
 							<div class="text">{$address['address']} {$address['room']}</div>
 							</td>
 							<td class="td_edit"><a href="{php echo $this->createMobileUrl('address', array('op' => 'post', 'id' => $address['id'],'sid' => $sid, 'r' => $_GPC['r']));}" class="edit_icon"><span></span></a><a class="address_delete deladdress" data-id="{$address['id']}" data-sid="{$address['sid']}"></a></td>
@@ -174,11 +174,16 @@ background-color: #E5E5E5;
 		height:52px!important;
 		line-height:52px;
 		font-size:23px;
-		background-color: #FFF;
-		color: #F7B74D;
+		background-color: #F39801;
+		color: #FFF;
 		border: 1px solid #F7B74D;
 		border-radius: 3px;
 		padding: 0px 20px;
+	}
+	.home-position:active,.home-position:hover,.home-position:visited{
+		background-color: #F39801;
+		color: #FFF;
+		text-decoration: none;
 	}
 	.store_name {
 		margin-top: 30px;
@@ -192,11 +197,6 @@ background-color: #E5E5E5;
 		padding: 0px 20px;
 	}
 	.store_name:active,.store_name:hover,.store_name:visited{
-		background-color: #FFF;
-		color: #F7B74D;
-		text-decoration: none;
-	}
-	.home-position:active,.home-position:hover,.home-position:visited{
 		background-color: #FFF;
 		color: #F7B74D;
 		text-decoration: none;
@@ -263,7 +263,7 @@ background-color: #E5E5E5;
 	<div style="position: relative;">
 		<a name="#ddress"></a>
 		<input type="text" name="address" id="location_input" autocomplete="off" placeholder="请输入您所在的地址"/><img id="search" style="position: absolute;height: 30px;display: block;top: 10px;right: 20px;" src="../addons/str_takeout/template/resource/images/search.png" /></div>
-	<div style="position: relative;"><a class="home-position">定位到我所在的门店</a><img style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/position.png" /></div>
+	<div style="position: relative;"><a class="home-position">定位到我所在的门店</a><img style="position: absolute;height: 30px;display: block;top: 11px;right: 20px;" src="../addons/str_takeout/template/resource/images/position-tran.png" /></div>
 	<div class="hidden">
 		<input type="text" name="realname" value="{$address['realname']}" placeholder="姓名">
 	</div>
@@ -481,14 +481,14 @@ background-color: #E5E5E5;
 		line-height:32px;
 		font-size:16px;
 		background-color: #FFF;
-		color: #F7B74D;
+		color: #F39801;
 		border: 1px solid #F7B74D;
 		border-radius: 3px;
 		padding: 0px 20px;
 	}
 	.home-position:active,.home-position:hover,.home-position:visited{
 		background-color: #FFF;
-		color: #F7B74D;
+		color: #F39801;
 		text-decoration: none;
 	}
 	.nav_sp_logo,.nav_sp_home{display:none;}
