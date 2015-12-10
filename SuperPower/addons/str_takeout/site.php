@@ -1924,18 +1924,22 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				message('门店不存在', '', 'error');
 			}
 			//购物车
-			if($op=='detail'){
+			if($op=='detail'&&$r==1){
 				$cart = get_order_cart($sid);
 				foreach($_GPC['dish'] as $k => $v) {
 					$k = intval($k);
 					$v = intval($v);
-					if($k && $v) {
+					if($k) {
 						$cart['data'][$k]=$v;
 					}
 				}
 				$cart['data'] = iserializer($cart['data']);
 				$id = pdo_fetchcolumn('SELECT id FROM ' . tablename('str_order_cart') . " WHERE uniacid = :aid AND sid = :sid AND uid = :uid", array(':aid' => $_W['uniacid'], ':sid' => $sid, ':uid' => $_W['member']['uid']));
 				pdo_update('str_order_cart', $cart, array('uniacid' => $_W['uniacid'], 'id' => $id, 'uid' => $_W['member']['uid']));
+				exit(json_encode(array('errorno' => 0, 'message' => '')));
+			}elseif($op=='detail'){
+				$cart = set_order_cart($sid);
+				exit(json_encode(array('errorno' => 0, 'message' => '')));
 			}else{
 				if($op=='get'){
 					$cart = get_order_cart($sid);

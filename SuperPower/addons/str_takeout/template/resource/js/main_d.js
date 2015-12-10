@@ -144,10 +144,12 @@ $.amountCb = function(){
 
 		if(disNumber > 0){
 			_cartNum.addClass('has_num');
-			_fix.removeClass('hidden');
+			$('#havOrd').removeClass('hidden');
+			$('#noOrd').addClass('hidden');
 		}else{
 			_cartNum.removeClass('has_num').text('');
-			_fix.addClass('hidden');
+			$('#havOrd').addClass('hidden');
+			$('#noOrd').removeClass('hidden');
 		}
 		return false;
 	}

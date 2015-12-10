@@ -56,10 +56,7 @@
     -->
 	
 	{loop $dish $ds}
-	{if $ds['dish_type']=='TAOCAN'}
-		{php $ds['kucun'] = -1; }
-	{/if}
-	{if $ds['kucun']==''}
+	{if ($ds['kucun']==''&&!($ds['selling'] == 1))}
 		{php $ds['kucun'] = 0;}
 	{/if}
 	<form name="cart_form" id="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
@@ -115,8 +112,8 @@
 		<footer class="shopping_cart">
 			<div class="fixed">
 				<div id="fix_bar">
-					<span class="comm_btn disabled"><span id="sendCondition" class="hide">0元</span>点餐</span>
-					<a id="settlement" data-href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}" class="comm_btn {if !$address['address']}disabled{/if}" style="display: none;">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份{$ds['title']} {if $address['address']}继续点单{else}请添加地址{/if}</a>
+					<span class="comm_btn"><span id="sendCondition" class="hide">0元</span>返回挑选</span>
+					<a id="settlement" data-href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}" class="comm_btn {if !$address['address']}disabled{/if}" style="display: none;"><span id="havOrd">￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份{$ds['title']} {if $address['address']}继续点单{else}请添加地址{/if}</span><span id="noOrd">返回挑选</span></a>
 				</div>
 				<nav class="nav_common">
 					<ul class="box_nav">
@@ -150,6 +147,10 @@
 	$(function() {
 		$("#settlement").click(function() {
 			if (!$("#settlement").hasClass("disabled")) {
+				if (!$("#noOrd").hasClass("hidden")) {
+					var href=$(this).attr("data-href");
+					location.href=href;
+				}
 				var action=$('#cart_form').attr("action");
 				action=action.split("#")[0];
 				action+='&op=detail&r=1#wechat_redirect';
@@ -162,6 +163,12 @@
 					url:action
 				};
 				$('#cart_form').ajaxSubmit(ajax_option);
+			}
+		});
+		$("span.comm_btn").click(function() {
+			if (!$("#comm_btn").hasClass("disabled")) {
+				var href=$('#settlement').attr("data-href");
+				location.href=href;
 			}
 		});
 
