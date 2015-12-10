@@ -162,12 +162,12 @@
 	function deleteOrder(oid){
 		if(confirm('确认取消订单？')){
 			$.post('{php echo $this->createMobileUrl('ajax', array('op' => 'deleteOrder'))}', {'id':oid}, function(data){
-						if(data == 'success') {
-							 location.href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}";
-						}else{
-							alert('取消失败');
-						}
-					});
+				if(data == 'success') {
+					 location.href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid,'rand' => rand()));}";
+				}else{
+					alert('取消失败');
+				}
+			});
 		}
 	}
 //	document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
