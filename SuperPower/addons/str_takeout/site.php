@@ -1924,19 +1924,7 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				message('门店不存在', '', 'error');
 			}
 			//购物车
-			if(!($op=='detail'&&$r==1)){
-				if($op=='get'){
-					$cart = get_order_cart($sid);
-					if(empty($cart['data'])){
-						header('Location: ' . $this->createMobileUrl('myorder', array('sid' => $sid)));
-						exit;
-					}
-				}else{
-					$cart = set_order_cart($sid);
-					header('Location: ' . $this->createMobileUrl('order', array('sid' => $sid,'op' =>'get'), true));
-					exit;
-				}
-			}else{
+			if($op=='detail'){
 				$cart = get_order_cart($sid);
 				foreach($_GPC['dish'] as $k => $v) {
 					$k = intval($k);
@@ -1948,6 +1936,18 @@ class Str_takeoutModuleSite extends WeModuleSite {
 				$cart['data'] = iserializer($cart['data']);
 				$id = pdo_fetchcolumn('SELECT id FROM ' . tablename('str_order_cart') . " WHERE uniacid = :aid AND sid = :sid AND uid = :uid", array(':aid' => $_W['uniacid'], ':sid' => $sid, ':uid' => $_W['member']['uid']));
 				pdo_update('str_order_cart', $cart, array('uniacid' => $_W['uniacid'], 'id' => $id, 'uid' => $_W['member']['uid']));
+			}else{
+				if($op=='get'){
+					$cart = get_order_cart($sid);
+					if(empty($cart['data'])){
+						header('Location: ' . $this->createMobileUrl('myorder', array('sid' => $sid)));
+						exit;
+					}
+				}else{
+					$cart = set_order_cart($sid);
+					header('Location: ' . $this->createMobileUrl('order', array('sid' => $sid,'op' =>'get'), true));
+					exit;
+				}
 			}
 			if(is_error($cart)) {
 				message("购物车错误".$cart.message, '', 'error');
