@@ -2044,11 +2044,13 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			foreach($cart['data'] as $k => $v) {
 				$k = intval($k);
 				$v = intval($v);
-				if($_GPC['dish'.$k]){
+				$out['orig'].='|  $k='.$k.' $v='.$v;
+				if($_GPC['dish'.$k]>=0){
 					$v=intval($_GPC['dish'.$k]);
 					$cart['data'][$k] = $v;
 					$data['num'] = $v + intval($data['num']);
 					$cart['num'] = $data['num'];
+					$out[$k]=$v;
 				}else{
 					$v=0;
 				}
