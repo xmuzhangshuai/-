@@ -1237,7 +1237,9 @@ ul.menu_list > li.order_item {
 	float: right;
 	padding-top: 22px;
 }
-
+.std_store .buy_btn{
+	display: none;
+}
 .order_item_count .btn_n.add,
 .order_item_count .btn_n.del {
 	color: #FFF;

@@ -2720,7 +2720,6 @@ class Str_takeoutModuleSite extends WeModuleSite {
 			':uniacid' => $_W['uniacid'],
 			':sid' => $sid,
 		);
-
 		$total = pdo_fetchcolumn('SELECT COUNT(*) FROM ' . tablename('str_order_comment') . ' AS a '.  $condition, $params);
 		$data = pdo_fetchall('SELECT a.*, b.nickname,b.avatar,b.realname FROM ' . tablename('str_order_comment') . ' AS a LEFT JOIN ' . tablename('mc_members') . ' AS b ON a.uid = b.uid ' . $condition . ' ORDER BY a.addtime DESC LIMIT '.($pindex - 1) * $psize.','.$psize, $params);
 		$pager = pagination($total, $pindex, $psize, '', array('before' => 0, 'after' => 0));

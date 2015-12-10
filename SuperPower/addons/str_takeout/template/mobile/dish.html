@@ -20,7 +20,7 @@
 	<form name="cart_form" id="cart_form" action="{php echo $this->createMobileUrl('order', array('sid' => $sid), true);}" method="post">
 		<input type="hidden" name="more" value="{$_GPC['more']}">
 		<input type="hidden" name="dish_str" value="{$dish_str}">
-		<section class="menu_wrap" id="menuWrap">
+		<section class="menu_wrap {if !$address['address']}std_store{/if}" id="menuWrap">
 			{if $store['open']==0}
 			<div class="tips">企鹅休息中，接受预定~下次配送时间：
 				<br /><span>{php $time = strtotime($store['nextStartTime']); echo date("m-d H:i",$time);} {$store['xingqi']} <i class="cantype{$store['cantype']}"></i></span></div>
@@ -90,28 +90,28 @@
 				<div id="fix_bar" {if $address['address']}class="hidden"{/if}">
 					<a id="settlement" class="comm_btn {if !$address['address']}disabled init{/if}">{if $address['address']}￥<span id="totalPrice">0</span>元 合计<span class="cart_num" id="cartNum"></span>份美食 立即下单{else}请添加地址{/if}</a>
 				</div>
-<nav class="nav_common">
-		<ul class="box_nav">
-			<li class="more on">
-				<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}">
-					 <span class="order">&nbsp;</span>
-		  		 <label>门店菜单</label>
-				</a>
-			</li>
-			<li class="more ">
-				<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}">
-					<span class="my">&nbsp;</span>
-				<label> 我的订单</label>
-			</a>
-			</li>
-			<li class="more">
-				<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">
-					<span class="introx">&nbsp;</span>
-				<label> 地址管理</label>
-				</a>
-			</li>
-		</ul>
-	</nav>
+				<nav class="nav_common">
+					<ul class="box_nav">
+						<li class="more on">
+							<a href="{php echo $this->createMobileUrl('dish', array('sid' => $sid));}">
+								 <span class="order">&nbsp;</span>
+					  		 <label>门店菜单</label>
+							</a>
+						</li>
+						<li class="more ">
+							<a href="{php echo $this->createMobileUrl('myorder', array('sid' => $sid));}">
+								<span class="my">&nbsp;</span>
+							<label> 我的订单</label>
+							</a>
+						</li>
+						<li class="more">
+							<a href="{php echo $this->createMobileUrl('address', array('sid' => $sid));}">
+								<span class="introx">&nbsp;</span>
+							<label> 地址管理</label>
+							</a>
+						</li>
+					</ul>
+				</nav>
 			</div>
 		</footer>
 	</form>
